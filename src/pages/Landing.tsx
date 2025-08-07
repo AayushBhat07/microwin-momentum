@@ -1,248 +1,235 @@
 import { AuthButton } from "@/components/auth/AuthButton";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { Award, Heart, Star, Target, TrendingUp, Users, Zap } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { ArrowRight, Award, BarChart, CheckCircle, Heart, Sparkles, Users, Zap } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { PillCTA } from "@/components/landing/PillCTA";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { BadgeWall } from "@/components/landing/BadgeWall";
+import { CommunityAndSafety } from "@/components/landing/CommunityAndSafety";
+import { Testimonials } from "@/components/landing/Testimonials";
+
+// --- Configuration for colors and badges ---
+const brandColors = {
+  teal: "var(--color-primary)",
+  magenta: "var(--color-secondary)", 
+  gold: "var(--color-accent)",
+  tangerine: "var(--color-destructive)",
+  cream: "var(--color-background)",
+  ink: "var(--color-foreground)",
+};
+
+const badgeExamples = [
+  { name: "First Win", icon: Award, color: brandColors.gold },
+  { name: "7-Day Streak", icon: Zap, color: brandColors.tangerine },
+  { name: "Community High-Five", icon: Heart, color: brandColors.magenta },
+  { name: "Goal Getter", icon: CheckCircle, color: brandColors.teal },
+];
+
+// --- Reusable Components ---
+
+const WinCard = ({ icon: Icon, title, points, category, color, rotation, delay }: any) => (
+  <motion.div
+    className="absolute w-64 p-4 bg-card rounded-2xl shadow-lg border flex flex-col"
+    initial={{ opacity: 0, y: 50, rotate: rotation + 10 }}
+    animate={{ opacity: 1, y: 0, rotate: rotation }}
+    transition={{ type: "spring", stiffness: 50, delay }}
+  >
+    <div className="flex justify-between items-start">
+      <div className="p-2 bg-primary/10 rounded-lg">
+        <Icon className="w-6 h-6 text-primary" />
+      </div>
+      <div className="text-right">
+        <p className="font-bold text-2xl text-accent">+{points}</p>
+        <p className="text-sm text-muted-foreground">Points</p>
+      </div>
+    </div>
+    <div className="mt-4">
+      <p className="font-semibold text-lg">{title}</p>
+      <div className="mt-2 inline-block px-3 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: color, color: brandColors.ink }}>
+        {category}
+      </div>
+    </div>
+  </motion.div>
+);
+
+const AnimatedStat = ({ value, label }: { value: number, label: string }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (isInView) {
+      let startTime: number;
+      const animate = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / 2000, 1); // 2 second duration
+        setCount(Math.floor(progress * value));
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      requestAnimationFrame(animate);
+    }
+  }, [isInView, value]);
+
+  return (
+    <div ref={ref} className="text-center">
+      <p className="text-5xl font-bold text-primary">{count.toLocaleString()}</p>
+      <p className="text-lg text-muted-foreground mt-1">{label}</p>
+    </div>
+  );
+};
+
+// --- Main Landing Page Component ---
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-primary/10">
-      {/* Navigation */}
-      <motion.nav 
-        className="w-full py-6 px-4 sm:px-6 lg:px-8"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <motion.div 
-            className="flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-          >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Star className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">MicroWin Momentum</span>
-          </motion.div>
-          
-          <AuthButton 
-            trigger={
-              <Button size="lg" className="shadow-lg hover:shadow-xl transition-shadow">
-                Get Started Free
-              </Button>
-            }
-            dashboardTrigger={
-              <Button size="lg" variant="outline">
-                Go to Dashboard
-              </Button>
-            }
+    <div className="bg-background text-foreground font-sans overflow-x-hidden">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-8 h-8 text-primary" />
+            <span className="text-2xl font-bold tracking-tighter">MicroWin</span>
+          </div>
+          <AuthButton
+            trigger={<PillCTA>Start Free</PillCTA>}
+            dashboardTrigger={<PillCTA>Dashboard</PillCTA>}
           />
         </div>
-      </motion.nav>
+      </header>
 
       {/* Hero Section */}
-      <motion.section 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.2 }}
-      >
-        <div className="text-center">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mb-8"
-          >
-            <div className="inline-flex items-center space-x-2 bg-accent/50 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>Celebrate Every Victory</span>
-            </div>
-          </motion.div>
-          
-          <motion.h1 
-            className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            Turn Small Wins Into
-            <span className="text-primary block">Big Momentum</span>
-          </motion.h1>
-          
-          <motion.p 
-            className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            Combat perfectionism and boost motivation by celebrating daily achievements. 
-            Join a supportive community that cheers for every step forward, no matter how small.
-          </motion.p>
-          
-          <motion.div 
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <AuthButton 
-              trigger={
-                <Button size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
-                  Start Celebrating Today
-                  <Star className="ml-2 w-5 h-5" />
-                </Button>
-              }
-            />
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-              Watch Demo
-            </Button>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Features Section */}
-      <motion.section 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-            Why MicroWin Works
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Built on positive psychology principles to help you build lasting motivation and overcome perfectionism.
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            {
-              icon: Target,
-              title: "Daily Achievement Tracking",
-              description: "Log and celebrate small wins every day. Build momentum through consistent progress recognition.",
-              color: "text-primary"
-            },
-            {
-              icon: Users,
-              title: "Supportive Community",
-              description: "Share your victories with others who understand the journey. Give and receive encouragement.",
-              color: "text-chart-2"
-            },
-            {
-              icon: TrendingUp,
-              title: "Progress Visualization",
-              description: "See your growth over time with streaks, points, and achievement analytics that motivate you.",
-              color: "text-chart-3"
-            },
-            {
-              icon: Heart,
-              title: "Positive Reinforcement",
-              description: "Every achievement earns points and celebrations. Focus on progress, not perfection.",
-              color: "text-chart-4"
-            },
-            {
-              icon: Award,
-              title: "Gamified Experience",
-              description: "Level up, earn badges, and maintain streaks. Make personal growth fun and engaging.",
-              color: "text-chart-5"
-            },
-            {
-              icon: Zap,
-              title: "Instant Motivation",
-              description: "Get daily motivational content and immediate positive feedback for every step forward.",
-              color: "text-primary"
-            }
-          ].map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              className="bg-card p-6 rounded-xl border shadow-sm hover:shadow-md transition-shadow"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -5 }}
+      <section className="relative min-h-screen flex items-center pt-24 md:pt-0">
+        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+          <div className="z-10">
+            <motion.h1
+              className="text-5xl md:text-7xl font-bold tracking-tighter"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              <div className={`w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4`}>
-                <feature.icon className={`w-6 h-6 ${feature.color}`} />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
+              Celebrate <span className="text-secondary">Small Wins.</span>
+              <br />
+              Build Big <span className="text-primary">Momentum.</span>
+            </motion.h1>
+            <motion.p
+              className="mt-6 text-xl text-muted-foreground max-w-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              Based on positive psychology, MicroWin helps you build motivation and combat perfectionism by celebrating daily achievements.
+            </motion.p>
+            <motion.div
+              className="mt-8 flex flex-col sm:flex-row gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <AuthButton trigger={<PillCTA>Start Free Today <ArrowRight className="ml-2 w-5 h-5" /></PillCTA>} />
+              <Button variant="outline" size="lg" className="rounded-full font-bold text-lg px-8 py-6">See How It Works</Button>
             </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* CTA Section */}
-      <motion.section 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="bg-gradient-to-r from-primary/10 via-accent/20 to-primary/10 rounded-2xl p-12 text-center">
-          <motion.h2 
-            className="text-3xl sm:text-4xl font-bold tracking-tight mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            Ready to Celebrate Your Journey?
-          </motion.h2>
-          <motion.p 
-            className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            Join thousands of people who are building momentum through daily wins. 
-            Start your journey to sustainable motivation today.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <AuthButton 
-              trigger={
-                <Button size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
-                  Start Your First MicroWin
-                  <Star className="ml-2 w-5 h-5" />
-                </Button>
-              }
-            />
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Footer */}
-      <motion.footer 
-        className="border-t bg-card/50"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
-                <Star className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className="font-semibold">MicroWin Momentum</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 MicroWin Momentum. Celebrating progress, one win at a time.
-            </p>
+          </div>
+          <div className="relative h-96 hidden md:flex items-center justify-center">
+            <WinCard icon={Zap} title="Morning Workout" points={25} category="Health" color={brandColors.teal} rotation={-8} delay={0.5} />
+            <WinCard icon={Award} title="Cleared Inbox" points={15} category="Work" color={brandColors.gold} rotation={4} delay={0.7} />
+            <WinCard icon={Heart} title="Called a Friend" points={20} category="Social" color={brandColors.magenta} rotation={-2} delay={0.9} />
           </div>
         </div>
-      </motion.footer>
+      </section>
+
+      {/* Live Momentum Preview */}
+      <section className="py-20 bg-primary/5">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-3 gap-12">
+            <AnimatedStat value={124589} label="Wins Logged Today" />
+            <AnimatedStat value={18345} label="Badges Earned" />
+            <AnimatedStat value={3291} label="Challenges Completed" />
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <HowItWorks />
+
+      {/* Benefits Grid */}
+      <section className="py-24">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold tracking-tight mb-4">Build Habits That Last</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-16">Focus on small, consistent actions to create lasting positive change.</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { icon: Zap, title: "Reduce Perfectionism", desc: "Focus on progress, not perfection. Every small step is a win." },
+              { icon: BarChart, title: "Build Consistency", desc: "Track your streaks and see your daily efforts compound over time." },
+              { icon: Users, title: "Feel Supported", desc: "Join a community that cheers for you and celebrates your journey." },
+              { icon: CheckCircle, title: "See Your Progress", desc: "Visualize your growth with points, badges, and insightful stats." },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                className="bg-card p-8 rounded-2xl border text-left"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <item.icon className="w-10 h-10 text-secondary mb-4" />
+                <h3 className="text-2xl font-bold mb-2">{item.title}</h3>
+                <p className="text-muted-foreground">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Badge Wall */}
+      <BadgeWall />
+
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* Community & Safety */}
+      <CommunityAndSafety />
+
+      {/* Final CTA */}
+      <section className="py-24 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
+        <div className="container mx-auto px-6 text-center">
+          <motion.h2
+            className="text-5xl font-bold tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            Ready to build your momentum?
+          </motion.h2>
+          <motion.p
+            className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            viewport={{ once: true }}
+          >
+            Start for free, no credit card required. Join a community celebrating progress, one small win at a time.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <AuthButton trigger={<PillCTA>Claim Your First Win <Sparkles className="ml-2 w-5 h-5" /></PillCTA>} />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 bg-card/50">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-muted-foreground">© {new Date().getFullYear()} MicroWin Momentum. All Rights Reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
