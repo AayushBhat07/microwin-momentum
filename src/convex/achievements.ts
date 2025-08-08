@@ -1,8 +1,10 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation, query } from "./_generated/server";
+import { action, internalMutation, mutation, query } from "./_generated/server";
 import { categoryValidator } from "./schema";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
+import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 
 // Get achievements for the logged-in user
 export const getMyAchievements = query({
@@ -41,8 +43,49 @@ export const getPublicFeed = query({
   },
 });
 
-// Create achievement
-export const create = mutation({
+// New internal mutation for creating an achievement
+export const internalCreate = internalMutation({
+  args: {
+    userId: v.id("users"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    category: categoryValidator,
+    pointsEarned: v.number(),
+    photoUrl: v.optional(v.string()),
+    isPublic: v.boolean(),
+    source: v.union(
+      v.literal("quick"),
+      v.literal("text"),
+      v.literal("voice"),
+      v.literal("photo")
+    ),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const clientId = `${args.userId}-${Date.now()}-${Math.random()}`;
+
+    const achievementId = await ctx.db.insert("achievements", {
+      userId: args.userId,
+      clientId,
+      categorySlug: args.category,
+      category: args.category,
+      title: args.title,
+      description: args.description,
+      photoUrl: args.photoUrl,
+      pointsEarned: args.pointsEarned,
+      points: args.pointsEarned,
+      source: args.source,
+      tags: args.tags,
+      isPublic: args.isPublic,
+      loggedAt: Date.now(),
+    });
+
+    return achievementId;
+  },
+});
+
+// New log action that orchestrates everything
+export const log = action({
   args: {
     title: v.string(),
     description: v.optional(v.string()),
@@ -54,35 +97,37 @@ export const create = mutation({
       v.literal("quick"),
       v.literal("text"),
       v.literal("voice"),
-      v.literal("photo"),
+      v.literal("photo")
     ),
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Not authenticated");
     }
+    const userId = identity.subject as Id<"users">;
 
-    const clientId = `${userId}-${Date.now()}-${Math.random()}`;
-
-    const achievementId = await ctx.db.insert("achievements", {
+    // 1. Create the achievement
+    await ctx.runMutation(internal.achievements.internalCreate, {
       userId,
-      clientId,
-      categorySlug: args.category,
-      category: args.category,
-      title: args.title,
-      description: args.description,
-      photoUrl: args.photoUrl,
-      pointsEarned: args.pointsEarned,
-      points: args.pointsEarned, // Also set points for consistency
-      source: args.source,
-      tags: args.tags,
-      isPublic: args.isPublic,
-      loggedAt: Date.now(),
+      ...args,
     });
 
-    return achievementId;
+    // 2. Update user points
+    await ctx.runMutation(internal.userStats.updateUserPoints, {
+      userId,
+      points: args.pointsEarned,
+    });
+
+    // 3. Update user streak
+    await ctx.runMutation(internal.userStats.updateUserStreak, { userId });
+
+    // 4. Update daily stats
+    await ctx.runMutation(internal.userStats.updateUserDailyStats, {
+      userId,
+      points: args.pointsEarned,
+    });
   },
 });
 
@@ -92,15 +137,18 @@ export const getHeatMapData = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-      throw new Error("Not authenticated");
+      return [];
     }
+
+    const sevenMonthsAgo = new Date();
+    sevenMonthsAgo.setMonth(sevenMonthsAgo.getMonth() - 7);
 
     const achievements = await ctx.db
       .query("achievements")
       .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter(q => q.gt(q.field("_creationTime"), sevenMonthsAgo.getTime()))
       .collect();
 
-    // Group by date
     const dailyStats = achievements.reduce((acc, achievement) => {
       const date = new Date(achievement.loggedAt).toISOString().split('T')[0];
       if (!acc[date]) {
