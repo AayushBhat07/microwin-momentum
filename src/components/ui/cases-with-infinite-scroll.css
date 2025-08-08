@@ -1,0 +1,35 @@
+@keyframes scroll {
+	to {
+		transform: translate(calc(-50% - 0.5rem));
+	}
+}
+
+.animate-scroll {
+  animation: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
+}
+
+.testimonials-section .case-card {
+  background: var(--card, oklch(0.98 0.01 240));
+  color: var(--card-foreground, oklch(0.145 0 0));
+  border: 1px solid oklch(from var(--border) l c h / 50%);
+  box-shadow: 0 4px 12px oklch(from var(--foreground) l c h / 5%);
+}
+
+.testimonials-section .case-card-name {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.testimonials-section .case-card-role {
+  color: oklch(from var(--muted-foreground) l c h / 80%);
+}
+
+.testimonials-section .case-card-quote {
+  color: var(--muted-foreground);
+}
+
+.dark .testimonials-section .case-card {
+  background: var(--card, oklch(0.22 0.02 240));
+  border-color: oklch(from var(--border) l c h / 50%);
+  box-shadow: 0 8px 24px oklch(from var(--foreground) l c h / 5%);
+}
