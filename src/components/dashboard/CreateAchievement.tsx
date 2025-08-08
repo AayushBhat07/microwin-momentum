@@ -110,7 +110,7 @@ export function CreateAchievement({ trigger }: CreateAchievementProps = {}) {
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, value]) => (
-                  <SelectItem key={key} value={value}>
+                  <SelectItem key={key} value={value.slug}>
                     {key.charAt(0) + key.slice(1).toLowerCase()}
                   </SelectItem>
                 ))}

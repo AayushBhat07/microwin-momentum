@@ -167,7 +167,7 @@ export default function UserProfilePage() {
                       className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                     >
                       <Trophy className="h-3 w-3 mr-1" />
-                      {badge.badgeName}
+                      Badge
                     </Badge>
                   ))}
                 </div>

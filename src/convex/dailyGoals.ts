@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUser } from "./users";
 import { categoryValidator } from "./schema";
+import { api } from "./_generated/api";
 
 // Create a daily goal
 export const create = mutation({
@@ -30,17 +31,15 @@ export const create = mutation({
     });
 
     // Award "Goal Setter" badge if this is user's first goal
-    const goalCount = await ctx.db
+    const goalCount = (await ctx.db
       .query("dailyGoals")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", user._id))
-      .collect()
-      .then(goals => goals.length);
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect()).length;
 
     if (goalCount === 1) {
-      await ctx.db.insert("badges", {
+      await ctx.runMutation(api.badges.awardBadge, {
         userId: user._id,
         badgeName: "Goal Setter",
-        dateEarned: Date.now(),
       });
     }
 
@@ -80,7 +79,7 @@ export const getGoalsForDate = query({
   },
 });
 
-// Complete a daily goal (alias for complete)
+// Complete a daily goal
 export const completeGoal = mutation({
   args: {
     goalId: v.id("dailyGoals"),
@@ -105,32 +104,24 @@ export const completeGoal = mutation({
       completedAt: Date.now(),
     });
 
-    // Update user stats for today
-    const today = new Date().toISOString().split('T')[0];
-    const existingStat = await ctx.db
-      .query("userStats")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", user._id).eq("date", today))
+    // Update user's total points
+    const userTotals = await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .unique();
 
-    if (existingStat) {
-      await ctx.db.patch(existingStat._id, {
-        goalsCompleted: existingStat.goalsCompleted + 1,
-        pointsEarned: existingStat.pointsEarned + 10, // Award 10 points for completing a goal
+    if (userTotals) {
+      await ctx.db.patch(userTotals._id, {
+        totalPoints: userTotals.totalPoints + 10,
+        lastPointsUpdateAt: Date.now(),
       });
     } else {
-      await ctx.db.insert("userStats", {
+      await ctx.db.insert("user_totals", {
         userId: user._id,
-        date: today,
-        achievementsCount: 0,
-        pointsEarned: 10,
-        goalsCompleted: 1,
+        totalPoints: 10,
+        lastPointsUpdateAt: Date.now(),
       });
     }
-
-    // Update user's total points
-    await ctx.db.patch(user._id, {
-      totalPoints: (user.totalPoints || 0) + 10,
-    });
 
     return { success: true, pointsEarned: 10 };
   },

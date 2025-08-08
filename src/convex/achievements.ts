@@ -21,11 +21,16 @@ export const create = mutation({
 
     const achievementId = await ctx.db.insert("achievements", {
       userId: user._id,
+      clientId: crypto.randomUUID(),
+      categorySlug: args.category,
+      category: args.category,
       title: args.title,
       description: args.description,
-      category: args.category,
+      pointsEarned: args.points,
       points: args.points,
+      source: "text",
       isPublic: args.isPublic,
+      loggedAt: Date.now(),
     });
 
     // Update user stats for today

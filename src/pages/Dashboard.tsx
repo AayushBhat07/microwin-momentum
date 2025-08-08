@@ -13,6 +13,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
 import { UserSearch } from "@/components/dashboard/UserSearch";
+import { LogAchievementSheet } from "@/components/dashboard/LogAchievementSheet";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -99,6 +100,9 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      {/* Floating Action Button for Logging Achievements */}
+      <LogAchievementSheet />
     </div>
   );
 }

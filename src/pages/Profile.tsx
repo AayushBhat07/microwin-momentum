@@ -155,7 +155,7 @@ export default function ProfilePage() {
                     {userBadges && userBadges.length > 0 ? (
                         userBadges.map((badge) => (
                             <Badge key={badge._id} variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-semibold">
-                                🏆 {badge.badgeName}
+                                🏆 Badge
                             </Badge>
                         ))
                     ) : (

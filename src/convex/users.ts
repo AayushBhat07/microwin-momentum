@@ -81,7 +81,7 @@ export const getPublicProfile = query({
       return null;
     }
 
-    // Get user's public achievements
+    // Get user's achievements
     const achievements = await ctx.db
       .query("achievements")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -91,9 +91,21 @@ export const getPublicProfile = query({
 
     // Get user's badges
     const badges = await ctx.db
-      .query("badges")
+      .query("userBadges")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
+
+    // Get user totals
+    const userTotals = await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+
+    // Get user streak
+    const userStreak = await ctx.db
+      .query("user_streaks")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
 
     return {
       _id: user._id,
@@ -101,9 +113,9 @@ export const getPublicProfile = query({
       name: user.name,
       image: user.image,
       bio: user.bio,
-      totalPoints: user.totalPoints || 0,
-      currentStreak: user.currentStreak || 0,
-      longestStreak: user.longestStreak || 0,
+      totalPoints: userTotals?.totalPoints || 0,
+      currentStreak: userStreak?.currentStreak || 0,
+      longestStreak: userStreak?.longestStreak || 0,
       achievements,
       badges,
     };
@@ -125,7 +137,7 @@ export const getProfileByUsername = query({
       return null;
     }
 
-    // Get user's public achievements
+    // Get user's achievements
     const achievements = await ctx.db
       .query("achievements")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
@@ -135,9 +147,21 @@ export const getProfileByUsername = query({
 
     // Get user's badges
     const badges = await ctx.db
-      .query("badges")
+      .query("userBadges")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
+
+    // Get user totals
+    const userTotals = await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+
+    // Get user streak
+    const userStreak = await ctx.db
+      .query("user_streaks")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
       
     return {
       _id: user._id,
@@ -145,9 +169,9 @@ export const getProfileByUsername = query({
       name: user.name,
       image: user.image,
       bio: user.bio,
-      totalPoints: user.totalPoints || 0,
-      currentStreak: user.currentStreak || 0,
-      longestStreak: user.longestStreak || 0,
+      totalPoints: userTotals?.totalPoints || 0,
+      currentStreak: userStreak?.currentStreak || 0,
+      longestStreak: userStreak?.longestStreak || 0,
       achievements,
       badges,
     };

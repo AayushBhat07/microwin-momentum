@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUser } from "./users";
+import { api } from "./_generated/api";
 
 // Get user stats for a date range
 export const getUserStats = query({
@@ -54,25 +55,35 @@ export const getWeeklyStats = query({
       .collect()
       .then(achievements => achievements.length);
 
+    // Get user totals
+    const userTotals = await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+
+    // Get user streak
+    const userStreak = await ctx.db
+      .query("user_streaks")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+
     // Get this week's achievements
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const oneWeekAgoStr = oneWeekAgo.toISOString().split('T')[0];
+    const oneWeekAgoTime = oneWeekAgo.getTime();
 
-    const weeklyStats = await ctx.db
-      .query("userStats")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", user._id))
-      .filter((q) => q.gte(q.field("date"), oneWeekAgoStr))
-      .collect();
-
-    const weeklyAchievements = weeklyStats.reduce((sum, stat) => sum + stat.achievementsCount, 0);
-    const weeklyStreak = Math.min(user.currentStreak || 0, 7); // Cap at 7 for weekly display
+    const weeklyAchievements = await ctx.db
+      .query("achievements")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .filter((q) => q.gte(q.field("loggedAt"), oneWeekAgoTime))
+      .collect()
+      .then(achievements => achievements.length);
 
     return {
       totalAchievements,
       weeklyAchievements,
-      totalPoints: user.totalPoints || 0,
-      weeklyStreak,
+      totalPoints: userTotals?.totalPoints || 0,
+      weeklyStreak: Math.min(userStreak?.currentStreak || 0, 7),
     };
   },
 });
@@ -88,62 +99,56 @@ export const updateLoginStreak = mutation({
 
     const now = Date.now();
     const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-    // Check if user already logged in today
-    const todayStats = await ctx.db
-      .query("userStats")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", user._id).eq("date", today))
+    // Get or create user streak record
+    let streakData = await ctx.db
+      .query("user_streaks")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .unique();
 
-    if (todayStats) {
-      // Already logged in today, just update lastLogin
-      await ctx.db.patch(user._id, { lastLogin: now });
+    if (!streakData) {
+      // Create initial streak record
+      await ctx.db.insert("user_streaks", {
+        userId: user._id,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastActivityDate: today,
+        streakStartDate: today,
+      });
+      return { streakUpdated: true, newStreak: 1, longestStreak: 1 };
+    }
+
+    // Check if already logged in today
+    if (streakData.lastActivityDate === today) {
       return { streakUpdated: false };
     }
 
-    // Check if user logged in yesterday
-    const yesterdayStats = await ctx.db
-      .query("userStats")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", user._id).eq("date", yesterday))
-      .unique();
-
+    // Calculate streak continuation
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     let newStreak = 1;
-    if (yesterdayStats) {
-      // Continue streak
-      newStreak = (user.currentStreak || 0) + 1;
+    
+    if (streakData.lastActivityDate === yesterday) {
+      newStreak = streakData.currentStreak + 1;
     }
 
-    // Update user streak
-    const longestStreak = Math.max(user.longestStreak || 0, newStreak);
-    
-    await ctx.db.patch(user._id, {
+    const longestStreak = Math.max(streakData.longestStreak, newStreak);
+
+    await ctx.db.patch(streakData._id, {
       currentStreak: newStreak,
       longestStreak,
-      lastLogin: now,
-    });
-
-    // Create today's stats entry
-    await ctx.db.insert("userStats", {
-      userId: user._id,
-      date: today,
-      achievementsCount: 0,
-      pointsEarned: 0,
-      goalsCompleted: 0,
+      lastActivityDate: today,
     });
 
     // Award streak badges
     if (newStreak === 7) {
-      await ctx.db.insert("badges", {
+      await ctx.runMutation(api.badges.awardBadge, {
         userId: user._id,
         badgeName: "Week Warrior",
-        dateEarned: now,
       });
     } else if (newStreak === 30) {
-      await ctx.db.insert("badges", {
+      await ctx.runMutation(api.badges.awardBadge, {
         userId: user._id,
         badgeName: "Month Master",
-        dateEarned: now,
       });
     }
 

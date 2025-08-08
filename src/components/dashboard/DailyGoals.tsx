@@ -33,7 +33,7 @@ export function DailyGoals() {
       await createGoal({
         title: newGoalTitle.trim(),
         // Using 'PERSONAL' as a default category for simplicity
-        category: "PERSONAL",
+        category: "personal",
         targetDate: today.getTime(),
       });
       setNewGoalTitle("");
