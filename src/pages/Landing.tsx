@@ -15,6 +15,9 @@ import {
   LinesPatternCard,
   LinesPatternCardBody,
 } from "@/components/ui/card-with-lines-pattern";
+import { useAuth } from "@/hooks/use-auth";
+import { useNavigate } from "react-router";
+import { Spinner } from "@/components/ui/spinner";
 
 // --- Configuration for colors and badges ---
 const brandColors = {
@@ -60,6 +63,29 @@ const AnimatedStat = ({ value, label }: { value: number, label: string }) => {
 // --- Main Landing Page Component ---
 
 export default function Landing() {
+  const { isLoading, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // This page should only be for unauthenticated users.
+  // The Protected component will handle routing for authenticated users.
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Spinner className="h-12 w-12" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    // Let the Protected component handle the redirect.
+    // This prevents a flash of the landing page.
+    return (
+       <div className="w-full h-screen flex items-center justify-center">
+        <Spinner className="h-12 w-12" />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-background text-foreground font-sans overflow-x-hidden">
       {/* Header */}

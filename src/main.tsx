@@ -11,7 +11,6 @@ import "./index.css";
 import Dashboard from "./pages/Dashboard.tsx";
 import Landing from "./pages/Landing.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import Onboarding from "./pages/Onboarding.tsx";
 import { Protected } from "@/lib/protected-page";
 import ProfilePage from "./pages/Profile.tsx";
 import LoginPage from "@/pages/Login.tsx";
@@ -58,8 +57,9 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
+            
+            {/* Protected Routes */}
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
-            <Route path="/onboarding" element={<Protected><Onboarding /></Protected>} />
             <Route path="/onboarding/profile" element={<Protected><ProfileSetupPage /></Protected>} />
             <Route path="/onboarding/goals" element={<Protected><GoalSettingPage /></Protected>} />
             <Route path="/onboarding/achievements" element={<Protected><AchievementIntroPage /></Protected>} />
