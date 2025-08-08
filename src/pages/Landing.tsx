@@ -112,7 +112,7 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <AuthButton trigger={<PillCTA>Start Free Today <ArrowRight className="ml-2 w-5 h-5" /></PillCTA>} />
+              <AuthButton useModal={false} trigger={<PillCTA>Start Free Today <ArrowRight className="ml-2 w-5 h-5" /></PillCTA>} />
               <Button variant="outline" size="lg" className="rounded-full font-bold text-lg px-8 py-6">See How It Works</Button>
             </motion.div>
           </div>

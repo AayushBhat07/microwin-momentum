@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { AuthCard } from "./AuthCard";
 
@@ -46,9 +46,15 @@ const UnauthenticatedButton = ({ useModal, trigger }: AuthButtonProps) => {
     );
   }
 
+  if (trigger) {
+    return React.cloneElement(trigger as React.ReactElement, {
+      onClick: () => navigate("/login"),
+    });
+  }
+
   return (
     <Button onClick={() => navigate("/login")}>
-      {trigger || "Get Started"}
+      {"Get Started"}
     </Button>
   );
 };
