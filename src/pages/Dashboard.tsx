@@ -9,13 +9,13 @@ import { MilestoneCard } from "@/components/dashboard/MilestoneCard";
 import { HeatMapCard } from "@/components/dashboard/HeatMapCard";
 import { PhotoMemoryCard } from "@/components/dashboard/PhotoMemoryCard";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-import { CreateAchievement } from "@/components/dashboard/CreateAchievement";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { FloatingLogButton } from "@/components/logging/FloatingLogButton";
+import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
   
   // Fetch user stats
   const weeklyStats = useQuery(api.userStats.getWeeklyStats);
@@ -113,36 +113,12 @@ export default function Dashboard() {
               {/* Placeholder for future features */}
             </div>
           </div>
-
-          {/* Quick Actions Footer */}
-          <motion.div
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                  Ready to log your next win?
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Quick log your next micro-win and keep the momentum going!
-                </p>
-              </div>
-              
-              <CreateAchievement
-                trigger={
-                  <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-full">
-                    <Plus className="w-5 h-5 mr-2" />
-                    Log a Win
-                  </Button>
-                }
-              />
-            </div>
-          </motion.div>
         </div>
       </div>
+
+      {/* Gamified Logging System */}
+      <FloatingLogButton onClick={() => setIsLogSheetOpen(true)} />
+      <LogAchievementSheet open={isLogSheetOpen} onOpenChange={setIsLogSheetOpen} />
     </div>
   );
 }
