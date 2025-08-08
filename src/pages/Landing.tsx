@@ -1,7 +1,7 @@
 import { AuthButton } from "@/components/auth/AuthButton";
 import { Button } from "@/components/ui/button";
 import { motion, useInView } from "framer-motion";
-import { ArrowRight, Award, BarChart, CheckCircle, Heart, Sparkles, Users, Zap } from "lucide-react";
+import { ArrowRight, BarChart, CheckCircle, Heart, Sparkles, Users, Zap, Award } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { PillCTA } from "@/components/landing/PillCTA";
 import { Squares } from "@/components/ui/squares-background";
@@ -9,6 +9,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { BadgeWall } from "@/components/landing/BadgeWall";
 import { CommunityAndSafety } from "@/components/landing/CommunityAndSafety";
 import { Testimonials } from "@/components/landing/Testimonials";
+import Folder from "@/components/landing/Folder";
 
 // --- Configuration for colors and badges ---
 const brandColors = {
@@ -21,31 +22,6 @@ const brandColors = {
 };
 
 // --- Reusable Components ---
-
-const WinCard = ({ icon: Icon, title, points, category, color, rotation, delay }: any) => (
-  <motion.div
-    className="absolute w-64 p-4 bg-card rounded-2xl shadow-lg border flex flex-col"
-    initial={{ opacity: 0, y: 50, rotate: rotation + 10 }}
-    animate={{ opacity: 1, y: 0, rotate: rotation }}
-    transition={{ type: "spring", stiffness: 50, delay }}
-  >
-    <div className="flex justify-between items-start">
-      <div className="p-2 bg-primary/10 rounded-lg">
-        <Icon className="w-6 h-6 text-primary" />
-      </div>
-      <div className="text-right">
-        <p className="font-bold text-2xl text-accent">+{points}</p>
-        <p className="text-sm text-muted-foreground">Points</p>
-      </div>
-    </div>
-    <div className="mt-4">
-      <p className="font-semibold text-lg">{title}</p>
-      <div className="mt-2 inline-block px-3 py-1 text-xs font-medium rounded-full text-foreground" style={{ backgroundColor: color }}>
-        {category}
-      </div>
-    </div>
-  </motion.div>
-);
 
 const AnimatedStat = ({ value, label }: { value: number, label: string }) => {
   const ref = useRef(null);
@@ -131,9 +107,20 @@ export default function Landing() {
             </motion.div>
           </div>
           <div className="relative h-96 hidden md:flex items-center justify-center">
-            <WinCard icon={Zap} title="Morning Workout" points={25} category="Health" color={brandColors.primary} rotation={-8} delay={0.5} />
-            <WinCard icon={Award} title="Cleared Inbox" points={15} category="Work" color={brandColors.accent} rotation={4} delay={0.7} />
-            <WinCard icon={Heart} title="Called a Friend" points={20} category="Social" color={brandColors.secondary} rotation={-2} delay={0.9} />
+            <Folder size={2} color="#60B5FF" items={[
+              <div className="p-2 text-center text-sm">
+                <p className="font-bold">Morning Workout</p>
+                <p className="text-xs">+25 Points</p>
+              </div>,
+              <div className="p-2 text-center text-sm">
+                <p className="font-bold">Cleared Inbox</p>
+                <p className="text-xs">+15 Points</p>
+              </div>,
+              <div className="p-2 text-center text-sm">
+                <p className="font-bold">Called a Friend</p>
+                <p className="text-xs">+20 Points</p>
+              </div>
+            ]} />
           </div>
         </div>
       </section>
