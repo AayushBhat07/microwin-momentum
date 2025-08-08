@@ -2,6 +2,7 @@ import { AuthButton } from "@/components/auth/AuthButton";
 import { Button } from "@/components/ui/button";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, BarChart, CheckCircle, Heart, Sparkles, Users, Zap, Award } from "lucide-react";
+import { useNavigate } from "react-router";
 import React, { useEffect, useRef, useState } from "react";
 import { PillCTA } from "@/components/landing/PillCTA";
 import { Squares } from "@/components/ui/squares-background";
@@ -63,6 +64,15 @@ const AnimatedStat = ({ value, label }: { value: number, label: string }) => {
 
 export default function Landing() {
   const { isLoading, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If auth is done loading and the user is logged in,
+    // redirect them from the landing page to the dashboard.
+    if (!isLoading && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
   // This page should only be for unauthenticated users.
   // The Protected component will handle routing for authenticated users.
