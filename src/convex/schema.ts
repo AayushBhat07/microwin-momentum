@@ -77,14 +77,6 @@ const schema = defineSchema({
     dateEarned: v.number(),
   }).index("by_user", ["userId"]),
 
-  userFollows: defineTable({
-    followerId: v.id("users"),
-    followingId: v.id("users"),
-  })
-    .index("by_follower", ["followerId"])
-    .index("by_following", ["followingId"])
-    .index("by_follower_and_following", ["followerId", "followingId"]),
-
   dailyGoals: defineTable({
     userId: v.id("users"),
     title: v.string(),

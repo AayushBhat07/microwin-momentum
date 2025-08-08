@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star, Trophy, Flame, Users, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
-import { FollowButton } from "@/components/dashboard/FollowButton";
 import { AchievementCard } from "@/components/dashboard/AchievementCard";
 
 export default function UserProfilePage() {
@@ -70,9 +69,6 @@ export default function UserProfilePage() {
             Back
           </Button>
           <div className="flex-1" />
-          {!isOwnProfile && currentUser && (
-            <FollowButton userIdToFollow={userProfile._id} />
-          )}
         </div>
       </header>
 
@@ -109,16 +105,7 @@ export default function UserProfilePage() {
                   )}
 
                   <div className="flex items-center gap-6 text-sm">
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span className="font-medium">{userProfile.followersCount}</span>
-                      <span className="text-muted-foreground">followers</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <UserPlus className="h-4 w-4" />
-                      <span className="font-medium">{userProfile.followingCount}</span>
-                      <span className="text-muted-foreground">following</span>
-                    </div>
+                    {/* Follower/Following counts removed */}
                   </div>
                 </div>
               </div>

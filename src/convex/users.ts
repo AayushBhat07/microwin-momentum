@@ -139,17 +139,6 @@ export const getProfileByUsername = query({
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
       
-    // Get follow counts directly from database to avoid circular reference
-    const followers = await ctx.db
-      .query("userFollows")
-      .withIndex("by_following", (q) => q.eq("followingId", user._id))
-      .collect();
-
-    const following = await ctx.db
-      .query("userFollows")
-      .withIndex("by_follower", (q) => q.eq("followerId", user._id))
-      .collect();
-
     return {
       _id: user._id,
       username: user.username,
@@ -161,8 +150,6 @@ export const getProfileByUsername = query({
       longestStreak: user.longestStreak || 0,
       achievements,
       badges,
-      followersCount: followers.length,
-      followingCount: following.length,
     };
   },
 });

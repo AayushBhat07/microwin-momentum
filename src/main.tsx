@@ -18,7 +18,7 @@ import ProfileSetupPage from "./pages/onboarding/ProfileSetup.tsx";
 import GoalSettingPage from "./pages/onboarding/GoalSetting.tsx";
 import AchievementIntroPage from "./pages/onboarding/AchievementIntro.tsx";
 import PreferencesPage from "./pages/onboarding/Preferences.tsx";
-import UserProfilePage from "./pages/UserProfile.tsx";
+import UserProfilePage from "./pages/UserProfilePage.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
