@@ -46,10 +46,10 @@ const TextType: React.FC<TextTypeProps> = ({
 
   // Function to apply color styling to specific words
   const renderStyledText = (text: string) => {
-    // Replace "Small Wins" with colored version
+    // Replace "Wins." with colored version
     let styledText = text.replace(
-      /Small Wins/g, 
-      '<span class="text-secondary">Small Wins</span>'
+      /Wins\./g,
+      '<span class="text-secondary">Wins.</span>'
     );
     
     // Replace "Momentum" with colored version
