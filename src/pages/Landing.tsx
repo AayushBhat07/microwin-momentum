@@ -17,7 +17,6 @@ import {
   LinesPatternCard,
   LinesPatternCardBody,
 } from "@/components/ui/card-with-lines-pattern";
-import { useAuth } from "@/hooks/use-auth";
 import { Spinner } from "@/components/ui/spinner";
 
 // --- Configuration for colors and badges ---
@@ -74,24 +73,6 @@ export default function Landing() {
       navigate("/dashboard", { replace: true });
     }
   }, [isLoading, isAuthenticated, navigate]);
-
-  // This page should only be for unauthenticated users.
-  // The Protected component will handle routing for authenticated users.
-  if (isLoading || isAuthenticated) {
-    return (
-      <div className="w-full h-screen flex flex-col items-center justify-center bg-background">
-        <Spinner className="h-12 w-12" />
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="text-muted-foreground mt-4"
-        >
-          Signing you in...
-        </motion.p>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-background text-foreground font-sans overflow-x-hidden">
