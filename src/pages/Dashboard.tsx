@@ -11,9 +11,6 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MotivationalQuote } from "@/components/dashboard/MotivationalQuote";
 import { DailyGoals } from "@/components/dashboard/DailyGoals";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { toast } from "sonner";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -45,9 +42,6 @@ export default function Dashboard() {
             <span className="text-xl font-bold tracking-tighter">MicroWin</span>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-4">
-            <Button variant="outline" size="sm" onClick={handleSeed}>
-              Seed Data
-            </Button>
             <CreateAchievement
               trigger={
                 <Button size="sm">
