@@ -10,6 +10,7 @@ import { BadgeWall } from "@/components/landing/BadgeWall";
 import { CommunityAndSafety } from "@/components/landing/CommunityAndSafety";
 import { Testimonials } from "@/components/landing/Testimonials";
 import Folder from "@/components/landing/Folder";
+import TextType from "@/components/landing/TextType";
 
 // --- Configuration for colors and badges ---
 const brandColors = {
@@ -84,9 +85,14 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              Celebrate <span className="text-secondary">Small Wins.</span>
-              <br />
-              Build Big <span className="text-primary">Momentum.</span>
+              <TextType 
+                text={["Celebrate Small Wins.", "Build Big Momentum."]}
+                typingSpeed={100}
+                pauseDuration={2000}
+                showCursor={true}
+                cursorCharacter="|"
+                className=""
+              />
             </motion.h1>
             <motion.p
               className="mt-6 text-xl text-muted-foreground max-w-lg"
