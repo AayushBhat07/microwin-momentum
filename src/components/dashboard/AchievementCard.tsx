@@ -19,8 +19,8 @@ export function AchievementCard({ achievement, showUser = false }: AchievementCa
 
   return (
     <Card className="overflow-hidden">
-      {achievement.photoUrl && (
-        <img src={achievement.photoUrl} alt={achievement.title} className="w-full h-48 object-cover" />
+      {achievement.photoStorageId && (
+        <img src={`/api/storage/${achievement.photoStorageId}`} alt={achievement.title} className="w-full h-48 object-cover" />
       )}
       <CardContent className="p-4">
         <div className="flex justify-between items-start">

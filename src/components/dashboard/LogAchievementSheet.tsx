@@ -177,7 +177,7 @@ export function LogAchievementSheet({ trigger, open, onOpenChange }: LogAchievem
         categorySlug: selectedCategory,
         title: title.trim(),
         description: description.trim() || undefined,
-        photoUrl: photoPreview || undefined, // In real app, upload to storage first
+        photoStorageId: undefined, // Photo upload not implemented in this component
         source: photoFile ? 'photo' : 'text',
         tags: tags.length > 0 ? tags : undefined,
       });

@@ -10,7 +10,7 @@ export const log = mutation({
     categorySlug: v.string(),
     title: v.string(),
     description: v.optional(v.string()),
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.id("_storage")),
     source: v.union(
       v.literal("quick"),
       v.literal("text"),
@@ -67,7 +67,7 @@ export const log = mutation({
       category: args.categorySlug as any,
       title: args.title,
       description: args.description,
-      photoUrl: args.photoUrl,
+      photoStorageId: args.photoStorageId,
       pointsEarned,
       points: pointsEarned,
       source: args.source,

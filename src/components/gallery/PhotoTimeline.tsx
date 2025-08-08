@@ -14,7 +14,7 @@ export function PhotoTimeline() {
     return <div className="animate-pulse h-64 bg-muted rounded" />;
   }
 
-  const photoAchievements = achievements.filter((a: Doc<"achievements">) => a.photoUrl);
+  const photoAchievements = achievements.filter((a: Doc<"achievements">) => a.photoStorageId);
 
   return (
     <Card>
@@ -32,7 +32,7 @@ export function PhotoTimeline() {
                 className="relative group cursor-pointer"
               >
                 <img
-                  src={achievement.photoUrl}
+                  src={`/api/storage/${achievement.photoStorageId}`}
                   alt={achievement.title}
                   className="w-full h-32 object-cover rounded-lg"
                 />

@@ -17,7 +17,7 @@ export const logWin = action({
       v.literal("voice"),
       v.literal("photo")
     ),
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
     isPublic: v.optional(v.boolean()),
   },

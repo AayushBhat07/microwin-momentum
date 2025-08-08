@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useAction } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -32,8 +33,15 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
   const [category, setCategory] = useState<string>("");
   const [activeTab, setActiveTab] = useState("quick");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const logWin = useAction(api.logWin.logWin);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+
+  const handlePhotoSelected = (file: File | null) => {
+    setPhotoFile(file);
+  };
 
   const handleSubmit = async () => {
     if (!title.trim() || !category) {
@@ -44,6 +52,21 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
     setIsSubmitting(true);
     
     try {
+      let photoStorageId: Id<"_storage"> | undefined = undefined;
+
+      if (photoFile && activeTab === 'photo') {
+        setIsUploading(true);
+        const postUrl = await generateUploadUrl();
+        const result = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": photoFile.type },
+          body: photoFile,
+        });
+        const { storageId } = await result.json();
+        photoStorageId = storageId;
+        setIsUploading(false);
+      }
+
       const clientId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
       const result = await logWin({
@@ -53,6 +76,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         categorySlug: category,
         source: activeTab as "quick" | "text" | "voice" | "photo",
         isPublic: true,
+        photoStorageId,
       });
 
       toast.success(`Win logged! +${result.pointsEarned} points`, {
@@ -63,12 +87,14 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
       setTitle("");
       setDescription("");
       setCategory("");
+      setPhotoFile(null);
       onOpenChange(false);
     } catch (error) {
       toast.error("Failed to log win. Please try again.");
       console.error("Error logging win:", error);
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
@@ -109,7 +135,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
               <VoiceInputTab onTranscription={setTitle} />
             </TabsContent>
             <TabsContent value="photo">
-              <PhotoInputTab />
+              <PhotoInputTab onPhotoSelected={handlePhotoSelected} isUploading={isUploading} />
             </TabsContent>
           </Tabs>
 
@@ -156,9 +182,14 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
             onClick={handleSubmit} 
             className="w-full" 
             size="lg"
-            disabled={isSubmitting || !title.trim() || !category}
+            disabled={isSubmitting || isUploading || !title.trim() || !category}
           >
-            {isSubmitting ? (
+            {isUploading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Uploading Photo...
+              </>
+            ) : isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Logging Win...

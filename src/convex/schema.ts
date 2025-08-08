@@ -78,7 +78,7 @@ const schema = defineSchema({
     category: categoryValidator, // Keep existing field
     title: v.string(),
     description: v.optional(v.string()),
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.id("_storage")),
     pointsEarned: v.number(),
     points: v.number(), // Keep existing field
     source: v.union(

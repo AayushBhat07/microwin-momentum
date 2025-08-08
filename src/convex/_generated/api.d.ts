@@ -18,6 +18,7 @@ import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as badges from "../badges.js";
 import type * as dailyGoals from "../dailyGoals.js";
+import type * as files from "../files.js";
 import type * as gamification from "../gamification.js";
 import type * as http from "../http.js";
 import type * as logWin from "../logWin.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   badges: typeof badges;
   dailyGoals: typeof dailyGoals;
+  files: typeof files;
   gamification: typeof gamification;
   http: typeof http;
   logWin: typeof logWin;

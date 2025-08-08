@@ -33,7 +33,7 @@ export const createWinWithGameification = internalMutation({
       v.literal("voice"),
       v.literal("photo")
     ),
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
     isPublic: v.boolean(),
   },
@@ -103,7 +103,7 @@ export const createWinWithGameification = internalMutation({
       category: args.categorySlug as any,
       title: args.title,
       description: args.description,
-      photoUrl: args.photoUrl,
+      photoStorageId: args.photoStorageId,
       pointsEarned: totalPoints,
       points: totalPoints,
       source: args.source,

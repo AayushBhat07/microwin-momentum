@@ -51,7 +51,7 @@ export const internalCreate = internalMutation({
     description: v.optional(v.string()),
     category: categoryValidator,
     pointsEarned: v.number(),
-    photoUrl: v.optional(v.string()),
+    photoStorageId: v.optional(v.id("_storage")),
     isPublic: v.boolean(),
     source: v.union(
       v.literal("quick"),
@@ -71,7 +71,7 @@ export const internalCreate = internalMutation({
       category: args.category,
       title: args.title,
       description: args.description,
-      photoUrl: args.photoUrl,
+      photoStorageId: args.photoStorageId,
       pointsEarned: args.pointsEarned,
       points: args.pointsEarned,
       source: args.source,
