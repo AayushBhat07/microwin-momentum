@@ -1,10 +1,14 @@
 import { Award, Edit, TrendingUp } from "lucide-react";
 import ScrollStack, { ScrollStackItem } from "./ScrollStack";
 import "./ScrollStack.css";
+import { Squares } from "@/components/ui/squares-background";
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative howitworks-stack">
+    <section id="how-it-works" className="relative isolate howitworks-stack">
+      <div className="absolute inset-0 -z-10">
+        <Squares direction="diagonal" speed={0.2} />
+      </div>
       <div className="howitworks-header">
         <h2 className="text-4xl font-bold tracking-tight heading">
           How It Works
