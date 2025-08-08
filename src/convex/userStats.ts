@@ -66,6 +66,7 @@ export const updateUserPoints = internalMutation({
       await ctx.db.insert("user_totals", {
         userId,
         totalPoints: points,
+        totalAchievements: 1,
         lastPointsUpdateAt: Date.now(),
       });
     }

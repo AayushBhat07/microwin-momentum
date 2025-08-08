@@ -13,7 +13,7 @@ export const getUserBadges = query({
 
     return await ctx.db
       .query("userBadges")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user_and_earned_at", (q) => q.eq("userId", user._id))
       .collect();
   },
 });
@@ -21,34 +21,25 @@ export const getUserBadges = query({
 // Award a badge to a user
 export const awardBadge = mutation({
   args: {
-    badgeName: v.string(),
+    badgeSlug: v.string(),
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
     // Check if badge already exists
     const existingBadge = await ctx.db
       .query("badges")
-      .filter((q) => q.eq(q.field("badgeName"), args.badgeName))
+      .withIndex("by_slug", (q) => q.eq("slug", args.badgeSlug))
       .first();
 
-    let badgeId;
-    if (existingBadge) {
-      badgeId = existingBadge._id;
-    } else {
-      // Create new badge
-      badgeId = await ctx.db.insert("badges", {
-        badgeName: args.badgeName,
-        description: `Badge: ${args.badgeName}`,
-        icon: "star",
-        type: "special",
-      });
+    if (!existingBadge) {
+      throw new Error(`Badge ${args.badgeSlug} not found`);
     }
 
     // Check if user already has this badge
     const userHasBadge = await ctx.db
       .query("userBadges")
       .withIndex("by_user_and_badge", (q) => 
-        q.eq("userId", args.userId).eq("badgeId", badgeId)
+        q.eq("userId", args.userId).eq("badgeSlug", args.badgeSlug)
       )
       .first();
 
@@ -59,8 +50,8 @@ export const awardBadge = mutation({
     // Award the badge
     await ctx.db.insert("userBadges", {
       userId: args.userId,
-      badgeId,
-      dateEarned: Date.now(),
+      badgeSlug: args.badgeSlug,
+      earnedAt: Date.now(),
     });
   },
 });

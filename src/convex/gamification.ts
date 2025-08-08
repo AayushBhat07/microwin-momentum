@@ -149,6 +149,7 @@ export const updateUserStats = internalMutation({
       await ctx.db.insert("user_totals", {
         userId: args.userId,
         totalPoints: args.pointsEarned,
+        totalAchievements: 1,
         lastPointsUpdateAt: Date.now(),
       });
     }

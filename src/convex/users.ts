@@ -92,7 +92,7 @@ export const getPublicProfile = query({
     // Get user's badges
     const badges = await ctx.db
       .query("userBadges")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user_and_earned_at", (q) => q.eq("userId", args.userId))
       .collect();
 
     // Get user totals
@@ -148,7 +148,7 @@ export const getProfileByUsername = query({
     // Get user's badges
     const badges = await ctx.db
       .query("userBadges")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user_and_earned_at", (q) => q.eq("userId", user._id))
       .collect();
 
     // Get user totals

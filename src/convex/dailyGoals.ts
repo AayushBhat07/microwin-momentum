@@ -39,7 +39,7 @@ export const create = mutation({
     if (goalCount === 1) {
       await ctx.runMutation(api.badges.awardBadge, {
         userId: user._id,
-        badgeName: "Goal Setter",
+        badgeSlug: "goal-setter",
       });
     }
 
@@ -119,6 +119,7 @@ export const completeGoal = mutation({
       await ctx.db.insert("user_totals", {
         userId: user._id,
         totalPoints: 10,
+        totalAchievements: 0,
         lastPointsUpdateAt: Date.now(),
       });
     }

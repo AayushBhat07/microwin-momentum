@@ -106,6 +106,7 @@ const schema = defineSchema({
   user_totals: defineTable({
     userId: v.id("users"),
     totalPoints: v.number(),
+    totalAchievements: v.number(),
     lastPointsUpdateAt: v.number(),
   }).index("by_user", ["userId"]),
 
@@ -117,20 +118,21 @@ const schema = defineSchema({
   }).index("by_user", ["userId"]),
 
   badges: defineTable({
+    slug: v.string(),
     badgeName: v.string(),
     description: v.string(),
     icon: v.string(),
     type: v.union(v.literal("streak"), v.literal("special")),
     threshold: v.optional(v.number()), // e.g., 3 for 3-day streak
-  }),
+  }).index("by_slug", ["slug"]),
 
   userBadges: defineTable({
     userId: v.id("users"),
-    badgeId: v.id("badges"),
-    dateEarned: v.number(),
+    badgeSlug: v.string(),
+    earnedAt: v.number(),
   })
-    .index("by_user", ["userId"])
-    .index("by_user_and_badge", ["userId", "badgeId"]),
+    .index("by_user_and_earned_at", ["userId", "earnedAt"])
+    .index("by_user_and_badge", ["userId", "badgeSlug"]),
 
   // Additional tables needed by existing code
   userStats: defineTable({

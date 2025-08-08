@@ -1,27 +1,79 @@
 import { useState } from "react";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuickPresetsTab } from "./tabs/QuickPresetsTab";
 import { TextInputTab } from "./tabs/TextInputTab";
 import { VoiceInputTab } from "./tabs/VoiceInputTab";
 import { PhotoInputTab } from "./tabs/PhotoInputTab";
-import { Flame, Sparkles } from "lucide-react";
+import { Flame, Sparkles, Loader2 } from "lucide-react";
 
 interface LogAchievementSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+const categories = [
+  { slug: "health", name: "Health & Fitness", basePoints: 20 },
+  { slug: "work", name: "Work & Career", basePoints: 15 },
+  { slug: "learning", name: "Learning & Growth", basePoints: 25 },
+  { slug: "social", name: "Social & Relationships", basePoints: 15 },
+  { slug: "creative", name: "Creative & Hobbies", basePoints: 20 },
+  { slug: "personal", name: "Personal Care", basePoints: 10 },
+];
+
 export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetProps) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("quick");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    // TODO: Implement submission logic with gamification
-    console.log("Submitting:", { title, category });
-    onOpenChange(false); // Close sheet on submit
+  const logWin = useAction(api.logWin.logWin);
+
+  const handleSubmit = async () => {
+    if (!title.trim() || !category) {
+      toast.error("Please provide a title and select a category");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const clientId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const result = await logWin({
+        clientId,
+        title: title.trim(),
+        description: description.trim() || undefined,
+        categorySlug: category,
+        source: activeTab as "quick" | "text" | "voice" | "photo",
+        isPublic: true,
+      });
+
+      toast.success(`Win logged! +${result.pointsEarned} points`, {
+        description: result.newStreak > 1 ? `${result.newStreak} day streak!` : undefined,
+      });
+
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setCategory("");
+      onOpenChange(false);
+    } catch (error) {
+      toast.error("Failed to log win. Please try again.");
+      console.error("Error logging win:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const selectedCategory = categories.find(c => c.slug === category);
+  const estimatedPoints = selectedCategory ? selectedCategory.basePoints : 0;
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -32,45 +84,89 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
             <DrawerDescription>Keep the momentum going. What did you accomplish?</DrawerDescription>
           </DrawerHeader>
 
-          <Tabs defaultValue="quick" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger value="quick">Quick</TabsTrigger>
               <TabsTrigger value="text">Text</TabsTrigger>
               <TabsTrigger value="voice">Voice</TabsTrigger>
               <TabsTrigger value="photo">Photo</TabsTrigger>
             </TabsList>
-            <TabsContent value="quick"><QuickPresetsTab onSelect={setTitle} /></TabsContent>
-            <TabsContent value="text"><TextInputTab value={title} onChange={setTitle} /></TabsContent>
-            <TabsContent value="voice"><VoiceInputTab onTranscription={setTitle} /></TabsContent>
-            <TabsContent value="photo"><PhotoInputTab /></TabsContent>
+            <TabsContent value="quick">
+              <QuickPresetsTab onSelect={setTitle} />
+            </TabsContent>
+            <TabsContent value="text">
+              <TextInputTab value={title} onChange={setTitle} />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add more details (optional)..."
+                className="w-full mt-2 p-2 border rounded-md resize-none"
+                rows={2}
+                maxLength={500}
+              />
+            </TabsContent>
+            <TabsContent value="voice">
+              <VoiceInputTab onTranscription={setTitle} />
+            </TabsContent>
+            <TabsContent value="photo">
+              <PhotoInputTab />
+            </TabsContent>
           </Tabs>
 
-          {/* Category, Tags, and Gamification Preview */}
+          {/* Category Selection */}
+          <div className="mt-4">
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.slug} value={cat.slug}>
+                    {cat.name} (+{cat.basePoints} pts)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Gamification Preview */}
           <div className="mt-6 flex items-center justify-between">
             <div className="flex items-center gap-2">
-                {/* TODO: Add category selector */}
+              {selectedCategory && (
                 <div className="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
-                    Category
+                  {selectedCategory.name}
                 </div>
-                {/* TODO: Add tag input */}
+              )}
             </div>
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1 text-sm font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">
-                    <Flame className="w-4 h-4" />
-                    <span>Day 4</span>
-                </div>
-                <div className="flex items-center gap-1 text-sm font-semibold text-teal-600 bg-teal-100 px-3 py-1 rounded-full">
-                    <Sparkles className="w-4 h-4" />
-                    <span>+30pts (x1.2)</span>
-                </div>
+              <div className="flex items-center gap-1 text-sm font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">
+                <Flame className="w-4 h-4" />
+                <span>Streak</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm font-semibold text-teal-600 bg-teal-100 px-3 py-1 rounded-full">
+                <Sparkles className="w-4 h-4" />
+                <span>~{estimatedPoints}pts</span>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="p-6 bg-gray-50 border-t mt-6">
-            <Button onClick={handleSubmit} className="w-full" size="lg">
-                Submit Win
-            </Button>
+          <Button 
+            onClick={handleSubmit} 
+            className="w-full" 
+            size="lg"
+            disabled={isSubmitting || !title.trim() || !category}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Logging Win...
+              </>
+            ) : (
+              "Submit Win"
+            )}
+          </Button>
         </div>
       </DrawerContent>
     </Drawer>
