@@ -16,7 +16,6 @@ import {
   LinesPatternCardBody,
 } from "@/components/ui/card-with-lines-pattern";
 import { useAuth } from "@/hooks/use-auth";
-import { useNavigate } from "react-router";
 import { Spinner } from "@/components/ui/spinner";
 
 // --- Configuration for colors and badges ---
@@ -64,24 +63,21 @@ const AnimatedStat = ({ value, label }: { value: number, label: string }) => {
 
 export default function Landing() {
   const { isLoading, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
   // This page should only be for unauthenticated users.
   // The Protected component will handle routing for authenticated users.
-  if (isLoading) {
+  if (isLoading || isAuthenticated) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-background">
         <Spinner className="h-12 w-12" />
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    // Let the Protected component handle the redirect.
-    // This prevents a flash of the landing page.
-    return (
-       <div className="w-full h-screen flex items-center justify-center">
-        <Spinner className="h-12 w-12" />
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="text-muted-foreground mt-4"
+        >
+          Signing you in...
+        </motion.p>
       </div>
     );
   }

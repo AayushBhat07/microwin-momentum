@@ -1,7 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { VlyToolbar } from "@/components/VlyToolbar";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
-import Auth from "@/pages/Auth.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect } from "react";
@@ -19,6 +18,7 @@ import ProfileSetupPage from "./pages/onboarding/ProfileSetup.tsx";
 import GoalSettingPage from "./pages/onboarding/GoalSetting.tsx";
 import AchievementIntroPage from "./pages/onboarding/AchievementIntro.tsx";
 import PreferencesPage from "./pages/onboarding/Preferences.tsx";
+import UserProfilePage from "./pages/UserProfile.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -65,6 +65,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/onboarding/achievements" element={<Protected><AchievementIntroPage /></Protected>} />
             <Route path="/onboarding/preferences" element={<Protected><PreferencesPage /></Protected>} />
             <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
+            <Route path="/u/:username" element={<UserProfilePage />} />
           </Routes>
         </BrowserRouter>
         <Toaster />

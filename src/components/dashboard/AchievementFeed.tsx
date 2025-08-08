@@ -15,6 +15,9 @@ export function AchievementFeed() {
   const publicFeed = useQuery(api.achievements.getPublicFeed, {
     paginationOpts: { numItems: 10, cursor: null }
   });
+  const followingFeed = useQuery(api.achievements.getFollowingFeed, {
+    paginationOpts: { numItems: 10, cursor: null }
+  });
 
   const isLoading = myAchievements === undefined || publicFeed === undefined;
 
@@ -55,6 +58,36 @@ export function AchievementFeed() {
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">
                   No achievements yet. Start by logging your first win!
+                </p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="following" className="mt-4">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : followingFeed && followingFeed.page.length > 0 ? (
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {followingFeed.page.map((achievement, index) => (
+                    <motion.div
+                      key={achievement._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <AchievementCard achievement={achievement} showUser />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  Follow other users to see their achievements here.
                 </p>
               </div>
             )}

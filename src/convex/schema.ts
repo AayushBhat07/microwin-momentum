@@ -48,18 +48,16 @@ const schema = defineSchema({
     email: v.optional(v.string()), // email of the user. do not remove
     emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
     isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
-    
     role: v.optional(roleValidator), // role of the user. do not remove
 
-    // Gamification fields
+    // User Profile & Gamification
     username: v.optional(v.string()),
     bio: v.optional(v.string()),
-    onboardingStep: v.optional(v.number()), // e.g., 1 to 4
-    profileCompletionScore: v.optional(v.number()),
     totalPoints: v.optional(v.number()),
     currentStreak: v.optional(v.number()),
     longestStreak: v.optional(v.number()),
-    lastLogin: v.optional(v.number()), // timestamp
+    lastLogin: v.optional(v.number()),
+    onboardingStep: v.optional(v.number()),
   })
     .index("email", ["email"]) // index for the email. do not remove or modify
     .index("by_username", ["username"]),

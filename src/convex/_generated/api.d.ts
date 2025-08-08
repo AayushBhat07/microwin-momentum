@@ -18,6 +18,7 @@ import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as badges from "../badges.js";
 import type * as dailyGoals from "../dailyGoals.js";
+import type * as follows from "../follows.js";
 import type * as http from "../http.js";
 import type * as motivationalContent from "../motivationalContent.js";
 import type * as onboarding from "../onboarding.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   badges: typeof badges;
   dailyGoals: typeof dailyGoals;
+  follows: typeof follows;
   http: typeof http;
   motivationalContent: typeof motivationalContent;
   onboarding: typeof onboarding;

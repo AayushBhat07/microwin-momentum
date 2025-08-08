@@ -12,6 +12,7 @@ import { DailyGoals } from "@/components/dashboard/DailyGoals";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
+import { UserSearch } from "@/components/dashboard/UserSearch";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -92,8 +93,9 @@ export default function Dashboard() {
           <div className="md:col-span-2">
             <AchievementFeed />
           </div>
-          <div>
+          <div className="space-y-6">
             <DailyGoals />
+            <UserSearch />
           </div>
         </div>
       </main>

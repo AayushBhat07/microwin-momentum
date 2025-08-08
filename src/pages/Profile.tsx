@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
+import { Doc } from "@/convex/_generated/dataModel";
 
 function EditProfileDialog({ user }: { user: any }) {
   const [username, setUsername] = useState(user.username ?? "");
@@ -87,8 +88,9 @@ function EditProfileDialog({ user }: { user: any }) {
 
 export default function ProfilePage() {
   const { user, isLoading } = useAuth();
+  const userBadges = useQuery(api.badges.getUserBadges, {});
 
-  if (isLoading) {
+  if (isLoading || (user && userBadges === undefined)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner className="h-12 w-12" />
@@ -145,6 +147,20 @@ export default function ProfilePage() {
                     <Badge variant="outline">Total Points: {user.totalPoints ?? 0}</Badge>
                     <Badge variant="outline">Current Streak: {user.currentStreak ?? 0} days</Badge>
                     <Badge variant="outline">Longest Streak: {user.longestStreak ?? 0} days</Badge>
+                </div>
+            </div>
+             <div>
+                <h3 className="font-semibold">Badges</h3>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                    {userBadges && userBadges.length > 0 ? (
+                        userBadges.map((badge) => (
+                            <Badge key={badge._id} variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-semibold">
+                                🏆 {badge.badgeName}
+                            </Badge>
+                        ))
+                    ) : (
+                        <p className="text-sm text-muted-foreground">No badges earned yet.</p>
+                    )}
                 </div>
             </div>
           </CardContent>
