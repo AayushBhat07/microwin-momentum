@@ -26,39 +26,30 @@ interface AuthButtonProps {
 
 const UnauthenticatedButton = ({ useModal, trigger }: AuthButtonProps) => {
   const [open, setOpen] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
-
   const navigate = useNavigate();
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (isRedirecting && !newOpen) {
-      return;
-    }
     setOpen(newOpen);
   };
 
-  const handleAuthSuccess = () => {
-    setIsRedirecting(true);
-  };
+  if (useModal) {
+    return (
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogTrigger asChild>
+          {trigger || <Button>Get Started</Button>}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle className="sr-only">Sign In</DialogTitle>
+          <AuthCard />
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
-    <div>
-      {useModal ? (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            {trigger || <Button>Get Started</Button>}
-          </DialogTrigger>
-          <DialogContent className="bg-transparent border-none shadow-none">
-            <DialogTitle></DialogTitle>
-            <AuthCard onAuthSuccess={handleAuthSuccess} />
-          </DialogContent>
-        </Dialog>
-      ) : trigger ? (
-        <div onClick={() => navigate("/auth")}>{trigger}</div>
-      ) : (
-        <Button onClick={() => navigate("/auth")}>Get Started</Button>
-      )}
-    </div>
+    <Button onClick={() => navigate("/login")}>
+      {trigger || "Get Started"}
+    </Button>
   );
 };
 

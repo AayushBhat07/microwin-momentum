@@ -25,9 +25,17 @@ export default function Dashboard() {
   }, [isAuthenticated, updateLoginStreak]);
 
   useEffect(() => {
-    // Redirect to onboarding if not completed. Assuming 3 steps total.
-    if (user && (!user.onboardingStep || user.onboardingStep < 3)) {
-      navigate("/onboarding");
+    // Redirect to onboarding if not completed. Now 4 steps total.
+    if (user && (!user.onboardingStep || user.onboardingStep < 4)) {
+      if (!user.onboardingStep || user.onboardingStep === 0) {
+        navigate("/onboarding/profile");
+      } else if (user.onboardingStep === 1) {
+        navigate("/onboarding/goals");
+      } else if (user.onboardingStep === 2) {
+        navigate("/onboarding/achievements");
+      } else if (user.onboardingStep === 3) {
+        navigate("/onboarding/preferences");
+      }
     }
   }, [user, navigate]);
 
@@ -51,7 +59,7 @@ export default function Dashboard() {
   }
   
   // Render nothing or a loading indicator while redirecting
-  if (!user.onboardingStep || user.onboardingStep < 3) {
+  if (!user.onboardingStep || user.onboardingStep < 4) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner className="h-12 w-12" />

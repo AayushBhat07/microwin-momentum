@@ -14,6 +14,12 @@ import NotFound from "./pages/NotFound.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import { Protected } from "@/lib/protected-page";
 import ProfilePage from "./pages/Profile.tsx";
+import LoginPage from "@/pages/Login.tsx";
+import VerifyEmailPage from "./pages/VerifyEmail.tsx";
+import ProfileSetupPage from "./pages/onboarding/ProfileSetup.tsx";
+import GoalSettingPage from "./pages/onboarding/GoalSetting.tsx";
+import AchievementIntroPage from "./pages/onboarding/AchievementIntro.tsx";
+import PreferencesPage from "./pages/onboarding/Preferences.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -50,9 +56,14 @@ createRoot(document.getElementById("root")!).render(
           <Routes>
             <Route path="*" element={<NotFound />} />
             <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
             <Route path="/onboarding" element={<Protected><Onboarding /></Protected>} />
+            <Route path="/onboarding/profile" element={<Protected><ProfileSetupPage /></Protected>} />
+            <Route path="/onboarding/goals" element={<Protected><GoalSettingPage /></Protected>} />
+            <Route path="/onboarding/achievements" element={<Protected><AchievementIntroPage /></Protected>} />
+            <Route path="/onboarding/preferences" element={<Protected><PreferencesPage /></Protected>} />
             <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
           </Routes>
         </BrowserRouter>

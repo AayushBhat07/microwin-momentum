@@ -62,6 +62,21 @@ export const completeOnboardingStep = mutation({
           dateEarned: Date.now(),
         });
       }
+    } else if (args.step === 4) {
+      // Award "Customization Master" badge for completing step 4
+      const existingBadge = await ctx.db
+        .query("badges")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .filter((q) => q.eq(q.field("badgeName"), "Customization Master"))
+        .first();
+      
+      if (!existingBadge) {
+        await ctx.db.insert("badges", {
+          userId: user._id,
+          badgeName: "Customization Master",
+          dateEarned: Date.now(),
+        });
+      }
     }
     
     // Future steps can award other badges here
