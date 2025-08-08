@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight, BarChart, CheckCircle, Heart, Sparkles, Users, Zap, Award } from "lucide-react";
 import { useNavigate } from "react-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useConvexAuth } from "convex/react";
 import { PillCTA } from "@/components/landing/PillCTA";
 import { Squares } from "@/components/ui/squares-background";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -63,7 +64,7 @@ const AnimatedStat = ({ value, label }: { value: number, label: string }) => {
 // --- Main Landing Page Component ---
 
 export default function Landing() {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated } = useConvexAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
