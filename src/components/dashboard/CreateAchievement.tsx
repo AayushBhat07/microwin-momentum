@@ -43,8 +43,9 @@ export function CreateAchievement({ trigger }: CreateAchievementProps = {}) {
         title: title.trim(),
         description: description.trim() || undefined,
         category: category as any,
-        points,
+        pointsEarned: points,
         isPublic,
+        source: "quick",
       });
 
       toast.success(`Achievement "${title}" created! +${points} points`);

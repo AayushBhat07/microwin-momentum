@@ -1,90 +1,28 @@
-import { v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
-import { paginationOptsValidator } from "convex/server";
-import { getCurrentUser } from "./users";
 import { categoryValidator } from "./schema";
+import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 
-// Create a new achievement
-export const create = mutation({
-  args: {
-    title: v.string(),
-    description: v.optional(v.string()),
-    category: categoryValidator,
-    points: v.number(),
-    isPublic: v.boolean(),
-  },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-    if (!user) {
-      throw new Error("Must be authenticated to create achievements");
-    }
-
-    const achievementId = await ctx.db.insert("achievements", {
-      userId: user._id,
-      clientId: crypto.randomUUID(),
-      categorySlug: args.category,
-      category: args.category,
-      title: args.title,
-      description: args.description,
-      pointsEarned: args.points,
-      points: args.points,
-      source: "text",
-      isPublic: args.isPublic,
-      loggedAt: Date.now(),
-    });
-
-    // Update user stats for today
-    const today = new Date().toISOString().split('T')[0];
-    const existingStat = await ctx.db
-      .query("userStats")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", user._id).eq("date", today))
-      .unique();
-
-    if (existingStat) {
-      await ctx.db.patch(existingStat._id, {
-        achievementsCount: existingStat.achievementsCount + 1,
-        pointsEarned: existingStat.pointsEarned + args.points,
-      });
-    } else {
-      await ctx.db.insert("userStats", {
-        userId: user._id,
-        date: today,
-        achievementsCount: 1,
-        pointsEarned: args.points,
-        goalsCompleted: 0,
-      });
-    }
-
-    return achievementId;
-  },
-});
-
-// Get user's achievements
-export const getUserAchievements = query({
-  args: {
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-    if (!user) {
+// Get achievements for the logged-in user
+export const getMyAchievements = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return [];
     }
-
-    const achievements = await ctx.db
+    return await ctx.db
       .query("achievements")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("desc")
-      .take(args.limit || 50);
-
-    return achievements;
+      .collect();
   },
 });
 
-// Get public achievements feed
+// Get public feed for community features
 export const getPublicFeed = query({
-  args: {
-    paginationOpts: paginationOptsValidator,
-  },
+  args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const achievements = await ctx.db
       .query("achievements")
@@ -92,20 +30,123 @@ export const getPublicFeed = query({
       .order("desc")
       .paginate(args.paginationOpts);
 
-    // Get user data for each achievement
-    const achievementsWithUsers = await Promise.all(
+    const page = await Promise.all(
       achievements.page.map(async (achievement) => {
         const user = await ctx.db.get(achievement.userId);
-        return {
-          ...achievement,
-          user: user ? { name: user.name, image: user.image } : null,
-        };
+        return { ...achievement, user };
       })
     );
 
+    return { ...achievements, page };
+  },
+});
+
+// Create achievement
+export const create = mutation({
+  args: {
+    title: v.string(),
+    description: v.optional(v.string()),
+    category: categoryValidator,
+    pointsEarned: v.number(),
+    photoUrl: v.optional(v.string()),
+    isPublic: v.boolean(),
+    source: v.union(
+      v.literal("quick"),
+      v.literal("text"),
+      v.literal("voice"),
+      v.literal("photo"),
+    ),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const clientId = `${userId}-${Date.now()}-${Math.random()}`;
+
+    const achievementId = await ctx.db.insert("achievements", {
+      userId,
+      clientId,
+      categorySlug: args.category,
+      category: args.category,
+      title: args.title,
+      description: args.description,
+      photoUrl: args.photoUrl,
+      pointsEarned: args.pointsEarned,
+      points: args.pointsEarned, // Also set points for consistency
+      source: args.source,
+      tags: args.tags,
+      isPublic: args.isPublic,
+      loggedAt: Date.now(),
+    });
+
+    return achievementId;
+  },
+});
+
+// Get heat map data for calendar visualization
+export const getHeatMapData = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const achievements = await ctx.db
+      .query("achievements")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    // Group by date
+    const dailyStats = achievements.reduce((acc, achievement) => {
+      const date = new Date(achievement.loggedAt).toISOString().split('T')[0];
+      if (!acc[date]) {
+        acc[date] = { date, count: 0, points: 0 };
+      }
+      acc[date].count++;
+      acc[date].points += achievement.pointsEarned;
+      return acc;
+    }, {} as Record<string, { date: string; count: number; points: number }>);
+
+    return Object.values(dailyStats);
+  },
+});
+
+// Get achievement stats for progress visualization
+export const getAchievementStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    const achievements = await ctx.db
+      .query("achievements")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    // Group by category
+    const categoryStats = achievements.reduce((acc, achievement) => {
+      const category = achievement.category;
+      if (!acc[category]) {
+        acc[category] = { name: category, count: 0, points: 0 };
+      }
+      acc[category].count++;
+      acc[category].points += achievement.pointsEarned;
+      return acc;
+    }, {} as Record<string, { name: string; count: number; points: number }>);
+
     return {
-      ...achievements,
-      page: achievementsWithUsers,
+      totalAchievements: achievements.length,
+      totalPoints: achievements.reduce((sum, a) => sum + a.pointsEarned, 0),
+      categories: Object.values(categoryStats),
     };
   },
 });
+
+// Alias for getUserAchievements (used by gallery components)
+export const getUserAchievements = getMyAchievements;

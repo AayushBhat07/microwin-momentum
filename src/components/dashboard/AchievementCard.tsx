@@ -1,91 +1,78 @@
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { formatDistanceToNow } from "date-fns";
+import { Heart, MessageCircle, Share2, Trophy, User } from "lucide-react";
+import { ACHIEVEMENT_CATEGORIES } from "@/convex/schema";
+import { Doc } from "@/convex/_generated/dataModel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { motion } from "framer-motion";
-import { Star, Calendar } from "lucide-react";
+import { Link } from "react-router";
 
 interface AchievementCardProps {
-  achievement: {
-    _id: string;
-    title: string;
-    description?: string;
-    category: string;
-    points: number;
-    _creationTime: number;
-    user?: {
-      name?: string;
-      image?: string;
-    } | null;
-  };
+  achievement: Doc<"achievements"> & { user?: Doc<"users"> };
   showUser?: boolean;
 }
 
 export function AchievementCard({ achievement, showUser = false }: AchievementCardProps) {
-  const categoryColors = {
-    HEALTH: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    WORK: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-    PERSONAL: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-    SOCIAL: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
-    LEARNING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-    CREATIVITY: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-    OTHER: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
-  };
+  const category = ACHIEVEMENT_CATEGORIES.find(c => c.slug === achievement.category);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className="hover:shadow-md transition-shadow">
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg leading-tight mb-1">
-                {achievement.title}
-              </h3>
-              {achievement.description && (
-                <p className="text-sm text-muted-foreground mb-2">
-                  {achievement.description}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-1 text-yellow-600 ml-2">
-              <Star className="h-4 w-4 fill-current" />
-              <span className="text-sm font-medium">{achievement.points}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge 
-                variant="secondary" 
-                className={categoryColors[achievement.category as keyof typeof categoryColors]}
-              >
-                {achievement.category.toLowerCase()}
+    <Card className="overflow-hidden">
+      {achievement.photoUrl && (
+        <img src={achievement.photoUrl} alt={achievement.title} className="w-full h-48 object-cover" />
+      )}
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            {category && (
+              <Badge style={{ backgroundColor: category.colorHex, color: 'white' }} className="mb-2">
+                {category.name}
               </Badge>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                {new Date(achievement._creationTime).toLocaleDateString()}
-              </div>
-            </div>
-
-            {showUser && achievement.user && (
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={achievement.user.image} />
-                  <AvatarFallback className="text-xs">
-                    {achievement.user.name?.charAt(0) || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-muted-foreground">
-                  {achievement.user.name || "Anonymous"}
-                </span>
-              </div>
             )}
+            <h3 className="font-bold text-lg">{achievement.title}</h3>
+            {achievement.description && <p className="text-sm text-muted-foreground mt-1">{achievement.description}</p>}
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+          <div className="text-right flex-shrink-0 ml-4">
+            <div className="flex items-center gap-1 font-bold text-lg text-amber-500">
+              <Trophy className="w-5 h-5" />
+              <span>{achievement.pointsEarned}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(achievement.loggedAt), { addSuffix: true })}
+            </p>
+          </div>
+        </div>
+
+        {showUser && achievement.user && (
+          <Link to={`/u/${achievement.user.username}`} className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={achievement.user.image} />
+              <AvatarFallback>
+                <User className="w-4 h-4" />
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-semibold text-sm">{achievement.user.name}</p>
+              <p className="text-xs text-muted-foreground">@{achievement.user.username}</p>
+            </div>
+          </Link>
+        )}
+
+        <div className="flex items-center justify-between mt-4 text-muted-foreground">
+          <div className="flex gap-4">
+            <Button variant="ghost" size="sm" className="flex items-center gap-1">
+              <Heart className="w-4 h-4" /> 0
+            </Button>
+            <Button variant="ghost" size="sm" className="flex items-center gap-1">
+              <MessageCircle className="w-4 h-4" /> 0
+            </Button>
+          </div>
+          <Button variant="ghost" size="sm">
+            <Share2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
