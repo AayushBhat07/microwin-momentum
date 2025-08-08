@@ -96,7 +96,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-24 md:pt-0">
+      <section className="relative isolate min-h-screen flex items-center pt-24 md:pt-0">
         <div className="absolute inset-0 -z-10">
           <Squares direction="diagonal" speed={0.2} />
         </div>
