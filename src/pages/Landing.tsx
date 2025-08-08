@@ -70,6 +70,7 @@ export default function Landing() {
             <span className="text-2xl font-bold tracking-tighter">MicroWin</span>
           </div>
           <AuthButton
+            useModal={false}
             trigger={<PillCTA>Start Free</PillCTA>}
             dashboardTrigger={<PillCTA>Dashboard</PillCTA>}
           />

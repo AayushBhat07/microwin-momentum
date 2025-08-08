@@ -47,9 +47,11 @@ const UnauthenticatedButton = ({ useModal, trigger }: AuthButtonProps) => {
   }
 
   if (trigger) {
-    return React.cloneElement(trigger as React.ReactElement, {
-      onClick: () => navigate("/login"),
-    });
+    return (
+      <div onClick={() => navigate("/login")} className="cursor-pointer">
+        {trigger}
+      </div>
+    );
   }
 
   return (
