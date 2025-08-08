@@ -9,11 +9,12 @@ const LinesPatternCard = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative h-full w-full overflow-hidden rounded-2xl border bg-[linear-gradient(to_right,theme(colors.border/0.2)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border/0.2)_1px,transparent_1px)] bg-[size:14px_24px]",
+        "relative h-full w-full overflow-hidden rounded-2xl border",
         className,
       )}
       {...props}
     >
+      <div className="pointer-events-none absolute inset-0 h-full w-full bg-[linear-gradient(to_bottom,theme(colors.border/0.2)_1px,transparent_1px)] bg-[size:14px_24px]" />
       <div className="relative z-10 flex h-full w-full items-center justify-center p-8">
         {children}
       </div>
