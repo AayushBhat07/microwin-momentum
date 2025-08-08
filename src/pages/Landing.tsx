@@ -112,7 +112,7 @@ export default function Landing() {
               <Button variant="outline" size="lg" className="rounded-full font-bold text-lg px-8 py-6">See How It Works</Button>
             </motion.div>
           </div>
-          <div className="relative h-96 hidden md:flex items-center justify-center">
+          <div className="relative h-96 hidden md:flex items-center justify-center -translate-y-8">
             <Folder size={2} items={[
               <div className="text-center text-xs">
                 <p className="font-bold whitespace-normal leading-tight">Morning Workout</p>
