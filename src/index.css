@@ -127,8 +127,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* ScrollStack overrides for HowItWorks section */
-.howitworks-stack .scroll-stack-scroller {
-  height: 100vh;
-}

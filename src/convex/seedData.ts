@@ -1,85 +1,111 @@
 import { mutation } from "./_generated/server";
 import { ACHIEVEMENT_CATEGORIES } from "./schema";
 
-export const seedInitialData = mutation({
-  args: {},
+export const seedDatabase = mutation({
   handler: async (ctx) => {
-    // Seed motivational content
-    const motivationalQuotes = [
-      {
-        content: "Progress, not perfection. Every small win counts! 🌟",
-        author: "MicroWin Team",
-        category: ACHIEVEMENT_CATEGORIES.PERSONAL,
-        isActive: true,
-      },
-      {
-        content: "You don't have to be great to get started, but you have to get started to be great.",
-        author: "Les Brown",
-        category: ACHIEVEMENT_CATEGORIES.PERSONAL,
-        isActive: true,
-      },
-      {
-        content: "Small daily improvements over time lead to stunning results.",
-        author: "Robin Sharma",
-        category: ACHIEVEMENT_CATEGORIES.PERSONAL,
-        isActive: true,
-      },
-      {
-        content: "The secret to getting ahead is getting started.",
-        author: "Mark Twain",
-        category: ACHIEVEMENT_CATEGORIES.WORK,
-        isActive: true,
-      },
-      {
-        content: "Your body can do it. It's your mind you need to convince.",
-        author: "Unknown",
-        category: ACHIEVEMENT_CATEGORIES.HEALTH,
-        isActive: true,
-      },
-      {
-        content: "Learning never exhausts the mind.",
-        author: "Leonardo da Vinci",
-        category: ACHIEVEMENT_CATEGORIES.LEARNING,
-        isActive: true,
-      },
-      {
-        content: "Creativity is intelligence having fun.",
-        author: "Albert Einstein",
-        category: ACHIEVEMENT_CATEGORIES.CREATIVITY,
-        isActive: true,
-      },
-      {
-        content: "Alone we can do so little; together we can do so much.",
-        author: "Helen Keller",
-        category: ACHIEVEMENT_CATEGORIES.SOCIAL,
-        isActive: true,
-      },
-      {
-        content: "The journey of a thousand miles begins with one step.",
-        author: "Lao Tzu",
-        category: ACHIEVEMENT_CATEGORIES.PERSONAL,
-        isActive: true,
-      },
-      {
-        content: "Success is the sum of small efforts repeated day in and day out.",
-        author: "Robert Collier",
-        category: ACHIEVEMENT_CATEGORIES.WORK,
-        isActive: true,
-      },
-    ];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      const message = "Not authenticated. Cannot seed database.";
+      console.error(message);
+      return { success: false, message };
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", identity.email!))
+      .unique();
 
-    // Check if motivational content already exists
-    const existingContent = await ctx.db
-      .query("motivationalContent")
-      .withIndex("by_active", (q) => q.eq("isActive", true))
-      .first();
-
-    if (!existingContent) {
-      for (const quote of motivationalQuotes) {
-        await ctx.db.insert("motivationalContent", quote);
-      }
+    if (!user) {
+      const message = "User not found in database. Cannot seed.";
+      console.error(message);
+      return { success: false, message };
     }
 
-    return "Initial data seeded successfully!";
+    // Check if already seeded for this user
+    const anyAchievement = await ctx.db.query("achievements").filter(q => q.eq(q.field("userId"), user._id)).first();
+    if (anyAchievement) {
+      const message = "Database already appears to be seeded for this user. Skipping.";
+      console.log(message);
+      return { success: true, message };
+    }
+
+    console.log("Seeding database with sample data for user:", user.email);
+
+    // 1. Seed Achievements
+    await ctx.db.insert("achievements", {
+      userId: user._id,
+      title: "Cleaned the entire kitchen",
+      category: ACHIEVEMENT_CATEGORIES.PERSONAL,
+      points: 20,
+      isPublic: true,
+    });
+    await ctx.db.insert("achievements", {
+      userId: user._id,
+      title: "Went for a 30-minute run",
+      category: ACHIEVEMENT_CATEGORIES.HEALTH,
+      points: 15,
+      isPublic: false,
+    });
+    await ctx.db.insert("achievements", {
+      userId: user._id,
+      title: "Finished a major work project ahead of schedule",
+      category: ACHIEVEMENT_CATEGORIES.WORK,
+      points: 50,
+      isPublic: true,
+    });
+     await ctx.db.insert("achievements", {
+      userId: user._id,
+      title: "Read a chapter of a book",
+      category: ACHIEVEMENT_CATEGORIES.LEARNING,
+      points: 10,
+      isPublic: true,
+    });
+
+    // 2. Seed Daily Goals
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    await ctx.db.insert("dailyGoals", {
+      userId: user._id,
+      title: "Drink 8 glasses of water",
+      category: ACHIEVEMENT_CATEGORIES.HEALTH,
+      targetDate: today.getTime(),
+      isCompleted: false,
+    });
+    await ctx.db.insert("dailyGoals", {
+      userId: user._id,
+      title: "Write morning pages",
+      category: ACHIEVEMENT_CATEGORIES.CREATIVITY,
+      targetDate: today.getTime(),
+      isCompleted: true,
+      completedAt: today.getTime() - 3600 * 1000, // an hour ago
+    });
+    await ctx.db.insert("dailyGoals", {
+      userId: user._id,
+      title: "Review daily tasks",
+      category: ACHIEVEMENT_CATEGORIES.WORK,
+      targetDate: yesterday.getTime(),
+      isCompleted: true,
+      completedAt: yesterday.getTime(),
+    });
+
+    // 3. Seed User Stats for the last 7 days
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateString = date.toISOString().split("T")[0];
+
+      await ctx.db.insert("userStats", {
+        userId: user._id,
+        date: dateString,
+        achievementsCount: Math.floor(Math.random() * 5) + 1,
+        pointsEarned: Math.floor(Math.random() * 50) + 10,
+        goalsCompleted: Math.floor(Math.random() * 3),
+      });
+    }
+    
+    const message = "Database seeded successfully!";
+    console.log(message);
+    return { success: true, message };
   },
 });

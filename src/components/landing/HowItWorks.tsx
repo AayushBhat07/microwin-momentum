@@ -5,12 +5,19 @@ import "./ScrollStack.css";
 export function HowItWorks() {
   return (
     <section id="how-it-works" className="relative howitworks-stack">
-      <div className="container mx-auto px-6 text-center pt-24">
-        <h2 className="text-4xl font-bold tracking-tight mb-16">
+      <div className="howitworks-header">
+        <h2 className="text-4xl font-bold tracking-tight heading">
           How It Works
         </h2>
+        <p className="text-xl subheading">
+          Capture small wins, build momentum, earn playful badges.
+        </p>
       </div>
-      <ScrollStack>
+      <ScrollStack
+        className="howitworks-stack-body"
+        stackPosition="25%"
+        scaleEndPosition="15%"
+      >
         <ScrollStackItem itemClassName="bg-card">
           <div className="flex flex-col items-center justify-center h-full text-center">
             <Edit className="w-12 h-12 text-secondary mb-4" />
