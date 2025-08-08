@@ -11,6 +11,10 @@ import { CommunityAndSafety } from "@/components/landing/CommunityAndSafety";
 import { Testimonials } from "@/components/landing/Testimonials";
 import Folder from "@/components/landing/Folder";
 import TextType from "@/components/landing/TextType";
+import {
+  LinesPatternCard,
+  LinesPatternCardBody,
+} from "@/components/ui/card-with-lines-pattern";
 
 // --- Configuration for colors and badges ---
 const brandColors = {
@@ -159,15 +163,19 @@ export default function Landing() {
             ].map((item, i) => (
               <motion.div
                 key={item.title}
-                className="bg-card p-8 rounded-2xl border text-left"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 viewport={{ once: true }}
+                className="h-full"
               >
-                <item.icon className="w-10 h-10 text-secondary mb-4" />
-                <h3 className="text-2xl font-bold mb-2">{item.title}</h3>
-                <p className="text-muted-foreground">{item.desc}</p>
+                <LinesPatternCard className="bg-primary/5 text-left">
+                  <LinesPatternCardBody>
+                    <item.icon className="w-10 h-10 text-secondary mb-4" />
+                    <h3 className="text-2xl font-bold mb-2">{item.title}</h3>
+                    <p className="text-muted-foreground">{item.desc}</p>
+                  </LinesPatternCardBody>
+                </LinesPatternCard>
               </motion.div>
             ))}
           </div>
