@@ -11,20 +11,13 @@ import { Testimonials } from "@/components/landing/Testimonials";
 
 // --- Configuration for colors and badges ---
 const brandColors = {
-  teal: "var(--color-primary)",
-  magenta: "var(--color-secondary)", 
-  gold: "var(--color-accent)",
-  tangerine: "var(--color-destructive)",
-  cream: "var(--color-background)",
-  ink: "var(--color-foreground)",
+  primary: "var(--color-primary)",
+  secondary: "var(--color-secondary)",
+  accent: "var(--color-accent)",
+  destructive: "var(--color-destructive)",
+  background: "var(--color-background)",
+  foreground: "var(--color-foreground)",
 };
-
-const badgeExamples = [
-  { name: "First Win", icon: Award, color: brandColors.gold },
-  { name: "7-Day Streak", icon: Zap, color: brandColors.tangerine },
-  { name: "Community High-Five", icon: Heart, color: brandColors.magenta },
-  { name: "Goal Getter", icon: CheckCircle, color: brandColors.teal },
-];
 
 // --- Reusable Components ---
 
@@ -46,7 +39,7 @@ const WinCard = ({ icon: Icon, title, points, category, color, rotation, delay }
     </div>
     <div className="mt-4">
       <p className="font-semibold text-lg">{title}</p>
-      <div className="mt-2 inline-block px-3 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: color, color: brandColors.ink }}>
+      <div className="mt-2 inline-block px-3 py-1 text-xs font-medium rounded-full text-foreground" style={{ backgroundColor: color }}>
         {category}
       </div>
     </div>
@@ -134,9 +127,9 @@ export default function Landing() {
             </motion.div>
           </div>
           <div className="relative h-96 hidden md:flex items-center justify-center">
-            <WinCard icon={Zap} title="Morning Workout" points={25} category="Health" color={brandColors.teal} rotation={-8} delay={0.5} />
-            <WinCard icon={Award} title="Cleared Inbox" points={15} category="Work" color={brandColors.gold} rotation={4} delay={0.7} />
-            <WinCard icon={Heart} title="Called a Friend" points={20} category="Social" color={brandColors.magenta} rotation={-2} delay={0.9} />
+            <WinCard icon={Zap} title="Morning Workout" points={25} category="Health" color={brandColors.primary} rotation={-8} delay={0.5} />
+            <WinCard icon={Award} title="Cleared Inbox" points={15} category="Work" color={brandColors.accent} rotation={4} delay={0.7} />
+            <WinCard icon={Heart} title="Called a Friend" points={20} category="Social" color={brandColors.secondary} rotation={-2} delay={0.9} />
           </div>
         </div>
       </section>
