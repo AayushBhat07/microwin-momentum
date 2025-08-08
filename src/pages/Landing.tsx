@@ -86,9 +86,9 @@ export default function Landing() {
               transition={{ duration: 0.8 }}
             >
               <TextType 
-                text={["Celebrate Small Wins.", "Build Big Momentum."]}
-                typingSpeed={100}
-                pauseDuration={2000}
+                text={["Celebrate Small Wins.<br />Build Big Momentum."]}
+                typingSpeed={70}
+                pauseDuration={10000}
                 showCursor={true}
                 cursorCharacter="|"
                 className=""
