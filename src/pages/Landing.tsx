@@ -107,7 +107,7 @@ export default function Landing() {
             </motion.div>
           </div>
           <div className="relative h-96 hidden md:flex items-center justify-center">
-            <Folder size={2} color="#60B5FF" items={[
+            <Folder size={2} items={[
               <div className="p-2 text-center text-sm">
                 <p className="font-bold">Morning Workout</p>
                 <p className="text-xs">+25 Points</p>
