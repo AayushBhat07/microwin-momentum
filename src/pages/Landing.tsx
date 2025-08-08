@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight, Award, BarChart, CheckCircle, Heart, Sparkles, Users, Zap } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { PillCTA } from "@/components/landing/PillCTA";
+import { Squares } from "@/components/ui/squares-background";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { BadgeWall } from "@/components/landing/BadgeWall";
 import { CommunityAndSafety } from "@/components/landing/CommunityAndSafety";
@@ -96,6 +97,9 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-24 md:pt-0">
+        <div className="absolute inset-0 -z-10">
+          <Squares direction="diagonal" speed={0.2} />
+        </div>
         <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div className="z-10">
             <motion.h1
