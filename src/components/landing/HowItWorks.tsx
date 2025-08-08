@@ -5,7 +5,7 @@ import "./ScrollStack.css";
 export function HowItWorks() {
   return (
     <section id="how-it-works" className="relative howitworks-stack">
-      <div className="container mx-auto px-6 text-center py-24">
+      <div className="container mx-auto px-6 text-center pt-24">
         <h2 className="text-4xl font-bold tracking-tight mb-16">
           How It Works
         </h2>
