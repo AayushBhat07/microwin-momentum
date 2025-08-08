@@ -9,16 +9,14 @@ const LinesPatternCard = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border p-8",
+        "relative h-full w-full overflow-hidden rounded-2xl border bg-[linear-gradient(to_right,theme(colors.border/0.2)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border/0.2)_1px,transparent_1px)] bg-[size:14px_24px]",
         className,
       )}
       {...props}
     >
-      {/* The line pattern */}
-      <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
-      {/* A faint overlay to make the lines more subtle */}
-      <div className="absolute inset-0 -z-10 h-full w-full bg-background/80" />
-      {children}
+      <div className="relative z-10 flex h-full w-full items-center justify-center p-8">
+        {children}
+      </div>
     </div>
   );
 });
@@ -31,7 +29,7 @@ const LinesPatternCardBody = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("z-10 h-full w-full", className)}
+      className={cn("h-full w-full", className)}
       {...props}
     />
   );
