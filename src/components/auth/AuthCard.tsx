@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { GoogleIcon } from "./GoogleIcon";
 
 interface AuthCardProps {
   onAuthSuccess?: () => void;
@@ -32,6 +33,20 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
   const [searchParams] = useSearchParams();
 
   const navigate = useNavigate();
+
+  const handleGoogleSignIn = () => {
+    setIsLoading(true);
+    signIn("google").catch((err) => {
+        console.error("Google sign-in error:", err);
+        setError(
+            err instanceof Error
+            ? err.message
+            : "Failed to sign in with Google. Please try again.",
+        );
+    }).finally(() => {
+        setIsLoading(false);
+    });
+  };
 
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -87,53 +102,56 @@ export function AuthCard({ onAuthSuccess }: AuthCardProps) {
               <CardHeader className="text-center">
                 <CardTitle className="text-xl">Get Started</CardTitle>
                 <CardDescription>
-                  Enter your email to log in or sign up
+                  Sign in to your account to continue
                 </CardDescription>
               </CardHeader>
-              <form onSubmit={handleEmailSubmit}>
-                <CardContent>
-                  <div className="flex justify-center">
-                    <img
-                      src="./auth.svg"
-                      alt="Lock Icon"
-                      width={200}
-                      height={200}
-                      className="rounded-lg -mt-4"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <Label htmlFor="email">Enter your email</Label>
-                  </div>
-                  <div className="relative flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        name="email"
-                        placeholder="name@example.com"
-                        type="email"
-                        className="pl-9"
-                        disabled={isLoading}
-                        required
-                      />
+              <CardContent className="flex flex-col gap-4">
+                <Button variant="outline" onClick={handleGoogleSignIn} disabled={isLoading} className="flex items-center gap-2">
+                    <GoogleIcon />
+                    Sign in with Google
+                </Button>
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
                     </div>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="icon"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <ArrowRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  {error && (
-                    <p className="mt-2 text-sm text-red-500">{error}</p>
-                  )}
-                </CardContent>
-              </form>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">
+                        Or continue with
+                        </span>
+                    </div>
+                </div>
+                <form onSubmit={handleEmailSubmit} className="grid gap-2">
+                    <Label htmlFor="email" className="sr-only">Email</Label>
+                    <div className="relative flex items-center gap-2">
+                        <div className="relative flex-1">
+                            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input
+                            name="email"
+                            placeholder="name@example.com"
+                            type="email"
+                            className="pl-9"
+                            disabled={isLoading}
+                            required
+                            />
+                        </div>
+                        <Button
+                            type="submit"
+                            variant="outline"
+                            size="icon"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                            <ArrowRight className="h-4 w-4" />
+                            )}
+                        </Button>
+                    </div>
+                    {error && (
+                        <p className="mt-2 text-sm text-red-500">{error}</p>
+                    )}
+                </form>
+              </CardContent>
             </>
           ) : (
             <>

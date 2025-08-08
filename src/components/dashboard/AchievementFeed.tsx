@@ -1,137 +1,96 @@
+import { useState } from "react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { usePaginatedQuery, useQuery } from "convex/react";
-import { motion } from "framer-motion";
-import { Award, Globe, Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { AchievementCard } from "./AchievementCard";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface AchievementFeedProps {
-  showPublic?: boolean;
-}
-
-const UserFeed = () => {
-  const userAchievements = useQuery(api.achievements.getUserAchievements, {
-    limit: 20,
+export function AchievementFeed() {
+  const [activeTab, setActiveTab] = useState("my");
+  
+  const myAchievements = useQuery(api.achievements.getUserAchievements, { limit: 10 });
+  const publicFeed = useQuery(api.achievements.getPublicFeed, {
+    paginationOpts: { numItems: 10, cursor: null }
   });
 
-  return (
-    <div className="space-y-4">
-      {userAchievements === undefined ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-24 bg-muted rounded-lg"></div>
-            </div>
-          ))}
-        </div>
-      ) : userAchievements.length === 0 ? (
-        <div className="text-center py-12">
-          <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-            No achievements yet
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Start logging your wins to see them here!
-          </p>
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-4"
-        >
-          {userAchievements.map((achievement, index) => (
-            <motion.div
-              key={achievement._id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <AchievementCard achievement={achievement} />
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
-    </div>
-  );
-};
-
-const PublicFeed = () => {
-  const {
-    results: publicFeed,
-    status: publicFeedStatus,
-    loadMore: loadMorePublic,
-  } = usePaginatedQuery(
-    api.achievements.getPublicFeed,
-    {},
-    { initialNumItems: 10 },
-  );
+  const isLoading = myAchievements === undefined || publicFeed === undefined;
 
   return (
-    <div className="space-y-4">
-      {publicFeedStatus === "LoadingFirstPage" ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-24 bg-muted rounded-lg"></div>
-            </div>
-          ))}
-        </div>
-      ) : publicFeed.length === 0 ? (
-        <div className="text-center py-12">
-          <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-            No public achievements yet
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Be the first to share your wins with the community!
-          </p>
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-4"
-        >
-          {publicFeed.map((achievement, index) => (
-            <motion.div
-              key={achievement._id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <AchievementCard achievement={achievement} showUser={true} />
-            </motion.div>
-          ))}
+    <Card>
+      <CardHeader>
+        <CardTitle>Achievements</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="my">My Achievements</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
+          </TabsList>
 
-          {publicFeedStatus === "CanLoadMore" && (
-            <div className="flex justify-center pt-4">
-              <Button
-                variant="outline"
-                onClick={() => loadMorePublic(5)}
-                className="flex items-center space-x-2"
-              >
-                <span>Load More</span>
-              </Button>
-            </div>
-          )}
+          <TabsContent value="my" className="mt-4">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : myAchievements && myAchievements.length > 0 ? (
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {myAchievements.map((achievement, index) => (
+                    <motion.div
+                      key={achievement._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <AchievementCard achievement={achievement} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  No achievements yet. Start by logging your first win!
+                </p>
+              </div>
+            )}
+          </TabsContent>
 
-          {publicFeedStatus === "LoadingMore" && (
-            <div className="flex justify-center pt-4">
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </div>
-          )}
-        </motion.div>
-      )}
-    </div>
+          <TabsContent value="community" className="mt-4">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : publicFeed && publicFeed.page.length > 0 ? (
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {publicFeed.page.map((achievement, index) => (
+                    <motion.div
+                      key={achievement._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <AchievementCard achievement={achievement} showUser />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  No public achievements yet. Be the first to share!
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
-};
-
-export function AchievementFeed({ showPublic = false }: AchievementFeedProps) {
-  if (showPublic) {
-    return <PublicFeed />;
-  }
-  return <UserFeed />;
 }

@@ -5,16 +5,31 @@ import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { CreateAchievement } from "@/components/dashboard/CreateAchievement";
 import { AchievementFeed } from "@/components/dashboard/AchievementFeed";
 import { UserButton } from "@/components/auth/UserButton";
-import { Button } from "@/components/ui/button";
-import { Plus, Sparkles } from "lucide-react";
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sparkles } from "lucide-react";
+import { useEffect } from "react";
 import { MotivationalQuote } from "@/components/dashboard/MotivationalQuote";
 import { DailyGoals } from "@/components/dashboard/DailyGoals";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useNavigate } from "react-router";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
-  const [activeTab, setActiveTab] = useState("my-wins");
+  const updateLoginStreak = useMutation(api.userStats.updateLoginStreak);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      updateLoginStreak();
+    }
+  }, [isAuthenticated, updateLoginStreak]);
+
+  useEffect(() => {
+    // Redirect to onboarding if not completed. Assuming 3 steps total.
+    if (user && (!user.onboardingStep || user.onboardingStep < 3)) {
+      navigate("/onboarding");
+    }
+  }, [user, navigate]);
 
   if (isLoading) {
     return (
@@ -25,10 +40,21 @@ export default function Dashboard() {
   }
 
   if (!isAuthenticated || !user) {
+    // This part might be redundant due to the <Protected> wrapper,
+    // but it's good for explicit handling and local development without the wrapper.
     return (
       <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
         <p>You need to sign in to access your dashboard.</p>
         <AuthButton />
+      </div>
+    );
+  }
+  
+  // Render nothing or a loading indicator while redirecting
+  if (!user.onboardingStep || user.onboardingStep < 3) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner className="h-12 w-12" />
       </div>
     );
   }
@@ -42,14 +68,7 @@ export default function Dashboard() {
             <span className="text-xl font-bold tracking-tighter">MicroWin</span>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-4">
-            <CreateAchievement
-              trigger={
-                <Button size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Win
-                </Button>
-              }
-            />
+            <CreateAchievement />
             <UserButton />
           </div>
         </div>
@@ -63,18 +82,7 @@ export default function Dashboard() {
 
         <div className="mt-8 grid gap-8 md:grid-cols-3">
           <div className="md:col-span-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="my-wins">My Wins</TabsTrigger>
-                <TabsTrigger value="community">Community Feed</TabsTrigger>
-              </TabsList>
-              <TabsContent value="my-wins" className="mt-4">
-                <AchievementFeed />
-              </TabsContent>
-              <TabsContent value="community" className="mt-4">
-                <AchievementFeed showPublic={true} />
-              </TabsContent>
-            </Tabs>
+            <AchievementFeed />
           </div>
           <div>
             <DailyGoals />

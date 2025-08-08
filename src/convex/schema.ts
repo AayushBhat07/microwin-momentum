@@ -50,8 +50,19 @@ const schema = defineSchema({
     isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
     
     role: v.optional(roleValidator), // role of the user. do not remove
+
+    // Gamification fields
+    username: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    onboardingStep: v.optional(v.number()), // e.g., 1 to 4
+    profileCompletionScore: v.optional(v.number()),
+    totalPoints: v.optional(v.number()),
+    currentStreak: v.optional(v.number()),
+    longestStreak: v.optional(v.number()),
+    lastLogin: v.optional(v.number()), // timestamp
   })
-    .index("email", ["email"]), // index for the email. do not remove or modify
+    .index("email", ["email"]) // index for the email. do not remove or modify
+    .index("by_username", ["username"]),
   
   achievements: defineTable({
     userId: v.id("users"),
@@ -61,6 +72,20 @@ const schema = defineSchema({
     points: v.number(),
     isPublic: v.boolean(),
   }).index("by_user", ["userId"]),
+
+  badges: defineTable({
+    userId: v.id("users"),
+    badgeName: v.string(),
+    dateEarned: v.number(),
+  }).index("by_user", ["userId"]),
+
+  userFollows: defineTable({
+    followerId: v.id("users"),
+    followingId: v.id("users"),
+  })
+    .index("by_follower", ["followerId"])
+    .index("by_following", ["followingId"])
+    .index("by_follower_and_following", ["followerId", "followingId"]),
 
   dailyGoals: defineTable({
     userId: v.id("users"),
