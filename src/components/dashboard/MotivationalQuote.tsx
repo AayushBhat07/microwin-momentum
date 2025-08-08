@@ -1,37 +1,53 @@
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
-import { useQuery } from "convex/react";
-import { motion } from "framer-motion";
 import { Quote, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function MotivationalQuote() {
   const motivation = useQuery(api.motivationalContent.getRandomMotivation, {});
 
   if (!motivation) {
-    return null;
+    return (
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-none">
+        <CardContent className="p-6">
+          <div className="animate-pulse">
+            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-muted rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
-      <Card className="bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 border-primary/20">
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-none">
         <CardContent className="p-6">
           <div className="flex items-start space-x-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Sparkles className="h-5 w-5 text-primary" />
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
             </div>
             <div className="flex-1">
-              <blockquote className="text-lg font-medium leading-relaxed mb-2">
-                "{motivation.content}"
-              </blockquote>
-              {motivation.author && (
-                <cite className="text-sm text-muted-foreground">
-                  — {motivation.author}
-                </cite>
-              )}
+              <div className="flex items-start space-x-2">
+                <Quote className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-lg font-medium text-foreground leading-relaxed">
+                    {motivation.content}
+                  </p>
+                  {motivation.author && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      — {motivation.author}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

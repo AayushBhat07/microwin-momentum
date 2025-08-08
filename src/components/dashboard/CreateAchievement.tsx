@@ -1,15 +1,19 @@
+import { useState } from "react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -18,114 +22,84 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { ACHIEVEMENT_CATEGORIES } from "@/convex/schema";
-import { useMutation } from "convex/react";
-import { motion } from "framer-motion";
-import { Plus, Sparkles } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface CreateAchievementProps {
   trigger?: React.ReactNode;
 }
 
-const categoryLabels = {
-  HEALTH: "Health & Wellness",
-  WORK: "Work & Career", 
-  PERSONAL: "Personal Growth",
-  SOCIAL: "Social & Relationships",
-  LEARNING: "Learning & Education",
-  CREATIVITY: "Creativity & Arts",
-  OTHER: "Other",
-};
-
-const categoryEmojis = {
-  HEALTH: "💪",
-  WORK: "💼",
-  PERSONAL: "🌱",
-  SOCIAL: "👥",
-  LEARNING: "📚",
-  CREATIVITY: "🎨",
-  OTHER: "⭐",
-};
-
 export function CreateAchievement({ trigger }: CreateAchievementProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<keyof typeof ACHIEVEMENT_CATEGORIES>("PERSONAL");
+  const [category, setCategory] = useState<string>("");
   const [points, setPoints] = useState(10);
-  const [isPublic, setIsPublic] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const createAchievement = useMutation(api.achievements.create);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    
+    if (!title.trim() || !category) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
-    setIsSubmitting(true);
+    setIsLoading(true);
+    
     try {
       await createAchievement({
         title: title.trim(),
         description: description.trim() || undefined,
-        category: ACHIEVEMENT_CATEGORIES[category],
+        category: category as any,
         points,
         isPublic,
       });
 
-      toast.success("🎉 Achievement added! Way to go!", {
-        description: `You earned ${points} points for "${title}"`,
-      });
-
+      toast.success("Achievement created successfully! 🎉");
+      
       // Reset form
       setTitle("");
       setDescription("");
-      setCategory("PERSONAL");
+      setCategory("");
       setPoints(10);
-      setIsPublic(true);
+      setIsPublic(false);
       setOpen(false);
     } catch (error) {
-      toast.error("Failed to add achievement. Please try again.");
+      toast.error("Failed to create achievement");
+      console.error(error);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
+
+  const categoryOptions = Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, value]) => ({
+    value,
+    label: key.charAt(0) + key.slice(1).toLowerCase(),
+  }));
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button className="shadow-sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Achievement
-          </Button>
-        )}
+        {trigger || <Button>Create Achievement</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span>Celebrate Your Win!</span>
-          </DialogTitle>
+          <DialogTitle>Create New Achievement</DialogTitle>
           <DialogDescription>
-            What did you accomplish today? Every step forward deserves recognition.
+            Log your win and celebrate your progress!
           </DialogDescription>
         </DialogHeader>
-
-        <motion.form
-          onSubmit={handleSubmit}
-          className="space-y-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">What did you achieve? *</Label>
+            <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
-              placeholder="e.g., Completed my morning workout"
+              placeholder="What did you accomplish?"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -133,47 +107,42 @@ export function CreateAchievement({ trigger }: CreateAchievementProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Tell us more (optional)</Label>
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              placeholder="Share details about your achievement..."
+              placeholder="Tell us more about your achievement..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Select value={category} onValueChange={(value: keyof typeof ACHIEVEMENT_CATEGORIES) => setCategory(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(categoryLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      <span className="flex items-center space-x-2">
-                        <span>{categoryEmojis[key as keyof typeof categoryEmojis]}</span>
-                        <span>{label}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">Category *</Label>
+            <Select value={category} onValueChange={setCategory} required>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="points">Points (1-50)</Label>
-              <Input
-                id="points"
-                type="number"
-                min="1"
-                max="50"
-                value={points}
-                onChange={(e) => setPoints(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="points">Points</Label>
+            <Input
+              id="points"
+              type="number"
+              min="1"
+              max="100"
+              value={points}
+              onChange={(e) => setPoints(parseInt(e.target.value) || 10)}
+            />
           </div>
 
           <div className="flex items-center space-x-2">
@@ -182,25 +151,24 @@ export function CreateAchievement({ trigger }: CreateAchievementProps) {
               checked={isPublic}
               onCheckedChange={setIsPublic}
             />
-            <Label htmlFor="public" className="text-sm">
-              Share with community for encouragement
-            </Label>
+            <Label htmlFor="public">Share publicly</Label>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !title.trim()}>
-              {isSubmitting ? "Adding..." : "Celebrate Win! 🎉"}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Achievement
             </Button>
-          </div>
-        </motion.form>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

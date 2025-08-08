@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { categoryValidator } from "./schema";
+import { categoryValidator, ACHIEVEMENT_CATEGORIES } from "./schema";
 
 // Get random motivational content
 export const getRandomMotivation = query({
@@ -8,18 +8,20 @@ export const getRandomMotivation = query({
     category: v.optional(categoryValidator),
   },
   handler: async (ctx, args) => {
-    let motivationalQuery = ctx.db
-      .query("motivationalContent")
-      .withIndex("by_active", (q) => q.eq("isActive", true));
+    let content;
 
-    if (args.category) {
-      motivationalQuery = ctx.db
+    if (args.category !== undefined) {
+      content = await ctx.db
         .query("motivationalContent")
-        .withIndex("by_category", (q) => q.eq("category", args.category))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .withIndex("by_category", (q) => q.eq("category", args.category!))
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .collect();
+    } else {
+      content = await ctx.db
+        .query("motivationalContent")
+        .withIndex("by_active", (q) => q.eq("isActive", true))
+        .collect();
     }
-
-    const content = await motivationalQuery.collect();
     
     if (content.length === 0) {
       return {
@@ -41,49 +43,49 @@ export const seedMotivationalContent = mutation({
       {
         content: "Progress, not perfection. Every small win counts! 🌟",
         author: "MicroWin Team",
-        category: "personal" as const,
+        category: ACHIEVEMENT_CATEGORIES.PERSONAL,
         isActive: true,
       },
       {
         content: "You don't have to be great to get started, but you have to get started to be great.",
         author: "Les Brown",
-        category: "personal" as const,
+        category: ACHIEVEMENT_CATEGORIES.PERSONAL,
         isActive: true,
       },
       {
         content: "Small daily improvements over time lead to stunning results.",
         author: "Robin Sharma",
-        category: "personal" as const,
+        category: ACHIEVEMENT_CATEGORIES.PERSONAL,
         isActive: true,
       },
       {
         content: "The secret to getting ahead is getting started.",
         author: "Mark Twain",
-        category: "work" as const,
+        category: ACHIEVEMENT_CATEGORIES.WORK,
         isActive: true,
       },
       {
         content: "Your body can do it. It's your mind you need to convince.",
         author: "Unknown",
-        category: "health" as const,
+        category: ACHIEVEMENT_CATEGORIES.HEALTH,
         isActive: true,
       },
       {
         content: "Learning never exhausts the mind.",
         author: "Leonardo da Vinci",
-        category: "learning" as const,
+        category: ACHIEVEMENT_CATEGORIES.LEARNING,
         isActive: true,
       },
       {
         content: "Creativity is intelligence having fun.",
         author: "Albert Einstein",
-        category: "creativity" as const,
+        category: ACHIEVEMENT_CATEGORIES.CREATIVITY,
         isActive: true,
       },
       {
         content: "Alone we can do so little; together we can do so much.",
         author: "Helen Keller",
-        category: "social" as const,
+        category: ACHIEVEMENT_CATEGORIES.SOCIAL,
         isActive: true,
       },
     ];

@@ -108,17 +108,17 @@ export default function Landing() {
           </div>
           <div className="relative h-96 hidden md:flex items-center justify-center">
             <Folder size={2} items={[
-              <div className="p-2 text-center text-sm">
-                <p className="font-bold">Morning Workout</p>
-                <p className="text-xs">+25 Points</p>
+              <div className="text-center text-xs">
+                <p className="font-bold whitespace-normal leading-tight">Morning Workout</p>
+                <p className="font-semibold text-green-600">+25</p>
               </div>,
-              <div className="p-2 text-center text-sm">
-                <p className="font-bold">Cleared Inbox</p>
-                <p className="text-xs">+15 Points</p>
+              <div className="text-center text-xs">
+                <p className="font-bold whitespace-normal leading-tight">Cleared Inbox</p>
+                <p className="font-semibold text-blue-600">+15</p>
               </div>,
-              <div className="p-2 text-center text-sm">
-                <p className="font-bold">Called a Friend</p>
-                <p className="text-xs">+20 Points</p>
+              <div className="text-center text-xs">
+                <p className="font-bold whitespace-normal leading-tight">Called a Friend</p>
+                <p className="font-semibold text-purple-600">+20</p>
               </div>
             ]} />
           </div>

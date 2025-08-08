@@ -96,6 +96,11 @@
   background: var(--paper-1);
   border-radius: 10px;
   transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  overflow: hidden;
 }
 
 .paper:nth-child(2) {

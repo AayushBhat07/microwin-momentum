@@ -1,148 +1,86 @@
-// TODO: THIS IS THE DEFAULT DASHBOARD PAGE THAT THE USER WILL SEE AFTER AUTHENTICATION. ADD MAIN FUNCTIONALITY HERE.
-// This is the entry point for users who have just signed in
-
-import { Protected } from "@/lib/protected-page";
-import { motion } from "framer-motion";
-import { useState } from "react";
-import { AchievementFeed } from "@/components/dashboard/AchievementFeed";
-import { CreateAchievement } from "@/components/dashboard/CreateAchievement";
-import { DailyGoals } from "@/components/dashboard/DailyGoals";
+import { useAuth } from "@/hooks/use-auth";
+import { Spinner } from "@/components/ui/spinner";
+import { AuthButton } from "@/components/auth/AuthButton";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
+import { CreateAchievement } from "@/components/dashboard/CreateAchievement";
+import { AchievementFeed } from "@/components/dashboard/AchievementFeed";
 import { UserButton } from "@/components/auth/UserButton";
 import { Button } from "@/components/ui/button";
+import { Plus, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Award, Home, Plus, Star, Target, TrendingUp, Users } from "lucide-react";
+import { MotivationalQuote } from "@/components/dashboard/MotivationalQuote";
+import { DailyGoals } from "@/components/dashboard/DailyGoals";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const { isLoading, isAuthenticated, user } = useAuth();
+  const [activeTab, setActiveTab] = useState("my-wins");
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner className="h-12 w-12" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+        <p>You need to sign in to access your dashboard.</p>
+        <AuthButton />
+      </div>
+    );
+  }
 
   return (
-    <Protected>
-      <div className="min-h-screen bg-gradient-to-br from-background via-accent/10 to-primary/5">
-        {/* Header */}
-        <motion.header 
-          className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <Star className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-xl font-bold tracking-tight">MicroWin</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <CreateAchievement 
-                  trigger={
-                    <Button size="sm" className="shadow-sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Win
-                    </Button>
-                  }
-                />
-                <UserButton />
-              </div>
-            </div>
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-primary" />
+            <span className="text-xl font-bold tracking-tighter">MicroWin</span>
           </div>
-        </motion.header>
+          <div className="flex flex-1 items-center justify-end space-x-4">
+            <CreateAchievement
+              trigger={
+                <Button size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Win
+                </Button>
+              }
+            />
+            <UserButton />
+          </div>
+        </div>
+      </header>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
-                <TabsTrigger value="overview" className="flex items-center space-x-2">
-                  <Home className="w-4 h-4" />
-                  <span className="hidden sm:inline">Overview</span>
-                </TabsTrigger>
-                <TabsTrigger value="achievements" className="flex items-center space-x-2">
-                  <Award className="w-4 h-4" />
-                  <span className="hidden sm:inline">My Wins</span>
-                </TabsTrigger>
-                <TabsTrigger value="goals" className="flex items-center space-x-2">
-                  <Target className="w-4 h-4" />
-                  <span className="hidden sm:inline">Goals</span>
-                </TabsTrigger>
-                <TabsTrigger value="community" className="flex items-center space-x-2">
-                  <Users className="w-4 h-4" />
-                  <span className="hidden sm:inline">Community</span>
-                </TabsTrigger>
+      <main className="container py-8">
+        <MotivationalQuote />
+        <div className="mt-8">
+          <StatsOverview />
+        </div>
+
+        <div className="mt-8 grid gap-8 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="my-wins">My Wins</TabsTrigger>
+                <TabsTrigger value="community">Community Feed</TabsTrigger>
               </TabsList>
-
-              <TabsContent value="overview" className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                >
-                  <StatsOverview />
-                </motion.div>
-                
-                <div className="grid lg:grid-cols-2 gap-6">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                  >
-                    <DailyGoals />
-                  </motion.div>
-                  
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                  >
-                    <AchievementFeed limit={5} showHeader={true} title="Recent Wins" />
-                  </motion.div>
-                </div>
+              <TabsContent value="my-wins" className="mt-4">
+                <AchievementFeed />
               </TabsContent>
-
-              <TabsContent value="achievements">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <AchievementFeed showHeader={true} title="My Achievements" />
-                </motion.div>
-              </TabsContent>
-
-              <TabsContent value="goals">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <DailyGoals expanded={true} />
-                </motion.div>
-              </TabsContent>
-
-              <TabsContent value="community">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <AchievementFeed 
-                    showPublic={true} 
-                    showHeader={true} 
-                    title="Community Wins" 
-                  />
-                </motion.div>
+              <TabsContent value="community" className="mt-4">
+                <AchievementFeed showPublic={true} />
               </TabsContent>
             </Tabs>
-          </motion.div>
+          </div>
+          <div>
+            <DailyGoals />
+          </div>
         </div>
-      </div>
-    </Protected>
+      </main>
+    </div>
   );
 }
