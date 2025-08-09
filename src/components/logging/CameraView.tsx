@@ -46,7 +46,12 @@ export function CameraView({ onPhotoTaken, onClose }: CameraViewProps) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const context = canvas.getContext('2d');
-      context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      if (context) {
+        // Flip the canvas horizontally to un-mirror the camera image
+        context.translate(video.videoWidth, 0);
+        context.scale(-1, 1);
+        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      }
       
       canvas.toBlob((blob) => {
         if (blob) {
@@ -65,7 +70,7 @@ export function CameraView({ onPhotoTaken, onClose }: CameraViewProps) {
           ref={videoRef}
           autoPlay
           playsInline
-          className="w-full h-full rounded-lg"
+          className="w-full h-full rounded-lg transform -scale-x-100"
         />
         <Button
           variant="ghost"
