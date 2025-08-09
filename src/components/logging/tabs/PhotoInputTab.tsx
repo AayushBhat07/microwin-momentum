@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, X } from "lucide-react";
+import { CameraView } from "../CameraView";
 
 interface PhotoInputTabProps {
   onPhotoSelected: (file: File | null) => void;
@@ -9,17 +10,27 @@ interface PhotoInputTabProps {
 
 export function PhotoInputTab({ onPhotoSelected, isUploading }: PhotoInputTabProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-      onPhotoSelected(file);
+      displayAndSetFile(file);
     }
+  };
+
+  const handlePhotoTaken = (file: File) => {
+    displayAndSetFile(file);
+    setShowCamera(false);
+  };
+
+  const displayAndSetFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setSelectedImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    onPhotoSelected(file);
   };
 
   const clearPhoto = () => {
@@ -31,13 +42,22 @@ export function PhotoInputTab({ onPhotoSelected, isUploading }: PhotoInputTabPro
     }
   }
 
+  if (showCamera) {
+    return <CameraView onPhotoTaken={handlePhotoTaken} onClose={() => setShowCamera(false)} />;
+  }
+
   return (
     <div className="space-y-4">
       {!selectedImage ? (
         <div className="flex gap-4">
-          <Button variant="outline" className="flex-1 h-24 flex flex-col gap-2" disabled>
+          <Button 
+            variant="outline" 
+            className="flex-1 h-24 flex flex-col gap-2" 
+            onClick={() => setShowCamera(true)}
+            disabled={isUploading}
+          >
             <Camera className="w-6 h-6" />
-            <span className="text-xs">Take Photo (soon)</span>
+            <span className="text-xs">Take Photo</span>
           </Button>
           
           <label className="flex-1 cursor-pointer">
