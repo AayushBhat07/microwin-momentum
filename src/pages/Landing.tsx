@@ -12,7 +12,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // --- Reusable Components ---
 const PixelatedCard = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-  <div className={`bg-muted border-2 border-foreground p-6 h-full shadow-[4px_4px_0px_var(--foreground)] hover:shadow-[2px_2px_0px_var(--foreground)] transition-all duration-150 ${className}`}>
+  <div className={`bg-background/10 backdrop-blur-md border-2 border-white/20 p-6 h-full shadow-[4px_4px_0px_#00000060] hover:shadow-[2px_2px_0px_#00000060] transition-all duration-150 ${className}`}>
     {children}
   </div>
 );
