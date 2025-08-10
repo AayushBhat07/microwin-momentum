@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useConvexAuth } from "convex/react";
 import AnimatedHeroCard from "@/components/landing/AnimatedHeroCard";
+import { TypingAnimation } from "@/components/landing/TypingAnimation";
 
 // --- Reusable Components ---
 const PixelatedCard = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -59,14 +60,10 @@ export default function Landing() {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%224%22%20height%3D%224%22%20viewBox%3D%220%200%204%204%22%3E%3Cpath%20fill%3D%22%239ca3af%22%20fill-opacity%3D%220.1%22%20d%3D%22M1%203h1v1H1V3zm2-2h1v1H3V1z%22%3E%3C/path%3E%3C/svg%3E')]"></div>
         <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center z-10">
           <div>
-            <motion.h1
+            <TypingAnimation
+              text="Turn Small Wins into Big Victories"
               className="text-5xl md:text-7xl font-bold tracking-tighter uppercase font-mono text-shadow-pixel"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              Celebrate Small Wins. Build Big Momentum.
-            </motion.h1>
+            />
             <motion.p
               className="mt-6 text-xl text-muted-foreground max-w-lg font-pixel"
               initial={{ opacity: 0, y: 20 }}
