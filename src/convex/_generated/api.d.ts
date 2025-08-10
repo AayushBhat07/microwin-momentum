@@ -23,6 +23,7 @@ import type * as gamification from "../gamification.js";
 import type * as http from "../http.js";
 import type * as logWin from "../logWin.js";
 import type * as logWinHelpers from "../logWinHelpers.js";
+import type * as memories from "../memories.js";
 import type * as motivationalContent from "../motivationalContent.js";
 import type * as onboarding from "../onboarding.js";
 import type * as seedData from "../seedData.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   logWin: typeof logWin;
   logWinHelpers: typeof logWinHelpers;
+  memories: typeof memories;
   motivationalContent: typeof motivationalContent;
   onboarding: typeof onboarding;
   seedData: typeof seedData;

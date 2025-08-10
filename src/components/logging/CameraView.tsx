@@ -66,28 +66,46 @@ export function CameraView({ onPhotoTaken, onClose }: CameraViewProps) {
 
   return (
     <motion.div 
-      className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center"
+      className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center font-mono"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <motion.div 
-        className="relative w-full max-w-lg aspect-video overflow-hidden rounded-2xl border-4 border-primary/50 shadow-2xl shadow-primary/20"
+        className="relative w-full max-w-lg aspect-video bg-black p-2"
+        style={{
+          border: '4px solid #422C22',
+          boxShadow: 'inset 0 0 0 4px #AFDDFF, 0 0 0 4px #AFDDFF',
+        }}
         initial={{ scale: 0.8, y: 50 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          className="w-full h-full object-cover transform -scale-x-100"
-        />
-        <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
+        <div className="relative w-full h-full overflow-hidden bg-black">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full h-full object-cover transform -scale-x-100"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-1/2 h-1/2 border-2 border-dashed border-white/50"></div>
+          </div>
+          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs font-bold tracking-widest animate-pulse">
+            REC
+          </div>
+          <div className="absolute bottom-2 right-2 text-white/80 text-xs">
+            CAM_V2.0
+          </div>
+          <div className="absolute bottom-2 left-2 text-white/80 text-xs">
+            STATUS: <span className="text-green-400">ONLINE</span>
+          </div>
+        </div>
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full"
+          className="absolute -top-5 -right-5 text-white bg-destructive hover:bg-destructive/80 rounded-none border-2 border-white"
           onClick={onClose}
         >
           <X className="h-6 w-6" />
@@ -97,14 +115,18 @@ export function CameraView({ onPhotoTaken, onClose }: CameraViewProps) {
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.2 }}
+        className="mt-8"
       >
         <Button
           size="lg"
-          className="mt-8 rounded-full h-20 w-20 bg-primary hover:bg-primary/90 ring-4 ring-primary/30"
+          className="h-20 w-40 bg-primary hover:bg-primary/90 rounded-none border-4 border-secondary"
           onClick={handleTakePhoto}
           aria-label="Take Photo"
         >
-          <Camera className="h-10 w-10" />
+          <div className="flex flex-col items-center">
+            <Camera className="h-8 w-8" />
+            <span className="text-sm font-bold mt-1">CAPTURE</span>
+          </div>
         </Button>
       </motion.div>
       <canvas ref={canvasRef} className="hidden" />
