@@ -163,10 +163,14 @@ export default function Landing() {
         </section>
 
         {/* Final CTA */}
-        <section className="py-24">
-          <div className="container mx-auto px-6 text-center">
+        <section 
+          className="py-24 relative bg-cover bg-center"
+          style={{ backgroundImage: "url('/assets/t4.png')" }}
+        >
+          <div className="absolute inset-0 bg-black/70" />
+          <div className="container mx-auto px-6 text-center relative">
             <motion.h2
-              className="text-5xl font-bold tracking-tight font-mono uppercase text-shadow-pixel"
+              className="text-5xl font-bold tracking-tight font-mono uppercase text-shadow-pixel text-white"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -174,7 +178,7 @@ export default function Landing() {
               Ready to build your momentum?
             </motion.h2>
             <motion.p
-              className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto mb-8 font-pixel"
+              className="mt-4 text-xl text-white/80 max-w-2xl mx-auto mb-8 font-pixel"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
