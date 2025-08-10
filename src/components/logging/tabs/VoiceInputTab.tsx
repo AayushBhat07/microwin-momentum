@@ -1,28 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Volume2 } from "lucide-react";
+import { Mic, MicOff, Volume2, AudioLines } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
 interface VoiceInputTabProps {
   onTranscription: (text: string) => void;
+  onAudioRecorded: (file: File | null) => void;
 }
 
-export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
+export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTabProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if speech recognition is supported
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setIsSupported(false);
       return;
     }
 
-    // Initialize speech recognition
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -31,7 +33,6 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
       let interimTranscript = '';
-
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
@@ -40,7 +41,6 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
           interimTranscript += transcript;
         }
       }
-
       if (finalTranscript) {
         setTranscript(prev => {
           const newTranscript = prev + finalTranscript;
@@ -58,6 +58,9 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
     };
 
     recognition.onend = () => {
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
       setIsRecording(false);
       setInterimTranscript("");
     };
@@ -65,9 +68,8 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
     recognitionRef.current = recognition;
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      recognitionRef.current?.stop();
+      mediaRecorderRef.current?.stream.getTracks().forEach(track => track.stop());
     };
   }, [onTranscription]);
 
@@ -78,17 +80,36 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
     }
 
     if (isRecording) {
-      // Stop recording
       recognitionRef.current?.stop();
-      setIsRecording(false);
-      toast.success("Recording stopped");
     } else {
-      // Start recording
-      setTranscript("");
-      setInterimTranscript("");
-      recognitionRef.current?.start();
-      setIsRecording(true);
-      toast.success("Recording started - speak now!");
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          clearTranscript();
+
+          recognitionRef.current?.start();
+
+          const mediaRecorder = new MediaRecorder(stream);
+          mediaRecorderRef.current = mediaRecorder;
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) audioChunksRef.current.push(event.data);
+          };
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            const audioFile = new File([audioBlob], `voice-memo-${Date.now()}.webm`, { type: 'audio/webm' });
+            const url = URL.createObjectURL(audioBlob);
+            setAudioUrl(url);
+            onAudioRecorded(audioFile);
+            stream.getTracks().forEach(track => track.stop());
+          };
+          mediaRecorder.start();
+
+          setIsRecording(true);
+          toast.success("Recording started - speak now!");
+        })
+        .catch(err => {
+          console.error("Error accessing microphone:", err);
+          toast.error("Could not access microphone. Please grant permission.");
+        });
     }
   };
 
@@ -96,6 +117,9 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
     setTranscript("");
     setInterimTranscript("");
     onTranscription("");
+    setAudioUrl(null);
+    onAudioRecorded(null);
+    audioChunksRef.current = [];
   };
 
   if (!isSupported) {
@@ -110,7 +134,6 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
 
   return (
     <div className="space-y-4">
-      {/* Recording Button */}
       <div className="flex flex-col items-center justify-center gap-4">
         <Button
           variant={isRecording ? "destructive" : "outline"}
@@ -125,18 +148,12 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
         </p>
       </div>
 
-      {/* Live Transcript Display */}
       {(transcript || interimTranscript || isRecording) && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border min-h-[100px]">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-medium text-gray-700">Live Transcript:</h4>
-            {transcript && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearTranscript}
-                className="text-xs"
-              >
+            {(transcript || audioUrl) && (
+              <Button variant="ghost" size="sm" onClick={clearTranscript} className="text-xs">
                 Clear
               </Button>
             )}
@@ -151,7 +168,16 @@ export function VoiceInputTab({ onTranscription }: VoiceInputTabProps) {
         </div>
       )}
 
-      {/* Recording Status Indicator */}
+      {audioUrl && (
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-medium text-gray-700">Voice Memo Playback:</h4>
+            <AudioLines className="w-4 h-4 text-gray-500" />
+          </div>
+          <audio src={audioUrl} controls className="w-full h-10" />
+        </div>
+      )}
+
       {isRecording && (
         <div className="flex items-center justify-center gap-2 text-red-600">
           <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>

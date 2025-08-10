@@ -79,6 +79,7 @@ const schema = defineSchema({
     title: v.string(),
     description: v.optional(v.string()),
     photoStorageId: v.optional(v.id("_storage")),
+    audioStorageId: v.optional(v.id("_storage")),
     pointsEarned: v.number(),
     points: v.number(), // Keep existing field
     source: v.union(

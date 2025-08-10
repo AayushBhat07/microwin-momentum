@@ -34,6 +34,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
   const [activeTab, setActiveTab] = useState("quick");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const logWin = useAction(api.logWin.logWin);
@@ -41,6 +42,10 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
 
   const handlePhotoSelected = (file: File | null) => {
     setPhotoFile(file);
+  };
+
+  const handleAudioRecorded = (file: File | null) => {
+    setAudioFile(file);
   };
 
   const handleSubmit = async () => {
@@ -53,9 +58,16 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
     
     try {
       let photoStorageId: Id<"_storage"> | undefined = undefined;
+      let audioStorageId: Id<"_storage"> | undefined = undefined;
 
-      if (photoFile && activeTab === 'photo') {
+      const isUploadingPhoto = photoFile && activeTab === 'photo';
+      const isUploadingAudio = audioFile && activeTab === 'voice';
+
+      if (isUploadingPhoto || isUploadingAudio) {
         setIsUploading(true);
+      }
+
+      if (isUploadingPhoto && photoFile) {
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
           method: "POST",
@@ -64,6 +76,20 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         });
         const { storageId } = await result.json();
         photoStorageId = storageId;
+      }
+
+      if (isUploadingAudio && audioFile) {
+        const postUrl = await generateUploadUrl();
+        const result = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": audioFile.type },
+          body: audioFile,
+        });
+        const { storageId } = await result.json();
+        audioStorageId = storageId;
+      }
+      
+      if (isUploadingPhoto || isUploadingAudio) {
         setIsUploading(false);
       }
 
@@ -77,6 +103,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         source: activeTab as "quick" | "text" | "voice" | "photo",
         isPublic: true,
         photoStorageId,
+        audioStorageId,
       });
 
       toast.success(`Win logged! +${result.pointsEarned} points`, {
@@ -88,6 +115,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
       setDescription("");
       setCategory("");
       setPhotoFile(null);
+      setAudioFile(null);
       onOpenChange(false);
     } catch (error) {
       toast.error("Failed to log win. Please try again.");
@@ -132,7 +160,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
               />
             </TabsContent>
             <TabsContent value="voice">
-              <VoiceInputTab onTranscription={setTitle} />
+              <VoiceInputTab onTranscription={setTitle} onAudioRecorded={handleAudioRecorded} />
             </TabsContent>
             <TabsContent value="photo">
               <PhotoInputTab onPhotoSelected={handlePhotoSelected} isUploading={isUploading} />
@@ -187,7 +215,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
             {isUploading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading Photo...
+                Uploading Media...
               </>
             ) : isSubmitting ? (
               <>

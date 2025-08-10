@@ -18,6 +18,7 @@ export const logWin = action({
       v.literal("photo")
     ),
     photoStorageId: v.optional(v.id("_storage")),
+    audioStorageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
     isPublic: v.optional(v.boolean()),
   },
