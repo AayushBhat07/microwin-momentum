@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Mic, MicOff, Volume2, AudioLines } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
@@ -215,6 +216,11 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
         <p className="text-sm text-muted-foreground text-center h-5">
           {isRecording ? `[TIME_LEFT: ${timeLeft}s]` : "> PRESS TO RECORD (30s MAX)"}
         </p>
+        {isRecording && (
+          <div className="w-full px-4 pt-2">
+            <Progress value={((30 - timeLeft) / 30) * 100} className="w-full h-4 border-2 border-foreground rounded-none bg-muted" />
+          </div>
+        )}
       </div>
 
       {(transcript || interimTranscript || isRecording) && (
