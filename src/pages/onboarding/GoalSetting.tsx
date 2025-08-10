@@ -11,16 +11,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner";
 import { Plus, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ACHIEVEMENT_CATEGORIES } from "@/convex/schema";
+import { ACHIEVEMENT_CATEGORIES, categoryValidator } from "@/convex/schema";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useNavigate } from "react-router";
+import { Infer } from "convex/values";
+
+type Category = Infer<typeof categoryValidator>;
 
 export default function GoalSettingPage() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const [goals, setGoals] = useState<Partial<Doc<"dailyGoals">>[]>([]);
   const [newGoalTitle, setNewGoalTitle] = useState("");
-  const [newGoalCategory, setNewGoalCategory] = useState("");
+  const [newGoalCategory, setNewGoalCategory] = useState<Category | "">("");
 
   const createGoal = useMutation(api.dailyGoals.create);
   const completeStep = useMutation(api.onboarding.completeOnboardingStep);
@@ -53,14 +56,15 @@ export default function GoalSettingPage() {
     try {
       await createGoal({
         title: newGoalTitle,
-        category: newGoalCategory as any,
+        category: newGoalCategory,
       });
-      setGoals([...goals, { title: newGoalTitle, category: newGoalCategory as any }]);
+      setGoals([...goals, { title: newGoalTitle, category: newGoalCategory }]);
       setNewGoalTitle("");
       setNewGoalCategory("");
       toast.success("Goal added!");
     } catch (error) {
-      toast.error("Failed to add goal.");
+      console.error("Failed to add goal:", error);
+      toast.error("Failed to add goal. Please try again.");
     }
   };
 
@@ -93,7 +97,7 @@ export default function GoalSettingPage() {
               </div>
               <div className="space-y-1">
                 <Label htmlFor="goal-category">Category</Label>
-                <Select value={newGoalCategory} onValueChange={setNewGoalCategory}>
+                <Select value={newGoalCategory} onValueChange={(v) => setNewGoalCategory(v as Category)}>
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>

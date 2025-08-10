@@ -14,7 +14,10 @@ import { Check, Loader2, Plus, Trash2, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ACHIEVEMENT_CATEGORIES, categoryValidator } from "@/convex/schema";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Doc } from "@/convex/_generated/dataModel";
+import { Doc, Id } from "@/convex/_generated/dataModel";
+import { Infer } from "convex/values";
+
+type Category = Infer<typeof categoryValidator>;
 
 function OnboardingStep1({ onComplete }: { onComplete: () => void }) {
   const [username, setUsername] = useState("");
@@ -85,7 +88,7 @@ function OnboardingStep1({ onComplete }: { onComplete: () => void }) {
 function OnboardingStep2({ onComplete }: { onComplete: () => void }) {
   const [goals, setGoals] = useState<Partial<Doc<"dailyGoals">>[]>([]);
   const [newGoalTitle, setNewGoalTitle] = useState("");
-  const [newGoalCategory, setNewGoalCategory] = useState("");
+  const [newGoalCategory, setNewGoalCategory] = useState<Category | "">("");
 
   const createGoal = useMutation(api.dailyGoals.create);
   const completeStep = useMutation(api.onboarding.completeOnboardingStep);
@@ -100,14 +103,15 @@ function OnboardingStep2({ onComplete }: { onComplete: () => void }) {
     try {
       await createGoal({
         title: newGoalTitle,
-        category: newGoalCategory as any,
+        category: newGoalCategory,
       });
-      setGoals([...goals, { title: newGoalTitle, category: newGoalCategory as any }]);
+      setGoals([...goals, { title: newGoalTitle, category: newGoalCategory }]);
       setNewGoalTitle("");
       setNewGoalCategory("");
       toast.success("Goal added!");
     } catch (error) {
-      toast.error("Failed to add goal.");
+      console.error("Failed to add goal:", error);
+      toast.error("Failed to add goal. Please try again.");
     }
   };
 
@@ -138,7 +142,7 @@ function OnboardingStep2({ onComplete }: { onComplete: () => void }) {
           </div>
           <div className="space-y-1">
             <Label htmlFor="goal-category">Category</Label>
-            <Select value={newGoalCategory} onValueChange={setNewGoalCategory}>
+            <Select value={newGoalCategory} onValueChange={(v) => setNewGoalCategory(v as Category)}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>

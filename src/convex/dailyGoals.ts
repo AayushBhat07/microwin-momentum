@@ -31,10 +31,11 @@ export const create = mutation({
     });
 
     // Award "Goal Setter" badge if this is user's first goal
-    const goalCount = (await ctx.db
+    const allGoals = await ctx.db
       .query("dailyGoals")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect()).length;
+      .withIndex("by_user_and_date", (q) => q.eq("userId", user._id))
+      .collect();
+    const goalCount = allGoals.length;
 
     if (goalCount === 1) {
       await ctx.runMutation(api.badges.awardBadge, {
