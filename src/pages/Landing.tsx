@@ -127,12 +127,16 @@ export default function Landing() {
         </div>
       </section>
 
-      <div ref={contentRef} className="relative z-10 bg-background/80 backdrop-blur-sm">
+      <div ref={contentRef} className="relative z-10 bg-background">
         {/* Benefits Grid */}
-        <section className="py-24 border-y-2 border-foreground">
-          <div className="container mx-auto px-6">
-            <SectionTitle>Build Habits That Last</SectionTitle>
-            <SectionSubtitle>Focus on small, consistent actions to create lasting positive change.</SectionSubtitle>
+        <section 
+          className="py-24 border-y-2 border-foreground relative bg-cover bg-center"
+          style={{ backgroundImage: "url('/assets/t3.png')" }}
+        >
+          <div className="absolute inset-0 bg-black/70" />
+          <div className="container mx-auto px-6 relative">
+            <SectionTitle><span className="text-white">Build Habits That Last</span></SectionTitle>
+            <SectionSubtitle><span className="text-white/80">Focus on small, consistent actions to create lasting positive change.</span></SectionSubtitle>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 { icon: Zap, title: "Reduce Perfectionism", desc: "Focus on progress, not perfection. Every small step is a win." },
