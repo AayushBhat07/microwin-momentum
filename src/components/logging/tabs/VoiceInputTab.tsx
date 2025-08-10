@@ -177,25 +177,25 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
 
   if (!isSupported) {
     return (
-      <div className="text-center p-6">
-        <Volume2 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-        <p className="text-sm text-red-600 mb-2">Voice input is not supported by your browser.</p>
-        <p className="text-xs text-gray-500">Try using Chrome, Edge, or Safari for voice recording.</p>
+      <div className="text-center p-6 font-mono border-4 border-foreground shadow-[8px_8px_0px_#000]">
+        <Volume2 className="w-12 h-12 mx-auto mb-4 text-foreground" />
+        <p className="text-sm text-destructive mb-2">[VOICE INPUT NOT SUPPORTED]</p>
+        <p className="text-xs text-muted-foreground">&gt; TRY CHROME/EDGE/SAFARI</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 font-mono p-4 border-4 border-foreground bg-background">
       <div className="space-y-2">
-        <Label htmlFor="language-select">Transcription Language</Label>
+        <Label htmlFor="language-select" className="text-sm font-bold text-foreground">[TRANSCRIPTION LANGUAGE]</Label>
         <Select value={selectedLang} onValueChange={setSelectedLang} disabled={isRecording}>
-          <SelectTrigger id="language-select">
+          <SelectTrigger id="language-select" className="w-full border-2 border-foreground shadow-[4px_4px_0px_#000] rounded-none">
             <SelectValue placeholder="Select a language" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="font-mono border-2 border-foreground rounded-none bg-background">
             {SUPPORTED_LANGUAGES.map((lang) => (
-              <SelectItem key={lang.code} value={lang.code}>
+              <SelectItem key={lang.code} value={lang.code} className="focus:bg-accent">
                 {lang.name}
               </SelectItem>
             ))}
@@ -207,50 +207,50 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
         <Button
           variant={isRecording ? "destructive" : "outline"}
           size="icon"
-          className="w-16 h-16 rounded-full"
+          className="w-24 h-24 rounded-full border-4 border-foreground shadow-[8px_8px_0px_#000] hover:shadow-[4px_4px_0px_#000] transition-all duration-200"
           onClick={handleToggleRecording}
         >
-          {isRecording ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+          {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
         </Button>
-        <p className="text-sm text-gray-600 text-center h-5">
-          {isRecording ? `Recording... ${timeLeft}s left` : "Click to start recording (30s max)."}
+        <p className="text-sm text-muted-foreground text-center h-5">
+          {isRecording ? `[TIME_LEFT: ${timeLeft}s]` : "> PRESS TO RECORD (30s MAX)"}
         </p>
       </div>
 
       {(transcript || interimTranscript || isRecording) && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border min-h-[100px]">
+        <div className="mt-4 p-4 bg-muted/50 border-2 border-foreground min-h-[100px] space-y-2">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-sm font-medium text-gray-700">Live Transcript:</h4>
+            <h4 className="text-sm font-bold text-foreground">[LIVE_TRANSCRIPT]</h4>
             {(transcript || audioUrl) && (
-              <Button variant="ghost" size="sm" onClick={clearTranscript} className="text-xs">
-                Clear
+              <Button variant="ghost" size="sm" onClick={clearTranscript} className="text-xs underline">
+                [CLEAR]
               </Button>
             )}
           </div>
-          <div className="text-sm text-gray-900 whitespace-pre-wrap">
+          <div className="text-sm text-foreground whitespace-pre-wrap">
             {transcript}
-            <span className="text-gray-500 italic">{interimTranscript}</span>
+            <span className="text-muted-foreground">{interimTranscript}</span>
             {isRecording && !transcript && !interimTranscript && (
-              <span className="text-gray-400 italic">Listening...</span>
+              <span className="text-muted-foreground animate-pulse">&gt; LISTENING...</span>
             )}
           </div>
         </div>
       )}
 
       {audioUrl && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+        <div className="mt-4 p-4 bg-muted/50 border-2 border-foreground">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-sm font-medium text-gray-700">Voice Memo Playback:</h4>
-            <AudioLines className="w-4 h-4 text-gray-500" />
+            <h4 className="text-sm font-bold text-foreground">[PLAYBACK]</h4>
+            <AudioLines className="w-4 h-4 text-foreground" />
           </div>
           <audio src={audioUrl} controls className="w-full h-10" />
         </div>
       )}
 
       {isRecording && (
-        <div className="flex items-center justify-center gap-2 text-red-600">
-          <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-          <span className="text-xs font-medium">RECORDING</span>
+        <div className="flex items-center justify-center gap-2 text-destructive">
+          <div className="w-3 h-3 bg-destructive rounded-full animate-pulse border-2 border-destructive-foreground"></div>
+          <span className="text-sm font-bold">[REC]</span>
         </div>
       )}
     </div>
