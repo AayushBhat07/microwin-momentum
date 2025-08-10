@@ -194,9 +194,9 @@ export default function Landing() {
         </section>
 
         {/* Footer */}
-        <footer className="py-8 bg-muted border-t-2 border-foreground">
+        <footer className="py-8 bg-foreground border-t-2 border-primary">
           <div className="container mx-auto px-6 text-center">
-            <p className="text-muted-foreground font-pixel">© {new Date().getFullYear()} MicroWin Momentum. All Rights Reserved.</p>
+            <p className="text-background/80 font-pixel">© {new Date().getFullYear()} MicroWin Momentum. All Rights Reserved.</p>
           </div>
         </footer>
       </div>
