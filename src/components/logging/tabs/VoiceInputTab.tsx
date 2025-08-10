@@ -218,7 +218,14 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
         </p>
         {isRecording && (
           <div className="w-full px-4 pt-2">
-            <Progress value={((30 - timeLeft) / 30) * 100} className="w-full h-4 border-2 border-foreground rounded-none bg-accent [&>div]:bg-secondary" />
+            <div className="relative w-full h-6">
+              <Progress value={((30 - timeLeft) / 30) * 100} className="h-full w-full border-2 border-foreground rounded-none bg-accent [&>div]:bg-secondary" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-mono text-sm font-bold text-white [text-shadow:1px_1px_0px_var(--foreground)]">
+                  {Math.round(((30 - timeLeft) / 30) * 100)}%
+                </span>
+              </div>
+            </div>
           </div>
         )}
       </div>
