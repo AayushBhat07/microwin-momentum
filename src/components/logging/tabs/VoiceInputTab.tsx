@@ -205,14 +205,28 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
       </div>
 
       <div className="flex flex-col items-center justify-center gap-4 pt-4">
-        <Button
-          variant={isRecording ? "destructive" : "outline"}
-          size="icon"
-          className="w-24 h-24 rounded-full border-4 border-foreground shadow-[8px_8px_0px_#000] hover:shadow-[4px_4px_0px_#000] transition-all duration-200"
-          onClick={handleToggleRecording}
-        >
-          {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
-        </Button>
+        <div className="flex items-center justify-center min-h-[96px]">
+          {!isRecording ? (
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-24 h-24 rounded-full border-4 border-foreground shadow-[8px_8px_0px_#000] hover:shadow-[4px_4px_0px_#000] transition-all duration-200"
+              onClick={handleToggleRecording}
+            >
+              <Mic className="w-10 h-10" />
+            </Button>
+          ) : (
+            <Button
+              variant="destructive"
+              size="lg"
+              className="font-mono font-bold border-4 h-24 w-48 border-foreground shadow-[8px_8px_0px_#000] hover:shadow-[4px_4px_0px_#000] transition-all duration-200 animate-pulse"
+              onClick={handleToggleRecording}
+            >
+              <MicOff className="w-6 h-6 mr-3" />
+              STOP
+            </Button>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground text-center h-5">
           {isRecording ? `[TIME_LEFT: ${timeLeft}s]` : "> PRESS TO RECORD (30s MAX)"}
         </p>
