@@ -108,7 +108,7 @@ export default function Landing() {
           <div>
             <TypingAnimation
               text="Turn Small Wins into Big Victories"
-              className="text-5xl md:text-7xl font-bold tracking-tighter uppercase font-mono text-shadow-pixel"
+              className="text-5xl md:text-7xl font-bold tracking-tighter uppercase font-mono text-shadow-pixel text-white"
             />
             <p
               className="mt-6 text-xl text-white/80 max-w-lg font-pixel"
