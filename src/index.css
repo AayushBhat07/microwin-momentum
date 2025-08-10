@@ -137,6 +137,24 @@
   animation: blink 1s step-end infinite;
 }
 
+.scroll-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+  will-change: transform; /* Performance hint */
+}
+
+.hero-content {
+  opacity: 0; /* Start transparent for GSAP */
+  will-change: opacity; /* Performance hint */
+}
+
 @layer utilities {
   .text-shadow-pixel {
     text-shadow: 
