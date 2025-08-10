@@ -82,7 +82,7 @@ export default function Landing() {
   }, [isLoading]);
 
   return (
-    <div ref={mainRef} className="bg-background text-foreground font-mono overflow-x-hidden">
+    <div ref={mainRef} className="text-foreground font-mono overflow-x-hidden">
       <div
         ref={bgRef}
         className="scroll-bg"
