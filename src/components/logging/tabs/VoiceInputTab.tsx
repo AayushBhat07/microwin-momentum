@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Mic, MicOff, Volume2, AudioLines } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
@@ -8,15 +10,41 @@ interface VoiceInputTabProps {
   onAudioRecorded: (file: File | null) => void;
 }
 
+const SUPPORTED_LANGUAGES = [
+  { code: 'en-US', name: 'English (US)' },
+  { code: 'hi-IN', name: 'Hindi (India)' },
+  { code: 'es-ES', name: 'Spanish (Spain)' },
+  { code: 'fr-FR', name: 'French (France)' },
+  { code: 'de-DE', name: 'German (Germany)' },
+  { code: 'ja-JP', name: 'Japanese (Japan)' },
+  { code: 'pt-BR', name: 'Portuguese (Brazil)' },
+  { code: 'ru-RU', name: 'Russian (Russia)' },
+  { code: 'zh-CN', name: 'Chinese (Mandarin, Simplified)' },
+  { code: 'bn-IN', name: 'Bengali (India)' },
+  { code: 'te-IN', name: 'Telugu (India)' },
+  { code: 'mr-IN', name: 'Marathi (India)' },
+  { code: 'ta-IN', name: 'Tamil (India)' },
+  { code: 'ur-IN', name: 'Urdu (India)' },
+  { code: 'gu-IN', name: 'Gujarati (India)' },
+  { code: 'kn-IN', name: 'Kannada (India)' },
+  { code: 'ml-IN', name: 'Malayalam (India)' },
+  { code: 'pa-IN', name: 'Punjabi (India)' },
+];
+
 export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTabProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
+  const [selectedLang, setSelectedLang] = useState('en-US');
+  const [timeLeft, setTimeLeft] = useState(30);
+  
   const recognitionRef = useRef<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -28,7 +56,7 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = selectedLang;
 
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
@@ -54,15 +82,11 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
       toast.error(`Speech recognition error: ${event.error}`);
-      setIsRecording(false);
+      stopRecording();
     };
 
     recognition.onend = () => {
-      if (mediaRecorderRef.current?.state === "recording") {
-        mediaRecorderRef.current.stop();
-      }
-      setIsRecording(false);
-      setInterimTranscript("");
+      stopRecording();
     };
 
     recognitionRef.current = recognition;
@@ -70,8 +94,20 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
     return () => {
       recognitionRef.current?.stop();
       mediaRecorderRef.current?.stream.getTracks().forEach(track => track.stop());
+      if (stopTimeoutRef.current) clearTimeout(stopTimeoutRef.current);
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
     };
-  }, [onTranscription]);
+  }, [onTranscription, selectedLang]);
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+    if (stopTimeoutRef.current) clearTimeout(stopTimeoutRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setIsRecording(false);
+    setInterimTranscript("");
+  };
 
   const handleToggleRecording = () => {
     if (!isSupported) {
@@ -86,6 +122,7 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
         .then(stream => {
           clearTranscript();
 
+          recognitionRef.current.lang = selectedLang;
           recognitionRef.current?.start();
 
           const mediaRecorder = new MediaRecorder(stream);
@@ -104,7 +141,23 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
           mediaRecorder.start();
 
           setIsRecording(true);
+          setTimeLeft(30);
           toast.success("Recording started - speak now!");
+
+          countdownIntervalRef.current = setInterval(() => {
+            setTimeLeft(prev => {
+              if (prev <= 1) {
+                if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          stopTimeoutRef.current = setTimeout(() => {
+            toast.info("30 second recording limit reached.");
+            recognitionRef.current?.stop();
+          }, 30000);
         })
         .catch(err => {
           console.error("Error accessing microphone:", err);
@@ -134,7 +187,23 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col items-center justify-center gap-4">
+      <div className="space-y-2">
+        <Label htmlFor="language-select">Transcription Language</Label>
+        <Select value={selectedLang} onValueChange={setSelectedLang} disabled={isRecording}>
+          <SelectTrigger id="language-select">
+            <SelectValue placeholder="Select a language" />
+          </SelectTrigger>
+          <SelectContent>
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <SelectItem key={lang.code} value={lang.code}>
+                {lang.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col items-center justify-center gap-4 pt-4">
         <Button
           variant={isRecording ? "destructive" : "outline"}
           size="icon"
@@ -143,8 +212,8 @@ export function VoiceInputTab({ onTranscription, onAudioRecorded }: VoiceInputTa
         >
           {isRecording ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
         </Button>
-        <p className="text-sm text-gray-600 text-center">
-          {isRecording ? "Recording... Click to stop." : "Click to start recording."}
+        <p className="text-sm text-gray-600 text-center h-5">
+          {isRecording ? `Recording... ${timeLeft}s left` : "Click to start recording (30s max)."}
         </p>
       </div>
 
