@@ -9,6 +9,7 @@ interface TypingAnimationProps {
 export const TypingAnimation = ({ text, className, speed = 100 }: TypingAnimationProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isCompleted, setIsCompleted] = useState(false);
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
     setIsCompleted(false);
@@ -24,7 +25,16 @@ export const TypingAnimation = ({ text, className, speed = 100 }: TypingAnimatio
     }, speed);
 
     return () => clearInterval(typingInterval);
-  }, [text, speed]);
+  }, [text, speed, key]);
+
+  useEffect(() => {
+    if (isCompleted) {
+      const timeout = setTimeout(() => {
+        setKey(prevKey => prevKey + 1);
+      }, 6000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isCompleted]);
 
   return (
     <div className={className}>
