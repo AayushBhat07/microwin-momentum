@@ -127,9 +127,9 @@ export default function Landing() {
         </div>
       </section>
 
-      <div ref={contentRef} className="relative z-10 bg-background">
+      <div ref={contentRef} className="relative z-10 bg-background/80 backdrop-blur-sm">
         {/* Benefits Grid */}
-        <section className="py-24 border-b-2 border-foreground">
+        <section className="py-24 border-y-2 border-foreground">
           <div className="container mx-auto px-6">
             <SectionTitle>Build Habits That Last</SectionTitle>
             <SectionSubtitle>Focus on small, consistent actions to create lasting positive change.</SectionSubtitle>
