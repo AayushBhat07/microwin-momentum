@@ -5,6 +5,7 @@ import { ArrowRight, BarChart, CheckCircle, Sparkles, Users, Zap } from "lucide-
 import { useNavigate } from "react-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useConvexAuth } from "convex/react";
+import AnimatedHeroCard from "@/components/landing/AnimatedHeroCard";
 
 // --- Reusable Components ---
 const PixelatedCard = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -84,35 +85,7 @@ export default function Landing() {
             </motion.div>
           </div>
           <div className="relative h-96 hidden md:flex items-center justify-center">
-            <motion.div
-              className="relative w-[450px] h-[300px] bg-white rounded-xl shadow-2xl p-4 border"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-            >
-              <div className="h-8 bg-gray-100 rounded-lg flex items-center justify-between px-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                </div>
-                <div className="w-24 h-4 bg-gray-200 rounded"></div>
-              </div>
-              <div className="mt-4 space-y-3">
-                <div className="h-10 bg-gray-100 rounded-lg flex items-center px-4">
-                  <div className="w-6 h-6 bg-blue-200 rounded-md mr-3"></div>
-                  <div className="w-4/5 h-4 bg-gray-200 rounded"></div>
-                </div>
-                <div className="h-10 bg-gray-100 rounded-lg flex items-center px-4">
-                  <div className="w-6 h-6 bg-green-200 rounded-md mr-3"></div>
-                  <div className="w-3/5 h-4 bg-gray-200 rounded"></div>
-                </div>
-                <div className="h-10 bg-gray-100 rounded-lg flex items-center px-4">
-                  <div className="w-6 h-6 bg-purple-200 rounded-md mr-3"></div>
-                  <div className="w-1/2 h-4 bg-gray-200 rounded"></div>
-                </div>
-              </div>
-            </motion.div>
+            <AnimatedHeroCard />
           </div>
         </div>
       </section>
