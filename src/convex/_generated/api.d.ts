@@ -26,6 +26,7 @@ import type * as logWinHelpers from "../logWinHelpers.js";
 import type * as memories from "../memories.js";
 import type * as motivationalContent from "../motivationalContent.js";
 import type * as onboarding from "../onboarding.js";
+import type * as seed from "../seed.js";
 import type * as seedData from "../seedData.js";
 import type * as userProfile from "../userProfile.js";
 import type * as userStats from "../userStats.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   memories: typeof memories;
   motivationalContent: typeof motivationalContent;
   onboarding: typeof onboarding;
+  seed: typeof seed;
   seedData: typeof seedData;
   userProfile: typeof userProfile;
   userStats: typeof userStats;
