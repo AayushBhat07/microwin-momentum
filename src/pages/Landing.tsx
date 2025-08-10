@@ -86,7 +86,7 @@ export default function Landing() {
       <div
         ref={bgRef}
         className="scroll-bg"
-        style={{ backgroundImage: "url('https://i.imgur.com/6G12P9s.png')" }}
+        style={{ backgroundImage: "url('/assets/t2.png')" }}
       ></div>
 
       <header className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b-2 border-foreground/20">
