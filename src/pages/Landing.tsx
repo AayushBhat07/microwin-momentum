@@ -1,125 +1,78 @@
 import { AuthButton } from "@/components/auth/AuthButton";
 import { Button } from "@/components/ui/button";
-import { motion, useInView } from "framer-motion";
-import { ArrowRight, BarChart, CheckCircle, Heart, Sparkles, Users, Zap, Award } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight, BarChart, CheckCircle, Sparkles, Users, Zap } from "lucide-react";
 import { useNavigate } from "react-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useConvexAuth } from "convex/react";
-import { PillCTA } from "@/components/landing/PillCTA";
-import { Squares } from "@/components/ui/squares-background";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { BadgeWall } from "@/components/landing/BadgeWall";
-import { CommunityAndSafety } from "@/components/landing/CommunityAndSafety";
-import { Testimonials } from "@/components/landing/Testimonials";
-import Folder from "@/components/landing/Folder";
-import TextType from "@/components/landing/TextType";
-import {
-  LinesPatternCard,
-  LinesPatternCardBody,
-} from "@/components/ui/card-with-lines-pattern";
-import { Spinner } from "@/components/ui/spinner";
-
-// --- Configuration for colors and badges ---
-const brandColors = {
-  primary: "var(--color-primary)",
-  secondary: "var(--color-secondary)",
-  accent: "var(--color-accent)",
-  destructive: "var(--color-destructive)",
-  background: "var(--color-background)",
-  foreground: "var(--color-foreground)",
-};
 
 // --- Reusable Components ---
+const PixelatedCard = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+  <div className={`bg-muted border-2 border-foreground p-6 h-full shadow-[4px_4px_0px_var(--foreground)] hover:shadow-[2px_2px_0px_var(--foreground)] transition-all duration-150 ${className}`}>
+    {children}
+  </div>
+);
 
-const AnimatedStat = ({ value, label }: { value: number, label: string }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  const [count, setCount] = useState(0);
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+  <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-center font-pixel uppercase">
+    {children}
+  </h2>
+);
 
-  useEffect(() => {
-    if (isInView) {
-      let startTime: number;
-      const animate = (timestamp: number) => {
-        if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime) / 2000, 1); // 2 second duration
-        setCount(Math.floor(progress * value));
-        
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-      requestAnimationFrame(animate);
-    }
-  }, [isInView, value]);
-
-  return (
-    <div ref={ref} className="text-center">
-      <p className="text-5xl font-bold text-primary">{count.toLocaleString()}</p>
-      <p className="text-lg text-muted-foreground mt-1">{label}</p>
-    </div>
-  );
-};
+const SectionSubtitle = ({ children }: { children: React.ReactNode }) => (
+  <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center mt-4 mb-12 font-pixel">
+    {children}
+  </p>
+);
 
 // --- Main Landing Page Component ---
-
 export default function Landing() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If auth is done loading and the user is logged in,
-    // redirect them from the landing page to the dashboard.
     if (!isLoading && isAuthenticated) {
       navigate("/dashboard", { replace: true });
     }
   }, [isLoading, isAuthenticated, navigate]);
 
   return (
-    <div className="bg-background text-foreground font-sans overflow-x-hidden">
+    <div className="bg-background text-foreground font-mono overflow-x-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b-2 border-foreground">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Sparkles className="w-8 h-8 text-primary" />
-            <span className="text-2xl font-bold tracking-tighter">MicroWin</span>
+            <span className="text-2xl font-bold tracking-tighter font-mono uppercase">MicroWin</span>
           </div>
           <AuthButton
             useModal={false}
-            trigger={<PillCTA>Start Free</PillCTA>}
-            dashboardTrigger={<PillCTA>Dashboard</PillCTA>}
+            trigger={<Button variant="secondary">Start</Button>}
+            dashboardTrigger={<Button>Dashboard</Button>}
           />
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative isolate min-h-screen flex items-center pt-24 md:pt-0">
-        <div className="absolute inset-0 -z-10">
-          <Squares direction="diagonal" speed={0.2} />
-        </div>
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-          <div className="z-10">
+      <section className="relative min-h-screen flex items-center pt-24 md:pt-0 border-b-2 border-foreground">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%224%22%20height%3D%224%22%20viewBox%3D%220%200%204%204%22%3E%3Cpath%20fill%3D%22%239ca3af%22%20fill-opacity%3D%220.1%22%20d%3D%22M1%203h1v1H1V3zm2-2h1v1H3V1z%22%3E%3C/path%3E%3C/svg%3E')]"></div>
+        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center z-10">
+          <div>
             <motion.h1
-              className="text-5xl md:text-7xl font-bold tracking-tighter"
+              className="text-5xl md:text-7xl font-bold tracking-tighter uppercase font-mono text-shadow-pixel"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <TextType 
-                text={["Celebrate Small<br />Wins.<br />Build Big Momentum."]}
-                typingSpeed={70}
-                pauseDuration={10000}
-                showCursor={true}
-                cursorCharacter="|"
-                className=""
-              />
+              Celebrate Small Wins. Build Big Momentum.
             </motion.h1>
             <motion.p
-              className="mt-6 text-xl text-muted-foreground max-w-lg"
+              className="mt-6 text-xl text-muted-foreground max-w-lg font-pixel"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Based on positive psychology, MicroWin helps you build motivation and combat perfectionism by celebrating daily achievements.
+              Track daily achievements, build motivation, and conquer your goals with a fun, gamified experience.
             </motion.p>
             <motion.div
               className="mt-8 flex flex-col sm:flex-row gap-4"
@@ -127,48 +80,27 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <AuthButton useModal={false} trigger={<PillCTA>Start Free Today <ArrowRight className="ml-2 w-5 h-5" /></PillCTA>} />
-              <Button variant="outline" size="lg" className="rounded-full font-bold text-lg px-8 py-6">See How It Works</Button>
+              <AuthButton useModal={false} trigger={<Button size="lg">Start Free Today <ArrowRight className="ml-2 w-5 h-5" /></Button>} />
             </motion.div>
           </div>
-          <div className="relative h-96 hidden md:flex items-center justify-center -translate-y-8">
-            <Folder size={2} items={[
-              <div className="text-center text-xs">
-                <p className="font-bold whitespace-normal leading-tight">Morning Workout</p>
-                <p className="font-semibold text-green-600">+25</p>
-              </div>,
-              <div className="text-center text-xs">
-                <p className="font-bold whitespace-normal leading-tight">Cleared Inbox</p>
-                <p className="font-semibold text-blue-600">+15</p>
-              </div>,
-              <div className="text-center text-xs">
-                <p className="font-bold whitespace-normal leading-tight">Called a Friend</p>
-                <p className="font-semibold text-purple-600">+20</p>
+          <div className="relative h-96 hidden md:flex items-center justify-center">
+            <div className="w-80 h-64 bg-muted border-2 border-foreground p-4 shadow-[8px_8px_0px_var(--primary)]">
+              <div className="border-2 border-foreground h-full p-2 flex flex-col gap-2">
+                <p className="text-center font-bold uppercase text-lg font-pixel">Daily Wins</p>
+                <div className="bg-background p-2 border border-foreground text-sm font-pixel">✅ Cleared Inbox +15</div>
+                <div className="bg-background p-2 border border-foreground text-sm font-pixel">✅ 5-min walk +10</div>
+                <div className="bg-background p-2 border border-foreground text-sm font-pixel">✅ Called a Friend +20</div>
               </div>
-            ]} />
+            </div>
           </div>
         </div>
       </section>
-
-      {/* Live Momentum Preview */}
-      <section className="py-20 bg-primary/5">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-12">
-            <AnimatedStat value={124589} label="Wins Logged Today" />
-            <AnimatedStat value={18345} label="Badges Earned" />
-            <AnimatedStat value={3291} label="Challenges Completed" />
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <HowItWorks />
 
       {/* Benefits Grid */}
-      <section className="py-24">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold tracking-tight mb-4">Build Habits That Last</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-16">Focus on small, consistent actions to create lasting positive change.</p>
+      <section className="py-24 border-b-2 border-foreground">
+        <div className="container mx-auto px-6">
+          <SectionTitle>Build Habits That Last</SectionTitle>
+          <SectionSubtitle>Focus on small, consistent actions to create lasting positive change.</SectionSubtitle>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { icon: Zap, title: "Reduce Perfectionism", desc: "Focus on progress, not perfection. Every small step is a win." },
@@ -182,35 +114,23 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="h-full"
               >
-                <LinesPatternCard className="bg-primary/5 text-left">
-                  <LinesPatternCardBody>
-                    <item.icon className="w-10 h-10 text-secondary mb-4" />
-                    <h3 className="text-2xl font-bold mb-2">{item.title}</h3>
-                    <p className="text-muted-foreground">{item.desc}</p>
-                  </LinesPatternCardBody>
-                </LinesPatternCard>
+                <PixelatedCard>
+                  <item.icon className="w-10 h-10 text-secondary mb-4" />
+                  <h3 className="text-2xl font-bold mb-2 uppercase font-pixel">{item.title}</h3>
+                  <p className="text-muted-foreground font-pixel">{item.desc}</p>
+                </PixelatedCard>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Badge Wall */}
-      <BadgeWall />
-
-      {/* Testimonials */}
-      <Testimonials />
-
-      {/* Community & Safety */}
-      <CommunityAndSafety />
-
       {/* Final CTA */}
-      <section className="py-24 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
+      <section className="py-24">
         <div className="container mx-auto px-6 text-center">
           <motion.h2
-            className="text-5xl font-bold tracking-tight"
+            className="text-5xl font-bold tracking-tight font-mono uppercase text-shadow-pixel"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -218,7 +138,7 @@ export default function Landing() {
             Ready to build your momentum?
           </motion.h2>
           <motion.p
-            className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto mb-8"
+            className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto mb-8 font-pixel"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -232,15 +152,15 @@ export default function Landing() {
             transition={{ delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <AuthButton trigger={<PillCTA>Claim Your First Win <Sparkles className="ml-2 w-5 h-5" /></PillCTA>} />
+            <AuthButton trigger={<Button size="lg">Claim Your First Win <Sparkles className="ml-2 w-5 h-5" /></Button>} />
           </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-card/50">
+      <footer className="py-8 bg-muted border-t-2 border-foreground">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-muted-foreground">© {new Date().getFullYear()} MicroWin Momentum. All Rights Reserved.</p>
+          <p className="text-muted-foreground font-pixel">© {new Date().getFullYear()} MicroWin Momentum. All Rights Reserved.</p>
         </div>
       </footer>
     </div>

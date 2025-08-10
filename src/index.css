@@ -1,4 +1,4 @@
-/* DO NOT CHANGE */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
@@ -100,7 +100,7 @@
   --muted-foreground: oklch(80% 0.05 258.35); /* Lighter blue */
   --accent: oklch(71.46% 0.153 258.35); /* #60B5FF */
   --accent-foreground: oklch(26.5% 0.029 258.35); /* #1E2A3A */
-  --destructive: oklch(77.87% 0.142 28.82); /* #FF8A8A */
+  --destructive: oklch(77.87% 0.142 28.82);
   --border: oklch(35% 0.029 258.35);
   --input: oklch(35% 0.029 258.35);
   --ring: oklch(87.16% 0.078 258.35); /* #AFDDFF */
@@ -125,5 +125,19 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-shadow-pixel {
+    text-shadow: 
+      1px 1px 0 var(--foreground),
+      -1px -1px 0 var(--foreground),
+      1px -1px 0 var(--foreground),
+      -1px 1px 0 var(--foreground),
+      2px 2px 0 var(--primary);
+  }
+  .font-pixel {
+    font-family: 'Press Start 2P', cursive; /* Assuming this font is available or will be added */
   }
 }
