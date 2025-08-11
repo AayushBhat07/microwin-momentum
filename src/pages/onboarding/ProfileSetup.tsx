@@ -58,8 +58,12 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center"
+      style={{ backgroundImage: "url('/assets/onboarding2.png')" }}
+    >
+      <div className="absolute inset-0 bg-black/50" />
+      <Card className="w-full max-w-md z-10 bg-background/80 backdrop-blur-sm border-white/20">
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
           <CardHeader>
             <CardTitle>Set Up Your Profile</CardTitle>
