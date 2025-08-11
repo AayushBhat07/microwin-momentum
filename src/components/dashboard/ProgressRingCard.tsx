@@ -14,7 +14,7 @@ export function ProgressRingCard({ progress, current, target }: ProgressRingCard
 
   return (
     <motion.div
-      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+      className="bg-background/80 backdrop-blur-sm border-primary/50 shadow-[4px_4px_0px_var(--primary)] font-pixel p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -28,44 +28,38 @@ export function ProgressRingCard({ progress, current, target }: ProgressRingCard
               cx="50"
               cy="50"
               r="45"
-              stroke="#f3f4f6"
+              stroke="var(--muted)"
               strokeWidth="8"
               fill="none"
             />
             {/* Progress circle */}
-            <circle
+            <motion.circle
               cx="50"
               cy="50"
               r="45"
-              stroke="url(#progressGradient)"
+              stroke="var(--chart-1)"
               strokeWidth="8"
               fill="none"
-              strokeLinecap="round"
+              strokeLinecap="butt"
               strokeDasharray={strokeDasharray}
-              strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-1000 ease-out"
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset }}
+              transition={{ duration: 1, ease: "easeOut" }}
             />
-            {/* Gradient definition */}
-            <defs>
-              <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#10b981" />
-                <stop offset="100%" stopColor="#f59e0b" />
-              </linearGradient>
-            </defs>
           </svg>
           
           {/* Center icon */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-              <Sun className="w-6 h-6 text-yellow-600" />
+            <div className="w-16 h-16 bg-secondary flex items-center justify-center border-2 border-foreground">
+              <Sun className="w-8 h-8 text-secondary-foreground" />
             </div>
           </div>
         </div>
 
         {/* Text content */}
-        <h3 className="text-lg font-bold text-gray-900 mb-1">Monthly Wins</h3>
-        <p className="text-sm text-gray-600">{current} of {target}</p>
-        <p className="text-2xl font-bold text-teal-600 mt-2">{progress}%</p>
+        <h3 className="text-lg text-foreground mb-1">Monthly Wins</h3>
+        <p className="text-sm text-muted-foreground">{current} of {target}</p>
+        <p className="text-2xl text-primary mt-2">{progress}%</p>
       </div>
     </motion.div>
   );

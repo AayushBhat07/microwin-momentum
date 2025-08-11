@@ -5,15 +5,18 @@ import { api } from "@/convex/_generated/api";
 export function HeatMapCard() {
   const heatMapData = useQuery(api.achievements.getHeatMapData);
 
-  // Generate last 3 months of dates
+  // Generate last 14 weeks of dates
   const generateDateGrid = () => {
     const dates = [];
     const today = new Date();
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(today.getMonth() - 3);
-
-    for (let d = new Date(threeMonthsAgo); d <= today; d.setDate(d.getDate() + 1)) {
-      dates.push(new Date(d).toISOString().split('T')[0]);
+    const daysToDisplay = 7 * 14; // 14 weeks
+    const startDate = new Date();
+    startDate.setDate(today.getDate() - daysToDisplay + 1);
+    
+    for (let i = 0; i < daysToDisplay; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      dates.push(d.toISOString().split('T')[0]);
     }
     return dates;
   };
@@ -25,32 +28,30 @@ export function HeatMapCard() {
   }, {} as Record<string, number>) || {};
 
   const getIntensity = (count: number) => {
-    if (count === 0) return 'bg-gray-100';
-    if (count <= 2) return 'bg-green-200';
-    if (count <= 4) return 'bg-green-400';
-    if (count <= 6) return 'bg-green-600';
-    return 'bg-green-800';
+    if (count === 0) return 'bg-muted/50';
+    if (count <= 2) return 'bg-chart-2/60';
+    if (count <= 4) return 'bg-chart-2/80';
+    return 'bg-chart-2';
   };
 
   return (
     <motion.div
-      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+      className="bg-background/80 backdrop-blur-sm border-primary/50 shadow-[4px_4px_0px_var(--primary)] font-pixel p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <h3 className="text-base font-semibold text-gray-900 mb-4">Achievement Heat Map</h3>
+      <h3 className="text-lg text-foreground mb-4">Contribution History</h3>
       
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-rows-7 grid-flow-col gap-1">
         {dates.map((date, index) => {
           const count = dataMap[date] || 0;
-          const dayOfWeek = new Date(date).getDay();
           
           return (
             <motion.div
               key={date}
-              className={`w-3 h-3 rounded-sm ${getIntensity(count)} cursor-pointer`}
-              whileHover={{ scale: 1.2 }}
+              className={`w-3 h-3 border border-foreground/20 ${getIntensity(count)}`}
+              whileHover={{ scale: 1.5, border: "1px solid var(--foreground)" }}
               title={`${date}: ${count} achievements`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -60,14 +61,13 @@ export function HeatMapCard() {
         })}
       </div>
 
-      <div className="flex items-center justify-between mt-4 text-xs text-gray-500">
+      <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
         <span>Less</span>
         <div className="flex space-x-1">
-          <div className="w-3 h-3 bg-gray-100 rounded-sm" />
-          <div className="w-3 h-3 bg-green-200 rounded-sm" />
-          <div className="w-3 h-3 bg-green-400 rounded-sm" />
-          <div className="w-3 h-3 bg-green-600 rounded-sm" />
-          <div className="w-3 h-3 bg-green-800 rounded-sm" />
+          <div className="w-3 h-3 bg-muted/50 border border-foreground/20" />
+          <div className="w-3 h-3 bg-chart-2/60 border border-foreground/20" />
+          <div className="w-3 h-3 bg-chart-2/80 border border-foreground/20" />
+          <div className="w-3 h-3 bg-chart-2 border border-foreground/20" />
         </div>
         <span>More</span>
       </div>

@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { BarChart3, Star, Clipboard, Camera, Settings } from "lucide-react";
-import { useState } from "react";
 
 interface SidebarProps {
   activeTab: string;
@@ -17,7 +16,7 @@ const navItems = [
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   return (
-    <div className="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-6 space-y-4">
+    <div className="w-24 bg-background/80 backdrop-blur-sm border-r-4 border-primary flex flex-col items-center py-6 space-y-4 font-pixel">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;
@@ -27,21 +26,21 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             key={item.id}
             onClick={() => onTabChange(item.id)}
             className={`
-              w-16 h-16 rounded-xl flex items-center justify-center
+              w-16 h-16 flex items-center justify-center border-2 border-foreground
               transition-all duration-200 relative group
               ${isActive 
-                ? `${item.color} text-white shadow-lg` 
-                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                ? `bg-primary text-white shadow-[4px_4px_0px_var(--foreground)] -translate-x-1 -translate-y-1` 
+                : 'bg-background text-foreground hover:bg-accent'
               }
             `}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label={item.label}
           >
-            <Icon className="w-6 h-6" />
+            <Icon className="w-8 h-8" />
             
             {/* Tooltip */}
-            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            <div className="absolute left-full ml-4 px-2 py-1 bg-foreground text-background text-xs rounded-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-[2px_2px_0px_var(--primary)]">
               {item.label}
             </div>
           </motion.button>
