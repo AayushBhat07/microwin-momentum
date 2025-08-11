@@ -44,8 +44,14 @@ function OnboardingStep1({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-      <CardHeader>
+    <motion.div
+      key="step1"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <CardHeader className="font-pixel">
         <CardTitle>Set Up Your Profile</CardTitle>
         <CardDescription>Choose a unique username and tell us a bit about yourself.</CardDescription>
       </CardHeader>
@@ -129,8 +135,14 @@ function OnboardingStep2({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-      <CardHeader>
+    <motion.div
+      key="step2"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <CardHeader className="font-pixel">
         <CardTitle>Set Your First Goals</CardTitle>
         <CardDescription>What do you want to accomplish today? Add at least one goal to continue.</CardDescription>
       </CardHeader>
@@ -199,8 +211,14 @@ function OnboardingStep3({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-      <CardHeader className="items-center text-center">
+    <motion.div
+      key="step3"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <CardHeader className="items-center text-center font-pixel">
         <Trophy className="w-12 h-12 text-yellow-500" />
         <CardTitle className="mt-4">You're Ready to Win!</CardTitle>
         <CardDescription>
@@ -255,7 +273,12 @@ export default function Onboarding() {
       // Future steps will be rendered here
       default:
         return (
-          <div>
+          <motion.div
+            key="step-complete"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <CardHeader>
               <CardTitle>Onboarding Complete!</CardTitle>
               <CardDescription>You're all set. Time to start winning.</CardDescription>
@@ -266,7 +289,7 @@ export default function Onboarding() {
             <CardFooter>
               <Button onClick={() => window.location.href = '/dashboard'} className="w-full">Go to Dashboard</Button>
             </CardFooter>
-          </div>
+          </motion.div>
         );
     }
   };
@@ -278,7 +301,9 @@ export default function Onboarding() {
     >
       <div className="absolute inset-0 bg-black/50" />
       <Card className="w-full max-w-md z-10 bg-background/80 backdrop-blur-sm border-foreground/20 shadow-[8px_8px_0px_#00000090]">
-        {renderStep()}
+        <AnimatePresence mode="wait">
+          {renderStep()}
+        </AnimatePresence>
       </Card>
     </div>
   );
