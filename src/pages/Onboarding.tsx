@@ -277,7 +277,7 @@ export default function Onboarding() {
       style={{ backgroundImage: "url('/assets/onboarding2.png')" }}
     >
       <div className="absolute inset-0 bg-black/50" />
-      <Card className="w-full max-w-md z-10 bg-background/80 backdrop-blur-sm border-white/20">
+      <Card className="w-full max-w-md z-10 bg-background/80 backdrop-blur-sm border-foreground/20 shadow-[8px_8px_0px_#00000090]">
         {renderStep()}
       </Card>
     </div>

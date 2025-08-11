@@ -87,9 +87,9 @@ export default function GoalSettingPage() {
       style={{ backgroundImage: "url('/assets/onboarding2.png')" }}
     >
       <div className="absolute inset-0 bg-black/50" />
-      <Card className="w-full max-w-md z-10 bg-background/80 backdrop-blur-sm border-white/20">
+      <Card className="w-full max-w-md z-10 bg-background/80 backdrop-blur-sm border-foreground/20 shadow-[8px_8px_0px_#00000090]">
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-          <CardHeader>
+          <CardHeader className="font-pixel">
             <CardTitle>Set Your First Goals</CardTitle>
             <CardDescription>What do you want to accomplish today? Add at least one goal to continue.</CardDescription>
           </CardHeader>

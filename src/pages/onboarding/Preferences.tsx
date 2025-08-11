@@ -103,7 +103,7 @@ export default function PreferencesPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleContinue} disabled={isSubmitting} className="w-full">
+            <Button onClick={handleContinue} disabled={isSubmitting} className="w-full font-pixel uppercase">
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Complete Setup
             </Button>
