@@ -15,11 +15,11 @@ export function DailyGoals() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const dailyGoals = useQuery(api.dailyGoals.getTodaysGoals);
+  const dailyGoals = useQuery(api.goals.getTodaysGoals);
 
-  const createGoal = useMutation(api.dailyGoals.create);
-  const completeGoal = useMutation(api.dailyGoals.complete);
-  const deleteGoal = useMutation(api.dailyGoals.remove);
+  const createGoal = useMutation(api.goals.create);
+  const completeGoal = useMutation(api.goals.complete);
+  const deleteGoal = useMutation(api.goals.remove);
 
   const handleCreateGoal = async () => {
     if (newGoalTitle.trim() === "") {
@@ -42,7 +42,7 @@ export function DailyGoals() {
     }
   };
 
-  const handleCompleteGoal = async (goalId: string, isCompleted: boolean) => {
+  const handleCompleteGoal = async (goalId: any, isCompleted: boolean) => {
     try {
       if (isCompleted) {
         await completeGoal({ goalId });
@@ -54,7 +54,7 @@ export function DailyGoals() {
     }
   };
 
-  const handleDeleteGoal = async (goalId: string) => {
+  const handleDeleteGoal = async (goalId: any) => {
     try {
       await deleteGoal({ goalId });
       toast.success("Goal removed.");

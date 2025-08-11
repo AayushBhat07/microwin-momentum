@@ -20,11 +20,11 @@ type Category = Infer<typeof categoryValidator>;
 
 export default function GoalSettingPage() {
   const { isLoading, isAuthenticated, user } = useAuth();
-  const todaysGoals = useQuery(api.dailyGoals.getTodaysGoals);
+  const todaysGoals = useQuery(api.goals.getTodaysGoals);
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalCategory, setNewGoalCategory] = useState<Category | "">("");
 
-  const createGoal = useMutation(api.dailyGoals.create);
+  const createGoal = useMutation(api.goals.create);
   const completeStep = useMutation(api.onboarding.completeOnboardingStep);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -121,7 +121,7 @@ export default function GoalSettingPage() {
                   </div>
                 )}
                 {todaysGoals && todaysGoals.length > 0 ? (
-                  todaysGoals.map((goal) => (
+                  todaysGoals.map((goal: any) => (
                     <motion.div key={goal._id} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center justify-between text-sm p-2 bg-secondary rounded-md">
                       <span>{goal.title}</span>
                       <span className="text-xs px-2 py-1 bg-background rounded-full">{goal.category?.toLowerCase()}</span>
