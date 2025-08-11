@@ -11,6 +11,7 @@ import { PhotoMemoryCard } from "@/components/dashboard/PhotoMemoryCard";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { FloatingLogButton } from "@/components/logging/FloatingLogButton";
 import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
+import { DailyGoals } from "@/components/dashboard/DailyGoals";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -23,8 +24,8 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -43,82 +44,87 @@ export default function Dashboard() {
   const progress = Math.min((currentWins / monthlyTarget) * 100, 100);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+    <div 
+      className="min-h-screen bg-cover bg-center bg-fixed" 
+      style={{ backgroundImage: "url('/assets/onboarding1.png')" }}
+    >
+      <div className="min-h-screen bg-black/60 flex">
+        {/* Sidebar */}
+        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back, {user.name || 'Champion'}! 👋
-            </h1>
-            <p className="text-gray-600">
-              Here's your achievement overview for today.
-            </p>
-          </motion.div>
+        {/* Main Content */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h1 className="text-4xl font-pixel text-white text-shadow-pixel mb-2">
+                Welcome back, {user.name || 'Champion'}!
+              </h1>
+              <p className="text-blue-300 font-pixel text-lg">
+                Here's your quest log for today.
+              </p>
+            </motion.div>
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {/* Progress Ring Card - Top Left */}
-            <div className="lg:col-span-1">
-              <ProgressRingCard
-                progress={Math.round(progress)}
-                current={currentWins}
-                target={monthlyTarget}
-              />
-            </div>
+            {/* Main Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              {/* Daily Goals Card - Full Width on Top */}
+              <div className="lg:col-span-3">
+                <DailyGoals />
+              </div>
 
-            {/* Milestone Card - Top Right */}
-            <div className="lg:col-span-1">
-              <MilestoneCard
-                milestone={currentWins}
-                title={`You've hit ${currentWins} Wins!`}
-              />
-            </div>
+              {/* Progress Ring Card */}
+              <div className="lg:col-span-1">
+                <ProgressRingCard
+                  progress={Math.round(progress)}
+                  current={currentWins}
+                  target={monthlyTarget}
+                />
+              </div>
 
-            {/* Stats Cards - Top Right (stacked) */}
-            <div className="lg:col-span-1 space-y-4">
-              <StatsCard
-                type="badges"
-                value={12} // TODO: Replace with real badge count
-                label="Badges Earned"
-              />
-              <StatsCard
-                type="streak"
-                value={weeklyStats?.weeklyStreak || 0}
-                label="Streak"
-              />
-            </div>
+              {/* Milestone Card */}
+              <div className="lg:col-span-1">
+                <MilestoneCard
+                  milestone={currentWins}
+                  title={`You've hit ${currentWins} Wins!`}
+                />
+              </div>
 
-            {/* Heat Map Card - Middle Left */}
-            <div className="lg:col-span-1">
-              <HeatMapCard />
-            </div>
+              {/* Stats Cards (stacked) */}
+              <div className="lg:col-span-1 space-y-6">
+                <StatsCard
+                  type="badges"
+                  value={12} // TODO: Replace with real badge count
+                  label="Badges Earned"
+                />
+                <StatsCard
+                  type="streak"
+                  value={weeklyStats?.weeklyStreak || 0}
+                  label="Streak"
+                />
+              </div>
 
-            {/* Photo Memory Card - Middle Center */}
-            <div className="lg:col-span-1">
-              <PhotoMemoryCard />
-            </div>
+              {/* Heat Map Card */}
+              <div className="lg:col-span-2">
+                <HeatMapCard />
+              </div>
 
-            {/* Empty space for future cards */}
-            <div className="lg:col-span-1">
-              {/* Placeholder for future features */}
+              {/* Photo Memory Card */}
+              <div className="lg:col-span-1">
+                <PhotoMemoryCard />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Gamified Logging System */}
-      <FloatingLogButton onClick={() => setIsLogSheetOpen(true)} />
-      <LogAchievementSheet open={isLogSheetOpen} onOpenChange={setIsLogSheetOpen} />
+        {/* Gamified Logging System */}
+        <FloatingLogButton onClick={() => setIsLogSheetOpen(true)} />
+        <LogAchievementSheet open={isLogSheetOpen} onOpenChange={setIsLogSheetOpen} />
+      </div>
     </div>
   );
 }

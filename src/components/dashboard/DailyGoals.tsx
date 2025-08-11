@@ -13,8 +13,6 @@ export function DailyGoals() {
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
   const dailyGoals = useQuery(api.goals.getTodaysGoals);
 
   const createGoal = useMutation(api.goals.create);
@@ -23,7 +21,7 @@ export function DailyGoals() {
 
   const handleCreateGoal = async () => {
     if (newGoalTitle.trim() === "") {
-      toast.error("Goal title cannot be empty.");
+      toast.error("Quest title cannot be empty.");
       return;
     }
     setIsCreating(true);
@@ -33,9 +31,9 @@ export function DailyGoals() {
         category: "personal",
       });
       setNewGoalTitle("");
-      toast.success("New goal added!");
+      toast.success("New Quest Added!");
     } catch (error) {
-      toast.error("Failed to add goal.");
+      toast.error("Failed to add quest.");
       console.error(error);
     } finally {
       setIsCreating(false);
@@ -46,10 +44,10 @@ export function DailyGoals() {
     try {
       if (isCompleted) {
         await completeGoal({ goalId });
-        toast.success("Goal completed! Great job!");
+        toast.success("Quest Complete! +10 XP");
       }
     } catch (error) {
-      toast.error("Failed to update goal.");
+      toast.error("Failed to update quest.");
       console.error(error);
     }
   };
@@ -57,28 +55,29 @@ export function DailyGoals() {
   const handleDeleteGoal = async (goalId: any) => {
     try {
       await deleteGoal({ goalId });
-      toast.success("Goal removed.");
+      toast.success("Quest Abandoned.");
     } catch (error) {
-      toast.error("Failed to remove goal.");
+      toast.error("Failed to remove quest.");
       console.error(error);
     }
   };
 
   return (
-    <Card>
+    <Card className="bg-background/80 backdrop-blur-sm border-primary/50 shadow-[4px_4px_0px_var(--primary)] font-pixel">
       <CardHeader>
-        <CardTitle>Today's Goals</CardTitle>
+        <CardTitle className="text-primary text-2xl">Today's Quests</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-2 mb-4">
           <Input
-            placeholder="Add a new goal for today..."
+            placeholder="Add a new quest..."
             value={newGoalTitle}
             onChange={(e) => setNewGoalTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreateGoal()}
             disabled={isCreating}
+            className="font-pixel bg-background/80 focus:ring-secondary"
           />
-          <Button onClick={handleCreateGoal} disabled={isCreating}>
+          <Button onClick={handleCreateGoal} disabled={isCreating} variant="secondary" className="font-pixel">
             {isCreating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -87,15 +86,15 @@ export function DailyGoals() {
           </Button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
           {dailyGoals === undefined && (
             <div className="flex justify-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           )}
           {dailyGoals && dailyGoals.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-4">
-              No goals for today yet. Add one to get started!
+              No quests for today. Add one to begin your adventure!
             </p>
           )}
           <AnimatePresence>
@@ -107,7 +106,7 @@ export function DailyGoals() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50"
+                className="flex items-center justify-between p-3 rounded-md bg-black/20"
               >
                 <div className="flex items-center gap-3">
                   <Checkbox
@@ -116,10 +115,11 @@ export function DailyGoals() {
                     onCheckedChange={(checked) =>
                       handleCompleteGoal(goal._id, checked as boolean)
                     }
+                    className="border-primary data-[state=checked]:bg-primary"
                   />
                   <label
                     htmlFor={goal._id}
-                    className={`text-sm ${
+                    className={`text-base text-white ${
                       goal.isCompleted ? "line-through text-muted-foreground" : ""
                     }`}
                   >
@@ -132,7 +132,7 @@ export function DailyGoals() {
                   className="h-8 w-8"
                   onClick={() => handleDeleteGoal(goal._id)}
                 >
-                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
               </motion.div>
             ))}
