@@ -1,9 +1,46 @@
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useEffect, useRef, useState } from "react";
+
+// Custom hook to get the previous value of a prop or state
+function usePrevious<T>(value: T): T | undefined {
+  const ref = useRef<T | undefined>(undefined);
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
 
 export function HeatMapCard() {
   const heatMapData = useQuery(api.achievements.getHeatMapData);
+  const prevHeatMapData = usePrevious(heatMapData);
+  const [highlightedDate, setHighlightedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (prevHeatMapData && heatMapData) {
+      const prevMap = (prevHeatMapData || []).reduce((acc, item) => {
+        acc[item.date] = item.count;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const currentMap = (heatMapData || []).reduce((acc, item) => {
+        acc[item.date] = item.count;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Find a date where the count has increased
+      const updatedDate = Object.keys(currentMap).find(date => 
+        currentMap[date] > (prevMap[date] || 0)
+      );
+
+      if (updatedDate) {
+        setHighlightedDate(updatedDate);
+        const timer = setTimeout(() => setHighlightedDate(null), 2000); // Highlight for 2 seconds
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [heatMapData, prevHeatMapData]);
 
   // Generate last 14 weeks of dates
   const generateDateGrid = () => {
@@ -46,6 +83,7 @@ export function HeatMapCard() {
       <div className="grid grid-rows-7 grid-flow-col gap-1">
         {dates.map((date, index) => {
           const count = dataMap[date] || 0;
+          const isHighlighted = date === highlightedDate;
           
           return (
             <motion.div
@@ -54,8 +92,17 @@ export function HeatMapCard() {
               whileHover={{ scale: 1.5, border: "1px solid var(--foreground)" }}
               title={`${date}: ${count} achievements`}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: index * 0.01 }}
+              animate={{ 
+                opacity: 1,
+                scale: isHighlighted ? [1, 1.8, 1] : 1,
+                boxShadow: isHighlighted ? "0 0 8px var(--primary)" : "none",
+              }}
+              transition={{ 
+                delay: index * 0.01,
+                duration: 0.2,
+                scale: { duration: 0.5, ease: "easeInOut" },
+                boxShadow: { duration: 0.5, ease: "easeInOut" },
+              }}
             />
           );
         })}
