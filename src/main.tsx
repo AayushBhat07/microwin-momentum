@@ -60,8 +60,8 @@ createRoot(document.getElementById("root")!).render(
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
-            <Route path="/onboarding/profile" element={<Protected><ProfileSetupPage /></Protected>} />
-            <Route path="/onboarding/goals" element={<Protected><GoalSettingPage /></Protected>} />
+            <Route path="/onboarding/profile" element={<Protected><ProfileSetupPage onComplete={() => {}} /></Protected>} />
+            <Route path="/onboarding/goals" element={<Protected><GoalSettingPage onComplete={() => {}} /></Protected>} />
             <Route path="/onboarding/achievements" element={<Protected><AchievementIntroPage /></Protected>} />
             <Route path="/onboarding/preferences" element={<Protected><PreferencesPage /></Protected>} />
             <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />

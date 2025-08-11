@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Spinner } from "@/components/ui/spinner";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,7 +64,7 @@ function OnboardingStep3({ onComplete }: { onComplete: () => void }) {
 export default function Onboarding() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(user?.onboardingStep ?? 0);
+  const completeStep = useMutation(api.onboarding.completeOnboardingStep);
 
   if (isLoading) {
     return (
@@ -84,15 +84,19 @@ export default function Onboarding() {
   }
 
   const onCompleteStep = (step: number) => {
-    setCurrentStep(step + 1);
-  }
+    completeStep({ step }).catch((err) => {
+      toast.error("Failed to save progress.");
+      console.error(err);
+    });
+  };
 
   const renderStep = () => {
+    const currentStep = user.onboardingStep ?? 0;
     switch (currentStep) {
       case 0:
-        return <ProfileSetupPage />;
+        return <ProfileSetupPage onComplete={() => onCompleteStep(1)} />;
       case 1:
-        return <GoalSettingPage />;
+        return <GoalSettingPage onComplete={() => onCompleteStep(2)} />;
       case 2:
         return <OnboardingStep3 onComplete={() => navigate('/dashboard')} />;
       default:
