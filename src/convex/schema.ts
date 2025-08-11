@@ -35,6 +35,22 @@ export const categoryValidator = v.union(
   v.literal("personal"),
 );
 
+export const BADGE_CATEGORIES = v.union(
+  v.literal("wins"),
+  v.literal("streak"),
+  v.literal("onboarding"),
+  v.literal("category"),
+  v.literal("mode"),
+  v.literal("variety")
+);
+
+export const BADGE_RARITY = v.union(
+  v.literal("common"),
+  v.literal("uncommon"),
+  v.literal("rare"),
+  v.literal("epic")
+);
+
 const schema = defineSchema({
   // default auth tables using convex auth.
   ...authTables, // do not remove or modify
@@ -56,6 +72,7 @@ const schema = defineSchema({
     
     // Gamification fields
     totalPoints: v.optional(v.number()),
+    totalAchievements: v.optional(v.number()),
     currentStreak: v.optional(v.number()),
     longestStreak: v.optional(v.number()),
   })
@@ -120,20 +137,29 @@ const schema = defineSchema({
 
   badges: defineTable({
     slug: v.string(),
-    badgeName: v.string(),
+    name: v.string(),
     description: v.string(),
-    icon: v.string(),
-    type: v.union(v.literal("streak"), v.literal("special")),
-    threshold: v.optional(v.number()), // e.g., 3 for 3-day streak
+    icon: v.string(), // Lucide icon name
+    category: BADGE_CATEGORIES,
+    threshold: v.optional(v.number()),
+    rarity: BADGE_RARITY,
+    isActive: v.boolean(),
   }).index("by_slug", ["slug"]),
 
   userBadges: defineTable({
     userId: v.id("users"),
     badgeSlug: v.string(),
     earnedAt: v.number(),
+    isFeatured: v.optional(v.boolean()),
   })
     .index("by_user_and_earned_at", ["userId", "earnedAt"])
     .index("by_user_and_badge", ["userId", "badgeSlug"]),
+
+  userCategoryTotals: defineTable({
+    userId: v.id("users"),
+    categorySlug: v.string(),
+    totalWins: v.number(),
+  }).index("by_user_and_category", ["userId", "categorySlug"]),
 
   // Additional tables needed by existing code
   userStats: defineTable({

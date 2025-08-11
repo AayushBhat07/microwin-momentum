@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
-import { api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { getCurrentUser } from "./users";
 
 export const completeOnboardingStep = mutation({
@@ -29,7 +29,7 @@ export const completeOnboardingStep = mutation({
     const badgeName = badgeNames[args.step];
     if (badgeName) {
       const badgeSlug = badgeName.toLowerCase().replace(/\s+/g, '-');
-      await ctx.runMutation(api.badges.awardBadge, {
+      await ctx.runMutation(internal.badges.awardBadge, {
         userId: user._id,
         badgeSlug,
       });

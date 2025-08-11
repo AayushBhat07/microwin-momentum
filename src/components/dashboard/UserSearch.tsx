@@ -33,7 +33,7 @@ export function UserSearch() {
 
         {searchResults && searchResults.length > 0 && (
           <div className="mt-4 space-y-2">
-            {searchResults.map((user) => (
+            {searchResults.map((user: any) => (
               <motion.div
                 key={user._id}
                 initial={{ opacity: 0, y: 10 }}

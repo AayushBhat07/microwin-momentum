@@ -1,5 +1,5 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { action, internalMutation, mutation, query } from "./_generated/server";
+import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { categoryValidator } from "./schema";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
@@ -101,7 +101,7 @@ export const log = action({
     ),
     tags: v.optional(v.array(v.string())),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ unlockedBadges: any[] }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Not authenticated");
@@ -109,10 +109,15 @@ export const log = action({
     const userId = identity.subject as Id<"users">;
 
     // 1. Create the achievement
-    await ctx.runMutation(internal.achievements.internalCreate, {
+    const achievementId: Id<"achievements"> = await ctx.runMutation(internal.achievements.internalCreate, {
       userId,
       ...args,
     });
+    
+    const achievement: any = await ctx.runQuery(internal.achievements.get, { id: achievementId });
+    if (!achievement) {
+        return { unlockedBadges: [] };
+    }
 
     // 2. Update user points
     await ctx.runMutation(internal.userStats.updateUserPoints, {
@@ -128,7 +133,31 @@ export const log = action({
       userId,
       points: args.pointsEarned,
     });
+
+    // 5. Evaluate and award badges
+    const unlockedBadges: any[] = await ctx.runAction(internal.badges.evaluateAchievement, {
+        userId,
+        achievement,
+    });
+
+    // Award first_win badge if it's the first achievement
+    const user = await ctx.runQuery(internal.users.get, { userId });
+    if (user && user.totalAchievements === 1) {
+        const firstWinBadge = await ctx.runMutation(internal.badges.evaluateOnboarding, { userId, step: "first_win" });
+        if (firstWinBadge) {
+            unlockedBadges.push(firstWinBadge);
+        }
+    }
+
+    return { unlockedBadges };
   },
+});
+
+export const get = internalQuery({
+    args: { id: v.id("achievements") },
+    handler: async (ctx, { id }) => {
+        return await ctx.db.get(id);
+    }
 });
 
 // Get heat map data for calendar visualization

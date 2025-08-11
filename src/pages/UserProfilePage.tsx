@@ -5,11 +5,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star, Trophy, Flame, Users, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { AchievementCard } from "@/components/dashboard/AchievementCard";
+import { BadgeCard } from "@/components/dashboard/BadgeCard";
+import { Badge } from "@/components/ui/badge";
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
@@ -160,15 +161,8 @@ export default function UserProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {userProfile.badges.map((badge) => (
-                    <Badge 
-                      key={badge._id} 
-                      variant="secondary" 
-                      className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                    >
-                      <Trophy className="h-3 w-3 mr-1" />
-                      Badge
-                    </Badge>
+                  {userProfile.badges.map((badge: any) => (
+                    <BadgeCard key={badge.userBadge._id} badge={badge} />
                   ))}
                 </div>
               </CardContent>

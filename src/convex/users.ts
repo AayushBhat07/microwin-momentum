@@ -1,32 +1,20 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { internalQuery, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { Id } from "./_generated/dataModel";
 
-/**
- * Get the current signed in user. Returns null if the user is not signed in.
- * Usage: const signedInUser = await ctx.runQuery(api.authHelpers.currentUser);
- * THIS FUNCTION IS READ-ONLY. DO NOT MODIFY.
- */
 export const currentUser = query({
   args: {},
   handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
-
-    if (user === null) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       return null;
     }
-
-    return user;
+    return await ctx.db.get(userId);
   },
 });
 
-/**
- * Use this function internally to get the current user data. Remember to handle the null user case.
- * @param ctx
- * @returns
- */
-export const getCurrentUser = async (ctx: QueryCtx) => {
+export const getCurrentUser = async (ctx: any) => {
   const userId = await getAuthUserId(ctx);
   if (userId === null) {
     return null;
@@ -34,146 +22,72 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
   return await ctx.db.get(userId);
 };
 
-// Search users by username
-export const searchUsers = query({
-  args: {
-    searchTerm: v.string(),
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    if (!args.searchTerm.trim()) {
-      return [];
+export const get = internalQuery({
+    args: { userId: v.id("users") },
+    handler: async (ctx, { userId }) => {
+        return await ctx.db.get(userId);
     }
+});
 
-    const users = await ctx.db
+export const searchUsers = query({
+  args: { searchTerm: v.string() },
+  handler: async (ctx, { searchTerm }) => {
+    if (!searchTerm.trim()) return [];
+    
+    return await ctx.db
       .query("users")
-      .withIndex("by_username")
       .filter((q) => 
-        q.and(
-          q.neq(q.field("username"), undefined),
-          q.gte(q.field("username"), args.searchTerm.toLowerCase()),
-          q.lt(q.field("username"), args.searchTerm.toLowerCase() + "\uffff")
+        q.or(
+          q.eq(q.field("username"), searchTerm),
+          q.eq(q.field("name"), searchTerm)
         )
       )
-      .take(args.limit || 10);
-
-    // Return public user data only
-    return users.map(user => ({
-      _id: user._id,
-      username: user.username,
-      name: user.name,
-      image: user.image,
-      bio: user.bio,
-      totalPoints: user.totalPoints || 0,
-      currentStreak: user.currentStreak || 0,
-    }));
-  },
-});
-
-// Get public user profile
-export const getPublicProfile = query({
-  args: {
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) {
-      return null;
-    }
-
-    // Get user's achievements
-    const achievements = await ctx.db
-      .query("achievements")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .filter((q) => q.eq(q.field("isPublic"), true))
-      .order("desc")
       .take(10);
-
-    // Get user's badges
-    const badges = await ctx.db
-      .query("userBadges")
-      .withIndex("by_user_and_earned_at", (q) => q.eq("userId", args.userId))
-      .collect();
-
-    // Get user totals
-    const userTotals = await ctx.db
-      .query("user_totals")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .unique();
-
-    // Get user streak
-    const userStreak = await ctx.db
-      .query("user_streaks")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .unique();
-
-    return {
-      _id: user._id,
-      username: user.username,
-      name: user.name,
-      image: user.image,
-      bio: user.bio,
-      totalPoints: userTotals?.totalPoints || 0,
-      currentStreak: userStreak?.currentStreak || 0,
-      longestStreak: userStreak?.longestStreak || 0,
-      achievements,
-      badges,
-    };
   },
 });
 
-// Get public user profile by username
 export const getProfileByUsername = query({
-  args: {
-    username: v.string(),
-  },
-  handler: async (ctx, args) => {
+  args: { username: v.string() },
+  handler: async (ctx, { username }) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .withIndex("by_username", (q) => q.eq("username", username))
       .unique();
+    
+    if (!user) return null;
 
-    if (!user) {
-      return null;
-    }
+    // Get user badges
+    const userBadges = await ctx.db
+      .query("userBadges")
+      .withIndex("by_user_and_earned_at", (q) => q.eq("userId", user._id))
+      .order("desc")
+      .collect();
 
-    // Get user's achievements
+    const badgesWithDetails = await Promise.all(
+      userBadges.map(async (userBadge) => {
+        const badgeDetails = await ctx.db
+          .query("badges")
+          .withIndex("by_slug", (q) => q.eq("slug", userBadge.badgeSlug))
+          .unique();
+        return {
+          userBadge,
+          badgeDetails,
+        };
+      })
+    );
+
+    // Get user achievements (public only for profile view)
     const achievements = await ctx.db
       .query("achievements")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .filter((q) => q.eq(q.field("isPublic"), true))
       .order("desc")
-      .take(10);
+      .take(5);
 
-    // Get user's badges
-    const badges = await ctx.db
-      .query("userBadges")
-      .withIndex("by_user_and_earned_at", (q) => q.eq("userId", user._id))
-      .collect();
-
-    // Get user totals
-    const userTotals = await ctx.db
-      .query("user_totals")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .unique();
-
-    // Get user streak
-    const userStreak = await ctx.db
-      .query("user_streaks")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .unique();
-      
     return {
-      _id: user._id,
-      username: user.username,
-      name: user.name,
-      image: user.image,
-      bio: user.bio,
-      totalPoints: userTotals?.totalPoints || 0,
-      currentStreak: userStreak?.currentStreak || 0,
-      longestStreak: userStreak?.longestStreak || 0,
+      ...user,
+      badges: badgesWithDetails.filter(b => b.badgeDetails),
       achievements,
-      badges,
     };
   },
 });
