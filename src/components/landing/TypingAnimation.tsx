@@ -45,15 +45,6 @@ export const TypingAnimation = ({ text, className, speed = 100 }: TypingAnimatio
     return () => clearInterval(typingInterval);
   }, [chars, speed, key]);
 
-  useEffect(() => {
-    if (isCompleted) {
-      const timeout = setTimeout(() => {
-        setKey(prevKey => prevKey + 1);
-      }, 6000);
-      return () => clearTimeout(timeout);
-    }
-  }, [isCompleted]);
-
   return (
     <div className={className}>
       {chars.slice(0, count + 1).map((charData, i) => (
