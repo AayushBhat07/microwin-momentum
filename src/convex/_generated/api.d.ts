@@ -20,6 +20,7 @@ import type * as badges from "../badges.js";
 import type * as dailyGoals from "../dailyGoals.js";
 import type * as files from "../files.js";
 import type * as gamification from "../gamification.js";
+import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as logWin from "../logWin.js";
 import type * as logWinHelpers from "../logWinHelpers.js";
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   dailyGoals: typeof dailyGoals;
   files: typeof files;
   gamification: typeof gamification;
+  goals: typeof goals;
   http: typeof http;
   logWin: typeof logWin;
   logWinHelpers: typeof logWinHelpers;

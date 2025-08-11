@@ -149,7 +149,7 @@ const schema = defineSchema({
     title: v.string(),
     description: v.optional(v.string()),
     category: categoryValidator,
-    targetDate: v.number(),
+    targetDate: v.string(), // Changed from v.number() to v.string() for date format
     isCompleted: v.boolean(),
     completedAt: v.optional(v.number()),
   })

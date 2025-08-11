@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Spinner } from "@/components/ui/spinner";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import { Plus, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ACHIEVEMENT_CATEGORIES, categoryValidator } from "@/convex/schema";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Doc } from "@/convex/_generated/dataModel";
 import { useNavigate } from "react-router";
 import { Infer } from "convex/values";
 
@@ -21,7 +20,7 @@ type Category = Infer<typeof categoryValidator>;
 
 export default function GoalSettingPage() {
   const { isLoading, isAuthenticated, user } = useAuth();
-  const [goals, setGoals] = useState<Partial<Doc<"dailyGoals">>[]>([]);
+  const todaysGoals = useQuery(api.dailyGoals.getTodaysGoals);
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalCategory, setNewGoalCategory] = useState<Category | "">("");
 
@@ -56,9 +55,8 @@ export default function GoalSettingPage() {
     try {
       await createGoal({
         title: newGoalTitle,
-        category: newGoalCategory,
+        category: newGoalCategory as Category,
       });
-      setGoals([...goals, { title: newGoalTitle, category: newGoalCategory }]);
       setNewGoalTitle("");
       setNewGoalCategory("");
       toast.success("Goal added!");
@@ -106,8 +104,8 @@ export default function GoalSettingPage() {
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, value]) => (
-                      <SelectItem key={key} value={value.slug}>{key.charAt(0) + key.slice(1).toLowerCase()}</SelectItem>
+                    {Object.values(ACHIEVEMENT_CATEGORIES).map((cat) => (
+                      <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -117,21 +115,26 @@ export default function GoalSettingPage() {
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Today's Goals</h4>
               <AnimatePresence>
-                {goals.length > 0 ? (
-                  goals.map((goal, index) => (
-                    <motion.div key={index} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center justify-between text-sm p-2 bg-secondary rounded-md">
+                {todaysGoals === undefined && (
+                  <div className="flex justify-center items-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                {todaysGoals && todaysGoals.length > 0 ? (
+                  todaysGoals.map((goal) => (
+                    <motion.div key={goal._id} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center justify-between text-sm p-2 bg-secondary rounded-md">
                       <span>{goal.title}</span>
                       <span className="text-xs px-2 py-1 bg-background rounded-full">{goal.category?.toLowerCase()}</span>
                     </motion.div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">Add your first goal for today.</p>
+                  todaysGoals && <p className="text-sm text-muted-foreground text-center py-4">Add your first goal for today.</p>
                 )}
               </AnimatePresence>
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleContinue} disabled={goals.length === 0 || isSubmitting} className="w-full">
+            <Button onClick={handleContinue} disabled={(todaysGoals?.length ?? 0) === 0 || isSubmitting} className="w-full">
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Continue
             </Button>

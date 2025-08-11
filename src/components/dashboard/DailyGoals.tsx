@@ -15,13 +15,11 @@ export function DailyGoals() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const dailyGoals = useQuery(api.dailyGoals.getGoalsForDate, {
-    date: today.getTime(),
-  });
+  const dailyGoals = useQuery(api.dailyGoals.getTodaysGoals);
 
   const createGoal = useMutation(api.dailyGoals.create);
-  const completeGoal = useMutation(api.dailyGoals.completeGoal);
-  const deleteGoal = useMutation(api.dailyGoals.deleteGoal);
+  const completeGoal = useMutation(api.dailyGoals.complete);
+  const deleteGoal = useMutation(api.dailyGoals.remove);
 
   const handleCreateGoal = async () => {
     if (newGoalTitle.trim() === "") {
@@ -32,9 +30,7 @@ export function DailyGoals() {
     try {
       await createGoal({
         title: newGoalTitle.trim(),
-        // Using 'PERSONAL' as a default category for simplicity
         category: "personal",
-        targetDate: today.getTime(),
       });
       setNewGoalTitle("");
       toast.success("New goal added!");
@@ -46,21 +42,19 @@ export function DailyGoals() {
     }
   };
 
-  const handleCompleteGoal = async (goalId: any, isCompleted: boolean) => {
+  const handleCompleteGoal = async (goalId: string, isCompleted: boolean) => {
     try {
       if (isCompleted) {
         await completeGoal({ goalId });
         toast.success("Goal completed! Great job!");
       }
-      // Note: There's no "uncomplete" functionality in the backend yet.
-      // We are only handling the completion.
     } catch (error) {
       toast.error("Failed to update goal.");
       console.error(error);
     }
   };
 
-  const handleDeleteGoal = async (goalId: any) => {
+  const handleDeleteGoal = async (goalId: string) => {
     try {
       await deleteGoal({ goalId });
       toast.success("Goal removed.");
