@@ -12,6 +12,8 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { FloatingLogButton } from "@/components/logging/FloatingLogButton";
 import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
 import { DailyGoals } from "@/components/dashboard/DailyGoals";
+import { StatsOverview } from "@/components/dashboard/StatsOverview";
+import { UserSearch } from "@/components/dashboard/UserSearch";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -72,9 +74,19 @@ export default function Dashboard() {
 
             {/* Main Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {/* Daily Goals Card - Full Width on Top */}
+              {/* Stats Overview - Full Width on Top */}
               <div className="lg:col-span-3">
-                <DailyGoals />
+                <StatsOverview />
+              </div>
+
+              {/* Heat Map Card */}
+              <div className="lg:col-span-2">
+                <HeatMapCard />
+              </div>
+
+              {/* User Search Card */}
+              <div className="lg:col-span-1">
+                <UserSearch />
               </div>
 
               {/* Progress Ring Card */}
@@ -92,25 +104,6 @@ export default function Dashboard() {
                   milestone={currentWins}
                   title={`You've hit ${currentWins} Wins!`}
                 />
-              </div>
-
-              {/* Stats Cards (stacked) */}
-              <div className="lg:col-span-1 space-y-6">
-                <StatsCard
-                  type="badges"
-                  value={12} // TODO: Replace with real badge count
-                  label="Badges Earned"
-                />
-                <StatsCard
-                  type="streak"
-                  value={weeklyStats?.weeklyStreak || 0}
-                  label="Streak"
-                />
-              </div>
-
-              {/* Heat Map Card */}
-              <div className="lg:col-span-2">
-                <HeatMapCard />
               </div>
 
               {/* Photo Memory Card */}
