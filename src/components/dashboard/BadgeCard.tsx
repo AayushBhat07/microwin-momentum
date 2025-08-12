@@ -1,5 +1,8 @@
 import { Doc } from "@/convex/_generated/dataModel";
-import { Trophy } from "lucide-react";
+import { Trophy, Star } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 
 interface BadgeCardProps {
   badge: {
@@ -9,7 +12,9 @@ interface BadgeCardProps {
 }
 
 export function BadgeCard({ badge }: BadgeCardProps) {
-  const { badgeDetails } = badge;
+  const { userBadge, badgeDetails } = badge;
+  const featureBadge = useMutation(api.badges.featureBadge);
+
   const rarityColor = {
     common: "border-stone-400",
     uncommon: "border-green-400",
@@ -24,10 +29,30 @@ export function BadgeCard({ badge }: BadgeCardProps) {
     epic: "text-purple-500",
   }[badgeDetails.rarity || "common"];
 
+  const handleFeatureToggle = async () => {
+    try {
+      await featureBadge({
+        badgeSlug: userBadge.badgeSlug,
+        isFeatured: !userBadge.isFeatured,
+      });
+      toast.success(
+        !userBadge.isFeatured ? "Badge featured!" : "Badge unfeatured."
+      );
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <div
-      className={`p-1 bg-gray-800/50 rounded-lg ${rarityColor} border-2 image-rendering-pixelated group transition-all hover:scale-105 hover:shadow-lg hover:shadow-black/50`}
+      onClick={handleFeatureToggle}
+      className={`p-1 bg-gray-800/50 rounded-lg ${rarityColor} border-2 image-rendering-pixelated group transition-all hover:scale-105 hover:shadow-lg hover:shadow-black/50 cursor-pointer relative`}
     >
+      {userBadge.isFeatured && (
+        <div className="absolute top-2 right-2 text-yellow-400">
+          <Star className="w-5 h-5 fill-current" />
+        </div>
+      )}
       <div className="bg-gray-900/80 p-4 rounded-md text-center h-full flex flex-col items-center justify-center">
         <Trophy className="h-10 w-10 mx-auto mb-2 text-yellow-400 group-hover:animate-pulse" />
         <h3 className="text-base font-bold text-white font-press-start leading-tight">

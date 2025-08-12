@@ -4,26 +4,18 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { ProgressRingCard } from "@/components/dashboard/ProgressRingCard";
-import { MilestoneCard } from "@/components/dashboard/MilestoneCard";
 import { HeatMapCard } from "@/components/dashboard/HeatMapCard";
-import { PhotoMemoryCard } from "@/components/dashboard/PhotoMemoryCard";
-import { StatsCard } from "@/components/dashboard/StatsCard";
+import { UserSearch } from "@/components/dashboard/UserSearch";
+import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { FloatingLogButton } from "@/components/logging/FloatingLogButton";
 import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
-import { DailyGoals } from "@/components/dashboard/DailyGoals";
-import { StatsOverview } from "@/components/dashboard/StatsOverview";
-import { UserSearch } from "@/components/dashboard/UserSearch";
+import { BadgesMilestonesSection } from "@/components/dashboard/BadgesMilestonesSection";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
   
-  // Fetch user stats
-  const weeklyStats = useQuery(api.userStats.getWeeklyStats);
-  const achievements = useQuery(api.achievements.getMyAchievements);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
@@ -39,11 +31,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  // Calculate progress data
-  const monthlyTarget = 20;
-  const currentWins = weeklyStats?.totalAchievements || 0;
-  const progress = Math.min((currentWins / monthlyTarget) * 100, 100);
 
   return (
     <div 
@@ -73,43 +60,23 @@ export default function Dashboard() {
             </motion.div>
 
             {/* Main Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className="space-y-8">
               {/* Stats Overview - Full Width on Top */}
-              <div className="lg:col-span-3">
-                <StatsOverview />
+              <StatsOverview />
+
+              {/* Heat Map & User Search */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <HeatMapCard />
+                </div>
+                <div className="lg:col-span-1">
+                  <UserSearch />
+                </div>
               </div>
 
-              {/* Heat Map Card */}
-              <div className="lg:col-span-2">
-                <HeatMapCard />
-              </div>
+              {/* Badges & Milestones Section */}
+              <BadgesMilestonesSection />
 
-              {/* User Search Card */}
-              <div className="lg:col-span-1">
-                <UserSearch />
-              </div>
-
-              {/* Progress Ring Card */}
-              <div className="lg:col-span-1">
-                <ProgressRingCard
-                  progress={Math.round(progress)}
-                  current={currentWins}
-                  target={monthlyTarget}
-                />
-              </div>
-
-              {/* Milestone Card */}
-              <div className="lg:col-span-1">
-                <MilestoneCard
-                  milestone={currentWins}
-                  title={`You've hit ${currentWins} Wins!`}
-                />
-              </div>
-
-              {/* Photo Memory Card */}
-              <div className="lg:col-span-1">
-                <PhotoMemoryCard />
-              </div>
             </div>
           </div>
         </div>
