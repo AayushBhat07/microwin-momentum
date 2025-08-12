@@ -5,9 +5,11 @@ interface ProgressRingCardProps {
   progress: number; // 0-100
   current: number;
   target: number;
+  name: string;
+  description: string;
 }
 
-export function ProgressRingCard({ progress, current, target }: ProgressRingCardProps) {
+export function ProgressRingCard({ progress, current, target, name, description }: ProgressRingCardProps) {
   const circumference = 2 * Math.PI * 45; // radius of 45
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -57,7 +59,8 @@ export function ProgressRingCard({ progress, current, target }: ProgressRingCard
         </div>
 
         {/* Text content */}
-        <h3 className="text-lg text-blue-200 mb-1 font-pixel">Monthly Wins</h3>
+        <h3 className="text-lg text-blue-200 mb-1 font-pixel">{name}</h3>
+        <p className="text-sm text-blue-400 font-pixel text-center">{description}</p>
         <p className="text-sm text-blue-400 font-pixel">{current} of {target}</p>
         <p className="text-2xl text-white mt-2 font-pixel">{progress}%</p>
       </div>

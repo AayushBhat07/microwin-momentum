@@ -1,209 +1,150 @@
 import { useState } from "react";
-import { useAction, useMutation } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import { toast } from "sonner";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/use-auth";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuickPresetsTab } from "./tabs/QuickPresetsTab";
-import { TextInputTab } from "./tabs/TextInputTab";
-import { VoiceInputTab } from "./tabs/VoiceInputTab";
-import { PhotoInputTab } from "./tabs/PhotoInputTab";
-import { Flame, Sparkles, Loader2 } from "lucide-react";
+import { Zap, Type, Mic, Camera } from "lucide-react";
+import { toast } from "sonner";
 import { postLogSuccess } from "@/lib/postLogSuccess";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 interface LogAchievementSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const categories = [
-  { slug: "health", name: "Health & Fitness", basePoints: 20 },
-  { slug: "work", name: "Work & Career", basePoints: 15 },
-  { slug: "learning", name: "Learning & Growth", basePoints: 25 },
-  { slug: "social", name: "Social & Relationships", basePoints: 15 },
-  { slug: "creative", name: "Creative & Hobbies", basePoints: 20 },
-  { slug: "personal", name: "Personal Care", basePoints: 10 },
-];
-
 export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<string>("");
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("quick");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
-  const [photoStorageId, setPhotoStorageId] = useState<Id<"_storage"> | undefined>(undefined);
-  const [audioStorageId, setAudioStorageId] = useState<Id<"_storage"> | undefined>(undefined);
-
+  
   const logWin = useAction(api.logWin.logWin);
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const categories = useQuery(api.achievements.getCategories);
 
-  const handlePhotoSelected = (file: File | null) => {
-    setPhotoFile(file);
-  };
-
-  const handleAudioRecorded = (file: File | null) => {
-    setAudioFile(file);
-  };
-
-  const handleSubmit = async () => {
-    if (!title.trim()) {
-      toast.error("Please enter a title for your achievement");
+  const handleSubmit = async (data: {
+    title: string;
+    description?: string;
+    categorySlug: string;
+    source: "quick" | "text" | "voice" | "photo";
+    photoStorageId?: string;
+    tags?: string[];
+    isPublic?: boolean;
+  }) => {
+    if (!user) {
+      toast.error("Please sign in to log achievements");
       return;
     }
 
-    if (!selectedCategory) {
-      toast.error("Please select a category");
+    // Client-side validation
+    if (!data.title.trim()) {
+      toast.error("Title is required");
       return;
     }
 
-    setIsLoading(true);
-    
+    if (!data.categorySlug) {
+      toast.error("Category is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
       const clientId = uuidv4();
       
       const result = await logWin({
+        title: data.title.trim(),
+        description: data.description?.trim(),
+        categorySlug: data.categorySlug,
+        source: data.source,
+        photoStorageId: data.photoStorageId as any,
+        tags: data.tags,
+        isPublic: data.isPublic ?? true,
         clientId,
-        title: title.trim(),
-        description: description.trim() || undefined,
-        categorySlug: selectedCategory,
-        source: activeTab as "quick" | "text" | "voice" | "photo",
-        photoStorageId: photoStorageId,
-        audioStorageId: audioStorageId,
-        tags: tags.length > 0 ? tags : undefined,
-        isPublic: true,
       });
 
-      // Use the centralized dispatcher
-      postLogSuccess(result);
-      
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setTags([]);
-      setPhotoStorageId(undefined);
-      setAudioStorageId(undefined);
-      
-      // Close sheet
-      onOpenChange(false);
-      
-    } catch (error) {
-      console.error("Failed to log achievement:", error);
-      toast.error("Failed to log achievement. Please try again.");
+      if (result.success) {
+        // Use centralized success handler
+        postLogSuccess(result);
+        
+        // Close the sheet
+        onOpenChange(false);
+        
+        // Reset to quick tab for next use
+        setActiveTab("quick");
+      } else {
+        toast.error(result.error || "Failed to log achievement");
+      }
+    } catch (error: any) {
+      console.error("Error logging achievement:", error);
+      toast.error(error.message || "Failed to log achievement");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const selectedCategory = categories.find(c => c.slug === category);
-  const estimatedPoints = selectedCategory ? selectedCategory.basePoints : 0;
+  if (!categories) {
+    return null;
+  }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-w-2xl mx-auto mt-24 p-0">
-        <div className="p-6">
-          <DrawerHeader className="p-0 text-left mb-4">
-            <DrawerTitle className="text-2xl font-bold tracking-tight">Log Your Next Win</DrawerTitle>
-            <DrawerDescription>Keep the momentum going. What did you accomplish?</DrawerDescription>
-          </DrawerHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-md bg-black/95 border-blue-500/50">
+        <SheetHeader>
+          <SheetTitle className="font-pixel text-white text-xl">Log Your Win! 🎉</SheetTitle>
+        </SheetHeader>
 
+        <div className="mt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-4">
-              <TabsTrigger value="quick">Quick</TabsTrigger>
-              <TabsTrigger value="text">Text</TabsTrigger>
-              <TabsTrigger value="voice">Voice</TabsTrigger>
-              <TabsTrigger value="photo">Photo</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 bg-gray-800/50">
+              <TabsTrigger value="quick" className="data-[state=active]:bg-blue-600">
+                <Zap className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="text" className="data-[state=active]:bg-blue-600">
+                <Type className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="voice" className="data-[state=active]:bg-blue-600">
+                <Mic className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="photo" className="data-[state=active]:bg-blue-600">
+                <Camera className="h-4 w-4" />
+              </TabsTrigger>
             </TabsList>
-            <TabsContent value="quick">
-              <QuickPresetsTab onSelect={setTitle} />
-            </TabsContent>
-            <TabsContent value="text">
-              <TextInputTab value={title} onChange={setTitle} />
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add more details (optional)..."
-                className="w-full mt-2 p-2 border rounded-md resize-none"
-                rows={2}
-                maxLength={500}
+
+            <TabsContent value="quick" className="mt-4">
+              <QuickPresetsTab 
+                onSelect={(text: string) => {
+                  handleSubmit({
+                    title: text,
+                    categorySlug: "health", // Default category for quick presets
+                    source: "quick",
+                    isPublic: true
+                  });
+                }}
               />
             </TabsContent>
-            <TabsContent value="voice">
-              <VoiceInputTab onTranscription={setTitle} onAudioRecorded={handleAudioRecorded} />
+
+            <TabsContent value="text" className="mt-4">
+              <div className="text-center text-blue-300 font-pixel">
+                Text input coming soon...
+              </div>
             </TabsContent>
-            <TabsContent value="photo">
-              <PhotoInputTab onPhotoSelected={handlePhotoSelected} isUploading={isUploading} />
+
+            <TabsContent value="voice" className="mt-4">
+              <div className="text-center text-blue-300 font-pixel">
+                Voice input coming soon...
+              </div>
+            </TabsContent>
+
+            <TabsContent value="photo" className="mt-4">
+              <div className="text-center text-blue-300 font-pixel">
+                Photo input coming soon...
+              </div>
             </TabsContent>
           </Tabs>
-
-          {/* Category Selection */}
-          <div className="mt-4">
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.slug} value={cat.slug}>
-                    {cat.name} (+{cat.basePoints} pts)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Gamification Preview */}
-          <div className="mt-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {selectedCategory && (
-                <div className="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
-                  {selectedCategory.name}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-sm font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">
-                <Flame className="w-4 h-4" />
-                <span>Streak</span>
-              </div>
-              <div className="flex items-center gap-1 text-sm font-semibold text-teal-600 bg-teal-100 px-3 py-1 rounded-full">
-                <Sparkles className="w-4 h-4" />
-                <span>~{estimatedPoints}pts</span>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <div className="p-6 bg-gray-50 border-t mt-6">
-          <Button 
-            onClick={handleSubmit} 
-            className="w-full" 
-            size="lg"
-            disabled={isSubmitting || isUploading || !title.trim() || !category}
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading Media...
-              </>
-            ) : isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Logging Win...
-              </>
-            ) : (
-              "Submit Win"
-            )}
-          </Button>
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -45,7 +45,7 @@ export function BadgesMilestonesSection() {
                  progress={Math.round(badge.progress)}
                  current={badge.current}
                  target={badge.target}
-                 title={badge.name}
+                 name={badge.name}
                  description={badge.description}
                />
             ))}

@@ -227,3 +227,19 @@ export const getAchievementStats = query({
 
 // Alias for getUserAchievements (used by gallery components)
 export const getUserAchievements = getMyAchievements;
+
+// Add getCategories query
+export const getCategories = query({
+  args: {},
+  handler: async (ctx) => {
+    // Return hardcoded categories for now - can be made dynamic later
+    return [
+      { slug: "health", name: "Health & Fitness", color: "#10b981" },
+      { slug: "learning", name: "Learning & Growth", color: "#3b82f6" },
+      { slug: "social", name: "Social & Relationships", color: "#f59e0b" },
+      { slug: "work", name: "Work & Career", color: "#8b5cf6" },
+      { slug: "creativity", name: "Creativity & Hobbies", color: "#ef4444" },
+      { slug: "mindfulness", name: "Mindfulness & Wellness", color: "#06b6d4" },
+    ];
+  },
+});

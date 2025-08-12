@@ -2,25 +2,25 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import {
-  DatabaseReader,
   internalAction,
   internalMutation,
   internalQuery,
   mutation,
   query,
-  QueryCtx,
 } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 // ===== PUBLIC APIs =====
 
 export const getCatalog = query({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db.query("badges").filter(q => q.eq(q.field("isActive"), true)).collect();
   },
 });
 
 export const getUserBadges = query({
+  args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -274,6 +274,7 @@ export const evaluateAchievement = internalAction({
 
 // ===== HELPERS =====
 export const getAllBadges = internalQuery({
+    args: {},
     handler: async (ctx) => await ctx.db.query("badges").collect()
 });
 

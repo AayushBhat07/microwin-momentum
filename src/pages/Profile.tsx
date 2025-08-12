@@ -154,7 +154,7 @@ export default function ProfilePage() {
                 <div className="flex gap-2 mt-2 flex-wrap">
                     {userBadges && userBadges.length > 0 ? (
                         userBadges.map((badge) => (
-                            <Badge key={badge._id} variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-semibold">
+                            <Badge key={badge.userBadge._id} variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-semibold">
                                 🏆 Badge
                             </Badge>
                         ))
