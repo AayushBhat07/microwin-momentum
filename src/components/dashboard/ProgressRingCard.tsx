@@ -14,7 +14,7 @@ export function ProgressRingCard({ progress, current, target }: ProgressRingCard
 
   return (
     <motion.div
-      className="bg-background/80 backdrop-blur-sm border-primary/50 shadow-[4px_4px_0px_var(--primary)] font-pixel p-6"
+      className="bg-black/60 backdrop-blur-sm p-6 border-2 border-blue-900/80 font-pixel"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -28,7 +28,7 @@ export function ProgressRingCard({ progress, current, target }: ProgressRingCard
               cx="50"
               cy="50"
               r="45"
-              stroke="var(--muted)"
+              stroke="var(--blue-900)"
               strokeWidth="8"
               fill="none"
             />
@@ -37,7 +37,7 @@ export function ProgressRingCard({ progress, current, target }: ProgressRingCard
               cx="50"
               cy="50"
               r="45"
-              stroke="var(--chart-1)"
+              stroke="var(--blue-500)"
               strokeWidth="8"
               fill="none"
               strokeLinecap="butt"
@@ -50,16 +50,16 @@ export function ProgressRingCard({ progress, current, target }: ProgressRingCard
           
           {/* Center icon */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 bg-secondary flex items-center justify-center border-2 border-foreground">
-              <Sun className="w-8 h-8 text-secondary-foreground" />
+            <div className="w-16 h-16 bg-blue-900/30 flex items-center justify-center border-2 border-blue-700">
+              <Sun className="w-8 h-8 text-blue-300" />
             </div>
           </div>
         </div>
 
         {/* Text content */}
-        <h3 className="text-lg text-foreground mb-1">Monthly Wins</h3>
-        <p className="text-sm text-muted-foreground">{current} of {target}</p>
-        <p className="text-2xl text-primary mt-2">{progress}%</p>
+        <h3 className="text-lg text-blue-200 mb-1 font-pixel">Monthly Wins</h3>
+        <p className="text-sm text-blue-400 font-pixel">{current} of {target}</p>
+        <p className="text-2xl text-white mt-2 font-pixel">{progress}%</p>
       </div>
     </motion.div>
   );

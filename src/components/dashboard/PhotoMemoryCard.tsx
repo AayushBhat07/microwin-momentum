@@ -24,8 +24,8 @@ export function PhotoMemoryCard() {
   const cardContent = () => {
     if (!memories || memories.length === 0) {
       return (
-        <div className="aspect-[4/3] bg-muted/50 flex items-center justify-center border-2 border-dashed border-foreground/30">
-          <div className="text-center text-muted-foreground">
+        <div className="aspect-[4/3] bg-blue-900/20 flex items-center justify-center border-2 border-dashed border-blue-700/50">
+          <div className="text-center text-blue-300/80">
             <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm font-pixel">No photo memories yet</p>
             <p className="text-xs font-pixel opacity-70">Start logging achievements with photos!</p>
@@ -54,7 +54,7 @@ export function PhotoMemoryCard() {
     return (
       <div className="relative group">
         <motion.div
-          className="relative aspect-[4/3] overflow-hidden cursor-pointer border-2 border-foreground bg-muted/20"
+          className="relative aspect-[4/3] overflow-hidden cursor-pointer border-2 border-blue-700 bg-blue-900/20"
           key={currentMemory._id}
         >
           <AnimatePresence mode="wait">
@@ -77,7 +77,7 @@ export function PhotoMemoryCard() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground border-2 border-foreground h-8 w-8 font-pixel"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-blue-900/50 hover:bg-blue-800/60 text-white border-2 border-blue-700 h-8 w-8 font-pixel"
                   onClick={prevPhoto}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -85,7 +85,7 @@ export function PhotoMemoryCard() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground border-2 border-foreground h-8 w-8 font-pixel"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-900/50 hover:bg-blue-800/60 text-white border-2 border-blue-700 h-8 w-8 font-pixel"
                   onClick={nextPhoto}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -95,7 +95,7 @@ export function PhotoMemoryCard() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 bg-background/80 hover:bg-background text-foreground border-2 border-foreground h-8 w-8 font-pixel"
+                  className="absolute top-2 right-2 bg-blue-900/50 hover:bg-blue-800/60 text-white border-2 border-blue-700 h-8 w-8 font-pixel"
                   onClick={toggleAutoPlay}
                 >
                   {isAutoPlay ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -106,7 +106,7 @@ export function PhotoMemoryCard() {
 
           {/* Photo counter */}
           {memories.length > 1 && (
-            <div className="absolute bottom-2 left-2 bg-background/80 text-foreground px-2 py-1 text-xs font-pixel border border-foreground">
+            <div className="absolute bottom-2 left-2 bg-blue-900/50 text-white px-2 py-1 text-xs font-pixel border border-blue-700">
               {currentIndex + 1} / {memories.length}
             </div>
           )}
@@ -118,17 +118,17 @@ export function PhotoMemoryCard() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <p className="text-sm text-foreground truncate font-pixel">
+          <p className="text-sm text-white truncate font-pixel">
             {currentMemory.title}
           </p>
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-pixel">
+          <div className="flex items-center justify-between text-xs text-blue-400 font-pixel">
             <span>{new Date(currentMemory.loggedAt).toLocaleDateString()}</span>
-            <span className="bg-primary/20 text-primary px-2 py-1 border border-primary/50">
+            <span className="bg-blue-900/30 text-blue-300 px-2 py-1 border border-blue-700/50">
               +{currentMemory.pointsEarned} XP
             </span>
           </div>
           {currentMemory.description && (
-            <p className="text-xs text-muted-foreground font-pixel opacity-80 line-clamp-2">
+            <p className="text-xs text-blue-400 font-pixel opacity-80 line-clamp-2">
               {currentMemory.description}
             </p>
           )}
@@ -143,8 +143,8 @@ export function PhotoMemoryCard() {
                 onClick={() => setCurrentIndex(index)}
                 className={`flex-shrink-0 w-8 h-8 border-2 overflow-hidden ${
                   index === currentIndex 
-                    ? 'border-primary shadow-[2px_2px_0px_var(--primary)]' 
-                    : 'border-foreground/30 hover:border-foreground/60'
+                    ? 'border-blue-500' 
+                    : 'border-blue-800/50 hover:border-blue-700'
                 }`}
               >
                 <img
@@ -155,8 +155,8 @@ export function PhotoMemoryCard() {
               </button>
             ))}
             {memories.length > 5 && (
-              <div className="flex-shrink-0 w-8 h-8 border-2 border-foreground/30 bg-muted/50 flex items-center justify-center">
-                <span className="text-xs font-pixel">+{memories.length - 5}</span>
+              <div className="flex-shrink-0 w-8 h-8 border-2 border-blue-800/50 bg-blue-900/30 flex items-center justify-center">
+                <span className="text-xs font-pixel text-white">+{memories.length - 5}</span>
               </div>
             )}
           </div>
@@ -167,17 +167,17 @@ export function PhotoMemoryCard() {
 
   return (
     <motion.div
-      className="bg-background/80 backdrop-blur-sm border-primary/50 shadow-[4px_4px_0px_var(--primary)] font-pixel p-6"
+      className="bg-black/60 backdrop-blur-sm p-6 border-2 border-blue-900/80 font-pixel"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg text-foreground font-pixel">Photo Memories</h3>
+        <h3 className="text-lg text-blue-200 font-pixel">Photo Memories</h3>
         <div className="flex items-center space-x-2">
-          <Camera className="w-6 h-6 text-foreground" />
+          <Camera className="w-6 h-6 text-blue-300" />
           {memories && memories.length > 0 && (
-            <span className="bg-secondary text-secondary-foreground px-2 py-1 text-xs border border-foreground">
+            <span className="bg-blue-900/50 text-white px-2 py-1 text-xs border border-blue-700">
               {memories.length}
             </span>
           )}

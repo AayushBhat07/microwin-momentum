@@ -65,20 +65,20 @@ export function HeatMapCard() {
   }, {} as Record<string, number>) || {};
 
   const getIntensity = (count: number) => {
-    if (count === 0) return 'bg-muted/50';
-    if (count <= 2) return 'bg-chart-2/60';
-    if (count <= 4) return 'bg-chart-2/80';
-    return 'bg-chart-2';
+    if (count === 0) return 'bg-blue-900/30';
+    if (count <= 2) return 'bg-blue-600/60';
+    if (count <= 4) return 'bg-blue-600/80';
+    return 'bg-blue-500';
   };
 
   return (
     <motion.div
-      className="bg-background/80 backdrop-blur-sm border-primary/50 shadow-[4px_4px_0px_var(--primary)] font-pixel p-6"
+      className="bg-black/60 backdrop-blur-sm p-6 border-2 border-blue-900/80 font-pixel"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <h3 className="text-lg text-foreground mb-4">Contribution History</h3>
+      <h3 className="text-lg text-blue-200 mb-4 font-pixel">Contribution History</h3>
       
       <div className="grid grid-rows-7 grid-flow-col gap-1">
         {dates.map((date, index) => {
@@ -88,14 +88,14 @@ export function HeatMapCard() {
           return (
             <motion.div
               key={date}
-              className={`w-3 h-3 border border-foreground/20 ${getIntensity(count)}`}
-              whileHover={{ scale: 1.5, border: "1px solid var(--foreground)" }}
+              className={`w-3 h-3 border border-blue-800/50 ${getIntensity(count)}`}
+              whileHover={{ scale: 1.5, border: "1px solid #60a5fa" }}
               title={`${date}: ${count} achievements`}
               initial={{ opacity: 0 }}
               animate={{ 
                 opacity: 1,
                 scale: isHighlighted ? [1, 1.8, 1] : 1,
-                boxShadow: isHighlighted ? "0 0 8px var(--primary)" : "none",
+                boxShadow: isHighlighted ? "0 0 8px #3b82f6" : "none",
               }}
               transition={{ 
                 delay: index * 0.01,
@@ -108,13 +108,13 @@ export function HeatMapCard() {
         })}
       </div>
 
-      <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between mt-4 text-xs text-blue-400 font-pixel">
         <span>Less</span>
         <div className="flex space-x-1">
-          <div className="w-3 h-3 bg-muted/50 border border-foreground/20" />
-          <div className="w-3 h-3 bg-chart-2/60 border border-foreground/20" />
-          <div className="w-3 h-3 bg-chart-2/80 border border-foreground/20" />
-          <div className="w-3 h-3 bg-chart-2 border border-foreground/20" />
+          <div className="w-3 h-3 bg-blue-900/30 border border-blue-700/50" />
+          <div className="w-3 h-3 bg-blue-600/60 border border-blue-700/50" />
+          <div className="w-3 h-3 bg-blue-600/80 border border-blue-700/50" />
+          <div className="w-3 h-3 bg-blue-500 border border-blue-700/50" />
         </div>
         <span>More</span>
       </div>
