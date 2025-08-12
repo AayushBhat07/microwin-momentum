@@ -98,6 +98,7 @@ export const featureBadge = mutation({
 });
 
 export const getNearMissBadges = query({
+    args: {},
     handler: async (ctx) => {
         const userId = await getAuthUserId(ctx);
         if (!userId) return [];
