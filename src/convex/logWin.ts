@@ -38,6 +38,14 @@ export const logWin = action({
       isPublic: args.isPublic ?? true,
     });
 
-    return result;
+    // Return comprehensive data for UI updates
+    return {
+      achievement: result.achievement,
+      pointsEarned: result.pointsEarned,
+      newStreak: result.newStreak,
+      totalPoints: result.totalPoints,
+      totalAchievements: result.totalAchievements,
+      unlockedBadges: result.unlockedBadges || []
+    };
   },
 });

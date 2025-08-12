@@ -191,6 +191,7 @@ export const createWinWithGameification = internalMutation({
       newStreak,
       totalPoints: (userTotals?.totalPoints || 0) + totalPoints,
       totalAchievements,
+      achievement: await ctx.db.get(achievementId),
     };
   },
 });

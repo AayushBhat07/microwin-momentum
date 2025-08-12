@@ -12,6 +12,8 @@ import { TextInputTab } from "./tabs/TextInputTab";
 import { VoiceInputTab } from "./tabs/VoiceInputTab";
 import { PhotoInputTab } from "./tabs/PhotoInputTab";
 import { Flame, Sparkles, Loader2 } from "lucide-react";
+import { postLogSuccess } from "@/lib/postLogSuccess";
+import { v4 as uuidv4 } from 'uuid';
 
 interface LogAchievementSheetProps {
   open: boolean;
@@ -36,6 +38,9 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [photoStorageId, setPhotoStorageId] = useState<Id<"_storage"> | undefined>(undefined);
+  const [audioStorageId, setAudioStorageId] = useState<Id<"_storage"> | undefined>(undefined);
 
   const logWin = useAction(api.logWin.logWin);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
@@ -49,80 +54,51 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !category) {
-      toast.error("Please provide a title and select a category");
+    if (!title.trim()) {
+      toast.error("Please enter a title for your achievement");
       return;
     }
 
-    setIsSubmitting(true);
+    if (!selectedCategory) {
+      toast.error("Please select a category");
+      return;
+    }
+
+    setIsLoading(true);
     
     try {
-      let photoStorageId: Id<"_storage"> | undefined = undefined;
-      let audioStorageId: Id<"_storage"> | undefined = undefined;
-
-      const isUploadingPhoto = photoFile && activeTab === 'photo';
-      const isUploadingAudio = audioFile && activeTab === 'voice';
-
-      if (isUploadingPhoto || isUploadingAudio) {
-        setIsUploading(true);
-      }
-
-      if (isUploadingPhoto && photoFile) {
-        const postUrl = await generateUploadUrl();
-        const result = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": photoFile.type },
-          body: photoFile,
-        });
-        const { storageId } = await result.json();
-        photoStorageId = storageId;
-      }
-
-      if (isUploadingAudio && audioFile) {
-        const postUrl = await generateUploadUrl();
-        const result = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": audioFile.type },
-          body: audioFile,
-        });
-        const { storageId } = await result.json();
-        audioStorageId = storageId;
-      }
-      
-      if (isUploadingPhoto || isUploadingAudio) {
-        setIsUploading(false);
-      }
-
-      const clientId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const clientId = uuidv4();
       
       const result = await logWin({
         clientId,
         title: title.trim(),
         description: description.trim() || undefined,
-        categorySlug: category,
+        categorySlug: selectedCategory,
         source: activeTab as "quick" | "text" | "voice" | "photo",
+        photoStorageId: photoStorageId,
+        audioStorageId: audioStorageId,
+        tags: tags.length > 0 ? tags : undefined,
         isPublic: true,
-        photoStorageId,
-        audioStorageId,
       });
 
-      toast.success(`Win logged! +${result.pointsEarned} points`, {
-        description: result.newStreak > 1 ? `${result.newStreak} day streak!` : undefined,
-      });
-
+      // Use the centralized dispatcher
+      postLogSuccess(result);
+      
       // Reset form
       setTitle("");
       setDescription("");
-      setCategory("");
-      setPhotoFile(null);
-      setAudioFile(null);
+      setTags([]);
+      setPhotoStorageId(undefined);
+      setAudioStorageId(undefined);
+      
+      // Close sheet
       onOpenChange(false);
+      
     } catch (error) {
-      toast.error("Failed to log win. Please try again.");
-      console.error("Error logging win:", error);
+      console.error("Failed to log achievement:", error);
+      toast.error("Failed to log achievement. Please try again.");
     } finally {
-      setIsSubmitting(false);
-      setIsUploading(false);
+      setIsLoading(false);
     }
   };
 
