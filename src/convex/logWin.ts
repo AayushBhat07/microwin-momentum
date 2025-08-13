@@ -46,27 +46,27 @@ export const logWin = action({
     });
     const achievement = (await ctx.runQuery(internal.achievements.get, { id: achievementId }))!;
 
-    // 2. Update Stats
-    await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
+    // 2. Update Stats and get the latest totals
+    const updatedTotals = await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
       userId: user._id,
       categorySlug: args.categorySlug,
       points: achievement.pointsEarned,
       source: args.source,
     });
 
-    // 3. Check for new badges
+    // 3. Check for new badges, passing the fresh stats
     const unlockedBadges = await ctx.runAction(internal.badges.checkAllBadges, {
       userId: user._id,
       achievement,
+      userTotals: updatedTotals,
     });
 
-    // 4. Fetch updated totals for return payload
-    const totals = await ctx.runQuery(internal.users.getUserTotals, { userId: user._id });
+    // 4. Fetch updated streak for return payload
     const streak = await ctx.runQuery(internal.userStats.getStreak, { userId: user._id });
 
     return {
       achievement,
-      totals,
+      totals: updatedTotals, // Use the totals we already have
       streak,
       unlockedBadges,
     };

@@ -49,12 +49,13 @@ export const checkAllBadges = internalAction({
     args: {
         userId: v.id("users"),
         achievement: v.optional(v.any()), 
+        userTotals: v.optional(v.any()), // Accept fresh user totals
     },
-    handler: async (ctx, { userId, achievement }): Promise<Doc<"badges">[]> => {
+    handler: async (ctx, { userId, achievement, userTotals }): Promise<Doc<"badges">[]> => {
         const newlyAwarded: Doc<"badges">[] = [];
 
         // 1. Get all data needed for evaluation
-        const userTotals = await ctx.runQuery(internal.users.getUserTotals, { userId });
+        // No longer need to query for userTotals, it's passed in.
         const userStreak = await ctx.runQuery(internal.userStats.getStreak, { userId });
         const categoryTotals = await ctx.runQuery(internal.userStats.getCategoryTotals, { userId });
         const allBadges = await ctx.runQuery(internal.badges.getBadgeCatalogInternal);

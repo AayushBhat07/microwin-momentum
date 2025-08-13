@@ -242,7 +242,7 @@ export const updateStatsForNewWin = internalMutation({
         achievementsCount: dailyStat.achievementsCount + 1,
         pointsEarned: dailyStat.pointsEarned + points,
         photoCount: dailyStat.photoCount + (isPhoto ? 1 : 0),
-        categories: [...new Set([...dailyStat.categories, categorySlug])],
+        categories: [...new Set([...(dailyStat.categories || []), categorySlug])],
       });
     } else {
       await ctx.db.insert("userStats", {
@@ -273,5 +273,11 @@ export const updateStatsForNewWin = internalMutation({
         totalWins: 1,
       });
     }
+
+    // Return the final, updated user_totals document
+    return await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
   },
 });
