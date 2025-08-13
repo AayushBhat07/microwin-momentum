@@ -1,6 +1,7 @@
 import { query, internalMutation, internalQuery } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 export const getWeeklyStats = query({
   args: {},
@@ -191,8 +192,6 @@ export const updateStatsForNewWin = internalMutation({
     points: v.number() 
   },
   handler: async (ctx, { userId, categorySlug, points }) => {
-    const { internal } = await import("./_generated/api");
-    
     // Update user totals
     await ctx.runMutation(internal.userStats.updateUserPoints, { userId, points });
     
