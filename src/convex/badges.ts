@@ -100,56 +100,64 @@ export const featureBadge = mutation({
 export const getNearMissBadges = query({
     args: {},
     handler: async (ctx) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) return [];
+        try {
+            const userId = await getAuthUserId(ctx);
+            if (!userId) return [];
 
-        const user = await ctx.db.get(userId);
-        if (!user) return [];
+            const user = await ctx.db.get(userId);
+            if (!user) return [];
 
-        const allBadges = await ctx.db.query("badges").filter(q => q.eq(q.field("isActive"), true)).collect();
-        const earnedBadges = await ctx.db.query("userBadges").withIndex("by_user_and_badge", q => q.eq("userId", userId)).collect();
-        const earnedBadgeSlugs = new Set(earnedBadges.map(b => b.badgeSlug));
+            const allBadges = await ctx.db.query("badges").filter(q => q.eq(q.field("isActive"), true)).collect();
+            const earnedBadges = await ctx.db.query("userBadges").withIndex("by_user_and_badge", q => q.eq("userId", userId)).collect();
+            const earnedBadgeSlugs = new Set(earnedBadges.map(b => b.badgeSlug));
 
-        const userCategoryTotals = await ctx.db.query("userCategoryTotals").withIndex("by_user_and_category", q => q.eq("userId", userId)).collect();
-        const categoryTotalsMap = new Map(userCategoryTotals.map(uct => [uct.categorySlug, uct.totalWins]));
+            const userCategoryTotals = await ctx.db.query("userCategoryTotals").withIndex("by_user_and_category", q => q.eq("userId", userId)).collect();
+            const categoryTotalsMap = new Map(userCategoryTotals.map(uct => [uct.categorySlug, uct.totalWins]));
 
-        const nearMisses = allBadges
-            .filter(badge => !earnedBadgeSlugs.has(badge.slug) && badge.threshold)
-            .map(badge => {
-                let progress = 0;
-                let current = 0;
-                const target = badge.threshold!;
+            const nearMisses = allBadges
+                .filter(badge => !earnedBadgeSlugs.has(badge.slug) && badge.threshold && badge.threshold > 0)
+                .map(badge => {
+                    let progress = 0;
+                    let current = 0;
+                    const target = badge.threshold!;
 
-                if (badge.category === "wins") {
-                    current = user.totalAchievements || 0;
-                } else if (badge.category === "streak") {
-                    current = user.currentStreak || 0;
-                } else if (badge.category === "category") {
-                    const categorySlug = badge.slug.replace("category_mastery_", "").replace("_20", "");
-                    current = categoryTotalsMap.get(categorySlug) || 0;
-                } else {
-                    return null; // Not a progress-based badge
-                }
+                    if (badge.category === "wins") {
+                        current = user.totalAchievements || 0;
+                    } else if (badge.category === "streak") {
+                        current = user.currentStreak || 0;
+                    } else if (badge.category === "category" && badge.slug.startsWith("category_mastery_")) {
+                        const slugParts = badge.slug.split('_');
+                        if (slugParts.length >= 3) {
+                            const categorySlug = slugParts[2];
+                            current = categoryTotalsMap.get(categorySlug) || 0;
+                        } else {
+                            return null; // malformed slug
+                        }
+                    } else {
+                        return null; // Not a progress-based badge
+                    }
 
-                if (target > 0) {
-                    progress = Math.min((current / target) * 100, 100);
-                }
-                
-                // Only include badges that are started or near completion
-                if (progress > 0 && progress < 100) {
-                    return {
-                        ...badge,
-                        progress,
-                        current,
-                        target
-                    };
-                }
-                return null;
-            })
-            .filter(b => b !== null) as (Doc<"badges"> & { progress: number, current: number, target: number })[];
+                    if (target > 0) {
+                        progress = Math.min((current / target) * 100, 100);
+                    }
+                    
+                    if (progress > 0 && progress < 100) {
+                        return {
+                            ...badge,
+                            progress,
+                            current,
+                            target
+                        };
+                    }
+                    return null;
+                })
+                .filter((b): b is Doc<"badges"> & { progress: number; current: number; target: number; } => b !== null);
 
-        // Sort by progress descending, then return top 3
-        return nearMisses.sort((a, b) => b.progress - a.progress).slice(0, 3);
+            return nearMisses.sort((a, b) => b.progress - a.progress).slice(0, 3);
+        } catch (error) {
+            console.error("Error in getNearMissBadges:", error);
+            throw error; // Rethrow to notify the client of failure
+        }
     }
 });
 
