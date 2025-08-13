@@ -2,7 +2,6 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FloatingLogButton } from "@/components/logging/FloatingLogButton";
 import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
 import { NearMissMilestones } from "@/components/dashboard/NearMissMilestones";
 import { RecentUnlocks } from "@/components/dashboard/RecentUnlocks";
@@ -77,7 +76,6 @@ export default function MilestonesPage() {
 
           </div>
         </div>
-        <FloatingLogButton onClick={() => setIsLogSheetOpen(true)} />
         <LogAchievementSheet open={isLogSheetOpen} onOpenChange={setIsLogSheetOpen} />
       </div>
     </div>

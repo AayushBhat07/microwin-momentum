@@ -91,7 +91,6 @@ export default function Dashboard() {
         </div>
 
         {/* Gamified Logging System */}
-        <FloatingLogButton onClick={() => setIsLogSheetOpen(true)} />
         <LogAchievementSheet open={isLogSheetOpen} onOpenChange={setIsLogSheetOpen} />
       </div>
     </div>
