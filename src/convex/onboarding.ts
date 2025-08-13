@@ -18,30 +18,21 @@ export const completeOnboardingStep = mutation({
       onboardingStep: args.step,
     });
 
-    // Award "Welcome Aboard" on the first step
+    // Award "Welcome" on the first step
     if (args.step === 1) {
       await ctx.runMutation(internal.badges.awardBadge, {
         userId: user._id,
-        badgeSlug: "welcome-aboard",
+        badgeSlug: "welcome",
         reason: "Completed first onboarding step",
       });
     }
 
-    // Award badges for completing steps
-    const badgeNames: { [key:number]: string } = {
-      1: "Profile Master",
-      2: "Self-Care Champion",
-      3: "Ready for Action",
-      4: "Achievement Scholar",
-      5: "Customization Master",
-    };
-
-    const badgeName = badgeNames[args.step];
-    if (badgeName) {
-      const badgeSlug = badgeName.toLowerCase().replace(/\s+/g, "-");
+    // Award "Profile Complete" badge for completing profile step.
+    // Assuming step 1 is profile completion.
+    if (args.step === 1) {
       await ctx.runMutation(internal.badges.awardBadge, {
         userId: user._id,
-        badgeSlug,
+        badgeSlug: "profile_complete",
         reason: `Completed onboarding step ${args.step}`,
       });
     }

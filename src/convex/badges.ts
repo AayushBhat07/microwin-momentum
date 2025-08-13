@@ -147,41 +147,65 @@ export const getNearMissBadges = query({
       return [];
     }
 
-    // Get user stats for progress calculation
-    const userTotals = await ctx.db
-      .query("user_totals")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .first();
+    // 1. Get all badges from the catalog
+    const allBadges = await ctx.db.query("badges").filter(q => q.eq(q.field("isActive"), true)).collect();
 
-    const totalAchievements = userTotals?.totalAchievements || 0;
+    // 2. Get all earned badge slugs for the user
+    const earnedUserBadges = await ctx.db
+      .query("userBadges")
+      .withIndex("by_user_and_badge", (q) => q.eq("userId", userId))
+      .collect();
+    const earnedBadgeSlugs = new Set(earnedUserBadges.map(b => b.badgeSlug));
 
-    // Return near-miss badges with progress
-    const nearMissBadges = [];
+    // 3. Get user's stats
+    const userTotals = await ctx.db.query("user_totals").withIndex("by_user", q => q.eq("userId", userId)).unique();
+    const userStreak = await ctx.db.query("user_streaks").withIndex("by_user", q => q.eq("userId", userId)).unique();
+    const userCategoryTotals = await ctx.db.query("userCategoryTotals").withIndex("by_user_and_category", q => q.eq("userId", userId)).collect();
     
-    // Example: First Win badge (if user has 0 achievements)
-    if (totalAchievements === 0) {
-      nearMissBadges.push({
-        _id: "wins_1",
-        name: "First Victory",
-        description: "Log your first achievement",
-        progress: 0,
-        current: 0,
-        target: 1
-      });
-    }
-    
-    // Example: 10 Wins badge (if user has 1-9 achievements)
-    if (totalAchievements > 0 && totalAchievements < 10) {
-      nearMissBadges.push({
-        _id: "wins_10",
-        name: "Getting Started",
-        description: "Log 10 achievements",
-        progress: (totalAchievements / 10) * 100,
-        current: totalAchievements,
-        target: 10
-      });
+    const totalAchievements = userTotals?.totalAchievements ?? 0;
+    const currentStreak = userStreak?.currentStreak ?? 0;
+    const categoryMap = new Map(userCategoryTotals.map(c => [c.categorySlug, c.totalWins]));
+
+    const nearMisses = [];
+
+    for (const badge of allBadges) {
+      if (earnedBadgeSlugs.has(badge.slug) || !badge.threshold) {
+        continue; // Skip if already earned or no threshold
+      }
+
+      let current = 0;
+      const target = badge.threshold;
+      let isNearMiss = false;
+
+      switch (badge.family) {
+        case "wins":
+          current = totalAchievements;
+          if (current > 0 && current < target) isNearMiss = true;
+          break;
+        case "streak":
+          current = currentStreak;
+          if (current > 0 && current < target) isNearMiss = true;
+          break;
+        case "category":
+          if (badge.categorySlug) {
+            current = categoryMap.get(badge.categorySlug) ?? 0;
+            if (current > 0 && current < target) isNearMiss = true;
+          }
+          break;
+        // Not implemented yet: variety, mode, explore, community
+      }
+
+      if (isNearMiss) {
+        nearMisses.push({
+          ...badge,
+          progress: (current / target) * 100,
+          current,
+          target,
+        });
+      }
     }
 
-    return nearMissBadges;
+    // Sort by progress descending and return top 3-5
+    return nearMisses.sort((a, b) => b.progress - a.progress).slice(0, 3);
   },
 });

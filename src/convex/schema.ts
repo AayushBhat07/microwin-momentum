@@ -52,7 +52,8 @@ export const BADGE_RARITY = v.union(
   v.literal("common"),
   v.literal("uncommon"),
   v.literal("rare"),
-  v.literal("epic")
+  v.literal("epic"),
+  v.literal("legendary")
 );
 
 const schema = defineSchema({
@@ -167,7 +168,7 @@ const schema = defineSchema({
     slug: v.string(),
     name: v.string(),
     description: v.string(),
-    icon: v.string(), // Lucide icon name or URL
+    icon_url: v.string(), // Lucide icon name or URL
     family: BADGE_FAMILIES,
     categorySlug: v.optional(v.string()), // For category mastery badges
     threshold: v.optional(v.number()),

@@ -12,18 +12,18 @@ export const backfillOnboardingBadges = internalMutation({
       if (user.onboardingStep && user.onboardingStep >= 1) {
         usersProcessed++;
         
-        // Award "Welcome Aboard" badge
+        // Award "Welcome" badge
         const welcomeAwarded = await ctx.runMutation(internal.badges.awardBadge, {
           userId: user._id,
-          badgeSlug: "welcome-aboard",
+          badgeSlug: "welcome",
           reason: "Backfill: Completed onboarding",
         });
         if (welcomeAwarded) totalAwarded++;
 
-        // Award "Profile Master" badge
+        // Award "Profile Complete" badge
         const profileAwarded = await ctx.runMutation(internal.badges.awardBadge, {
           userId: user._id,
-          badgeSlug: "profile-master",
+          badgeSlug: "profile_complete",
           reason: "Backfill: Completed profile setup",
         });
         if (profileAwarded) totalAwarded++;

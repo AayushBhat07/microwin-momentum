@@ -21,6 +21,7 @@ export function BadgeCard({ badge }: BadgeCardProps) {
     uncommon: "border-green-400",
     rare: "border-blue-400",
     epic: "border-purple-500",
+    legendary: "border-yellow-500",
   }[badgeDetails.rarity || "common"];
 
   const rarityTextColor = {
@@ -28,6 +29,7 @@ export function BadgeCard({ badge }: BadgeCardProps) {
     uncommon: "text-green-400",
     rare: "text-blue-400",
     epic: "text-purple-500",
+    legendary: "text-yellow-500",
   }[badgeDetails.rarity || "common"];
 
   const handleFeatureToggle = async () => {

@@ -19,6 +19,7 @@ function LockedBadgeCard({ badge }: { badge: Doc<"badges"> }) {
     uncommon: "border-green-700",
     rare: "border-blue-700",
     epic: "border-purple-800",
+    legendary: "border-yellow-700",
   }[badge.rarity || "common"];
 
   return (
@@ -26,7 +27,7 @@ function LockedBadgeCard({ badge }: { badge: Doc<"badges"> }) {
       className={`p-1 bg-gray-900/50 rounded-lg ${rarityColor} border-2 image-rendering-pixelated filter grayscale`}
     >
       <div className="bg-gray-900/80 p-4 rounded-md text-center h-full flex flex-col items-center justify-center">
-        <p className="text-3xl mb-2">{badge.icon || "❓"}</p>
+        <p className="text-3xl mb-2">🏆</p>
         <h3 className="text-base font-bold text-gray-400 font-press-start leading-tight">
           {badge.name}
         </h3>
@@ -75,6 +76,12 @@ export function BadgeCatalog() {
     });
   }, [badgesWithStatus, filter, statusFilter]);
 
+  const filterCategories = useMemo(() => {
+    if (!catalog) return [];
+    const families = new Set(catalog.map(b => b.family));
+    return ["all", ...Array.from(families).sort()];
+  }, [catalog]);
+
   if (badgesWithStatus === undefined) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -82,8 +89,6 @@ export function BadgeCatalog() {
       </div>
     );
   }
-
-  const filterCategories = ["all", "wins", "streak", "category", "variety", "mode", "explore", "community", "event"];
 
   return (
     <div>
