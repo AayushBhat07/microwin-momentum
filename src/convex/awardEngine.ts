@@ -40,30 +40,30 @@ export const evaluateAndAwardBadges = internalAction({
             if (badge.threshold) {
                 switch (badge.family) {
                     case "wins":
-                        console.log(`Checking badge '${badge.slug}': totalAchievements (${totalAchievements}) === threshold (${badge.threshold})`);
-                        if (totalAchievements === badge.threshold) shouldAward = true;
+                        console.log(`Checking badge '${badge.slug}': totalAchievements (${totalAchievements}) >= threshold (${badge.threshold})`);
+                        if (totalAchievements >= badge.threshold) shouldAward = true;
                         break;
                     case "streak":
-                         console.log(`Checking badge '${badge.slug}': currentStreak (${currentStreak}) === threshold (${badge.threshold})`);
-                        if (currentStreak === badge.threshold) shouldAward = true;
+                         console.log(`Checking badge '${badge.slug}': currentStreak (${currentStreak}) >= threshold (${badge.threshold})`);
+                        if (currentStreak >= badge.threshold) shouldAward = true;
                         break;
                     case "category":
                         if (badge.categorySlug) {
                             const categoryCount = categoryMap.get(badge.categorySlug) ?? 0;
-                            console.log(`Checking badge '${badge.slug}': categoryCount for '${badge.categorySlug}' (${categoryCount}) === threshold (${badge.threshold})`);
-                            if (categoryCount === (badge.threshold || 0)) shouldAward = true;
+                            console.log(`Checking badge '${badge.slug}': categoryCount for '${badge.categorySlug}' (${categoryCount}) >= threshold (${badge.threshold})`);
+                            if (categoryCount >= (badge.threshold || 0)) shouldAward = true;
                         }
                         break;
                     case "mode":
                         if (badge.modeType === "photo") {
-                            console.log(`Checking badge '${badge.slug}': totalPhotoCount (${totalPhotoCount}) === threshold (${badge.threshold})`);
-                            if (totalPhotoCount === badge.threshold) shouldAward = true;
+                            console.log(`Checking badge '${badge.slug}': totalPhotoCount (${totalPhotoCount}) >= threshold (${badge.threshold})`);
+                            if (totalPhotoCount >= badge.threshold) shouldAward = true;
                         } else if (badge.modeType === "voice") {
-                             console.log(`Checking badge '${badge.slug}': totalVoiceCount (${totalVoiceCount}) === threshold (${badge.threshold})`);
-                            if (totalVoiceCount === badge.threshold) shouldAward = true;
+                             console.log(`Checking badge '${badge.slug}': totalVoiceCount (${totalVoiceCount}) >= threshold (${badge.threshold})`);
+                            if (totalVoiceCount >= badge.threshold) shouldAward = true;
                         } else if (badge.modeType === "text") {
-                             console.log(`Checking badge '${badge.slug}': totalTextCount (${totalTextCount}) === threshold (${badge.threshold})`);
-                            if (totalTextCount === badge.threshold) shouldAward = true;
+                             console.log(`Checking badge '${badge.slug}': totalTextCount (${totalTextCount}) >= threshold (${badge.threshold})`);
+                            if (totalTextCount >= badge.threshold) shouldAward = true;
                         }
                         break;
                 }
