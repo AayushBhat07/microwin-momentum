@@ -39,20 +39,26 @@ function OnboardingStep3({ onComplete }: { onComplete: () => void }) {
       transition={{ duration: 0.3 }}
     >
       <CardHeader className="items-center text-center font-pixel">
-        <Trophy className="w-12 h-12 text-yellow-500" />
-        <CardTitle className="mt-4">You're Ready to Win!</CardTitle>
-        <CardDescription>
+        <div className="p-4 bg-yellow-400/20 border-2 border-yellow-500">
+            <Trophy className="w-12 h-12 text-yellow-400" />
+        </div>
+        <CardTitle className="mt-4 text-2xl text-white text-shadow-pixel">You're Ready to Win!</CardTitle>
+        <CardDescription className="text-blue-300">
           Start logging your accomplishments, big and small. Each entry earns you points and helps build momentum.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="text-sm text-muted-foreground bg-secondary p-4 rounded-lg">
-          <p className="font-semibold">What's an achievement?</p>
+        <div className="text-sm text-blue-300 bg-black/50 border-2 border-blue-900/80 p-4 space-y-2">
+          <p className="font-bold text-white">What's an achievement?</p>
           <p>Anything you're proud of! Finished a workout, learned something new, or completed a task at work? Log it!</p>
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleContinue} disabled={isSubmitting} className="w-full">
+        <Button 
+          onClick={handleContinue} 
+          disabled={isSubmitting} 
+          className="w-full font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+        >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Let's Go!
         </Button>
