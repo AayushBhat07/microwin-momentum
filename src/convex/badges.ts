@@ -90,6 +90,8 @@ export const featureBadge = mutation({
         if (featuredCount >= 5) {
             throw new Error("Maximum number of featured badges reached.");
         }
+        // Award community badge on first feature
+        await ctx.runMutation(internal.badges.awardBadge, { userId, badgeSlug: "community_feature_badge" });
     }
 
     await ctx.db.patch(userBadge._id, { isFeatured });
@@ -263,7 +265,18 @@ export const evaluateAchievement = internalAction({
         if(unlocked) unlockedBadges.push(unlocked);
     }
 
-    // 4. Mode Badges
+    // 4. Variety Milestones
+    const allUserCategoryTotals = await ctx.runQuery(internal.badges.getAllUserCategoryTotals, { userId });
+    const distinctCategories = allUserCategoryTotals.length;
+    const varietyBadges = allBadges.filter((b: any) => b.family === "variety" && b.threshold);
+    for (const badge of varietyBadges) {
+        if (!userBadgeSlugs.has(badge.slug) && distinctCategories >= badge.threshold!) {
+            const unlocked = await ctx.runMutation(internal.badges.awardBadge, { userId, badgeSlug: badge.slug });
+            if(unlocked) unlockedBadges.push(unlocked);
+        }
+    }
+
+    // 5. Mode Badges
     if (achievement.source === 'voice' && !userBadgeSlugs.has('voice_first')) {
         const unlocked = await ctx.runMutation(internal.badges.awardBadge, { userId, badgeSlug: "voice_first" });
         if(unlocked) unlockedBadges.push(unlocked);
@@ -289,6 +302,13 @@ export const getAllBadges = internalQuery({
 export const getAllUserBadges = internalQuery({
     args: { userId: v.id("users") },
     handler: async (ctx, { userId }) => await ctx.db.query("userBadges").withIndex("by_user_and_badge", q => q.eq("userId", userId)).collect()
+});
+
+export const getAllUserCategoryTotals = internalQuery({
+    args: { userId: v.id("users") },
+    handler: async (ctx, { userId }) => {
+        return await ctx.db.query("userCategoryTotals").withIndex("by_user_and_category", q => q.eq("userId", userId)).collect();
+    }
 });
 
 export const getCategoryTotal = internalQuery({
