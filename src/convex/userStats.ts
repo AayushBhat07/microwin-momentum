@@ -124,59 +124,6 @@ export const updateUserStreak = internalMutation({
   },
 });
 
-export const updateUserDailyStats = internalMutation({
-  args: { userId: v.id("users"), points: v.number(), source: v.string() },
-  handler: async (ctx, { userId, points, source }) => {
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-
-    const dailyStat = await ctx.db
-      .query("userStats")
-      .withIndex("by_user_and_date", (q) =>
-        q.eq("userId", userId).eq("date", today)
-      )
-      .unique();
-
-    const isPhoto = source === "photo";
-    const isVoice = source === "voice";
-    const isText = source === "text";
-
-    if (dailyStat) {
-      await ctx.db.patch(dailyStat._id, {
-        achievementsCount: dailyStat.achievementsCount + 1,
-        pointsEarned: dailyStat.pointsEarned + points,
-        photoCount: dailyStat.photoCount + (isPhoto ? 1 : 0),
-      });
-    } else {
-      await ctx.db.insert("userStats", {
-        userId,
-        date: today,
-        achievementsCount: 1,
-        pointsEarned: points,
-        goalsCompleted: 0, // Assuming goals are handled elsewhere
-        categories: ["general"], // Default category
-        photoCount: isPhoto ? 1 : 0,
-      });
-    }
-
-    // Also update the lifetime totals for specific modes
-    if (isPhoto || isVoice || isText) {
-      const userTotals = await ctx.db
-        .query("user_totals")
-        .withIndex("by_user", (q) => q.eq("userId", userId))
-        .unique();
-      
-      if (userTotals) {
-        const patchPayload: any = {};
-        if (isPhoto) patchPayload.totalPhotoCount = ((userTotals as any).totalPhotoCount ?? 0) + 1;
-        if (isVoice) patchPayload.totalVoiceCount = ((userTotals as any).totalVoiceCount ?? 0) + 1;
-        if (isText) patchPayload.totalTextCount = ((userTotals as any).totalTextCount ?? 0) + 1;
-        
-        await ctx.db.patch(userTotals._id, patchPayload);
-      }
-    }
-  },
-});
-
 export const getStreak = internalQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
@@ -215,27 +162,104 @@ export const updateStatsForNewWin = internalMutation({
     source: v.string(),
   },
   handler: async (ctx, { userId, categorySlug, points, source }) => {
-    // Update user totals
-    await ctx.runMutation(internal.userStats.updateUserPoints, {
-      userId,
-      points,
-    });
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const isPhoto = source === "photo";
+    const isVoice = source === "voice";
+    const isText = source === "text";
 
-    // Update streak
-    await ctx.runMutation(internal.userStats.updateUserStreak, { userId });
+    // --- 1. Handle User Totals (points, achievements, and mode counts) ---
+    const userTotals = await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
 
-    // Update daily stats
-    await ctx.runMutation(internal.userStats.updateUserDailyStats, {
-      userId,
-      points,
-      source,
-    });
+    if (userTotals) {
+      const patchPayload: any = {
+        totalPoints: userTotals.totalPoints + points,
+        totalAchievements: userTotals.totalAchievements + 1,
+        lastPointsUpdateAt: Date.now(),
+      };
+      if (isPhoto) patchPayload.totalPhotoCount = ((userTotals as any).totalPhotoCount ?? 0) + 1;
+      if (isVoice) patchPayload.totalVoiceCount = ((userTotals as any).totalVoiceCount ?? 0) + 1;
+      if (isText) patchPayload.totalTextCount = ((userTotals as any).totalTextCount ?? 0) + 1;
+      
+      await ctx.db.patch(userTotals._id, patchPayload);
+    } else {
+      const insertPayload: any = {
+        userId,
+        totalPoints: points,
+        totalAchievements: 1,
+        lastPointsUpdateAt: Date.now(),
+        totalPhotoCount: isPhoto ? 1 : 0,
+        totalVoiceCount: isVoice ? 1 : 0,
+        totalTextCount: isText ? 1 : 0,
+      };
+      await ctx.db.insert("user_totals", insertPayload);
+    }
 
-    // Update category totals
+    // --- 2. Handle Streak ---
+    const userStreak = await ctx.db
+      .query("user_streaks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    if (userStreak) {
+      if (userStreak.lastActivityDate !== today) {
+        const lastActivityDate = new Date(userStreak.lastActivityDate);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        let newStreak = userStreak.currentStreak;
+        if (lastActivityDate.toISOString().split("T")[0] === yesterday.toISOString().split("T")[0]) {
+          newStreak++;
+        } else {
+          newStreak = 1;
+        }
+        await ctx.db.patch(userStreak._id, {
+          currentStreak: newStreak,
+          longestStreak: Math.max(newStreak, userStreak.longestStreak),
+          lastActivityDate: today,
+        });
+      }
+    } else {
+      await ctx.db.insert("user_streaks", {
+        userId,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastActivityDate: today,
+        streakStartDate: today,
+      });
+    }
+
+    // --- 3. Handle Daily Stats ---
+    const dailyStat = await ctx.db
+      .query("userStats")
+      .withIndex("by_user_and_date", (q) => q.eq("userId", userId).eq("date", today))
+      .unique();
+
+    if (dailyStat) {
+      await ctx.db.patch(dailyStat._id, {
+        achievementsCount: dailyStat.achievementsCount + 1,
+        pointsEarned: dailyStat.pointsEarned + points,
+        photoCount: dailyStat.photoCount + (isPhoto ? 1 : 0),
+        categories: [...new Set([...dailyStat.categories, categorySlug])],
+      });
+    } else {
+      await ctx.db.insert("userStats", {
+        userId,
+        date: today,
+        achievementsCount: 1,
+        pointsEarned: points,
+        goalsCompleted: 0,
+        categories: [categorySlug],
+        photoCount: isPhoto ? 1 : 0,
+      });
+    }
+
+    // --- 4. Handle Category Totals ---
     const categoryTotal = await ctx.db
       .query("userCategoryTotals")
-      .withIndex("by_user_and_category", (q) => 
-        q.eq("userId", userId).eq("categorySlug", categorySlug))
+      .withIndex("by_user_and_category", (q) => q.eq("userId", userId).eq("categorySlug", categorySlug))
       .unique();
     
     if (categoryTotal) {
@@ -247,25 +271,6 @@ export const updateStatsForNewWin = internalMutation({
         userId,
         categorySlug,
         totalWins: 1,
-      });
-    }
-    
-    // Update user totals achievement count
-    const userTotals = await ctx.db
-      .query("user_totals")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .unique();
-    
-    if (userTotals) {
-      await ctx.db.patch(userTotals._id, {
-        totalAchievements: userTotals.totalAchievements + 1,
-      });
-    } else {
-      await ctx.db.insert("user_totals", {
-        userId,
-        totalPoints: points,
-        totalAchievements: 1,
-        lastPointsUpdateAt: Date.now(),
       });
     }
   },
