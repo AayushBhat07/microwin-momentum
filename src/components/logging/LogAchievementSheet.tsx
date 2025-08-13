@@ -99,14 +99,14 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md bg-black/95 border-blue-500/50">
+      <SheetContent side="right" className="w-full sm:max-w-md bg-black/95 border-blue-500/50 flex flex-col">
         <SheetHeader>
           <SheetTitle className="font-pixel text-white text-xl">Log Your Win! 🎉</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6">
+        <div className="mt-6 flex-1 overflow-y-auto -mr-6 pr-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gray-800/50">
+            <TabsList className="grid w-full grid-cols-4 bg-gray-800/50 sticky top-0 z-10 backdrop-blur-sm">
               <TabsTrigger value="quick" className="data-[state=active]:bg-blue-600">
                 <Zap className="h-4 w-4" />
               </TabsTrigger>
