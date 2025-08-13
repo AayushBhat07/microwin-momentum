@@ -125,8 +125,8 @@ export const updateUserStreak = internalMutation({
 });
 
 export const updateUserDailyStats = internalMutation({
-  args: { userId: v.id("users"), points: v.number() },
-  handler: async (ctx, { userId, points }) => {
+  args: { userId: v.id("users"), points: v.number(), source: v.string() },
+  handler: async (ctx, { userId, points, source }) => {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
     const dailyStat = await ctx.db
@@ -186,21 +186,29 @@ export const getEarnedBadgeSlugs = internalQuery({
 });
 
 export const updateStatsForNewWin = internalMutation({
-  args: { 
-    userId: v.id("users"), 
-    categorySlug: v.string(), 
-    points: v.number() 
+  args: {
+    userId: v.id("users"),
+    categorySlug: v.string(),
+    points: v.number(),
+    source: v.string(),
   },
-  handler: async (ctx, { userId, categorySlug, points }) => {
+  handler: async (ctx, { userId, categorySlug, points, source }) => {
     // Update user totals
-    await ctx.runMutation(internal.userStats.updateUserPoints, { userId, points });
-    
+    await ctx.runMutation(internal.userStats.updateUserPoints, {
+      userId,
+      points,
+    });
+
     // Update streak
     await ctx.runMutation(internal.userStats.updateUserStreak, { userId });
-    
+
     // Update daily stats
-    await ctx.runMutation(internal.userStats.updateUserDailyStats, { userId, points });
-    
+    await ctx.runMutation(internal.userStats.updateUserDailyStats, {
+      userId,
+      points,
+      source,
+    });
+
     // Update category totals
     const categoryTotal = await ctx.db
       .query("userCategoryTotals")

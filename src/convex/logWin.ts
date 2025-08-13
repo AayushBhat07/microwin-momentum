@@ -51,6 +51,7 @@ export const logWin = action({
       userId: user._id,
       categorySlug: args.categorySlug,
       points: achievement.pointsEarned,
+      source: args.source,
     });
 
     // 3. Check for new badges
