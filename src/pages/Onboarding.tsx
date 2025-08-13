@@ -11,16 +11,17 @@ import { Loader2, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileSetupPage from "./onboarding/ProfileSetup";
 import WellnessSupport from "./onboarding/WellnessSupport";
+import GoalSettingPage from "./onboarding/GoalSetting";
 import { useNavigate } from "react-router";
 
-function OnboardingStep3({ onComplete }: { onComplete: () => void }) {
+function OnboardingStep4({ onComplete }: { onComplete: () => void }) {
   const completeStep = useMutation(api.onboarding.completeOnboardingStep);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleContinue = async () => {
     setIsSubmitting(true);
     try {
-      await completeStep({ step: 3 });
+      await completeStep({ step: 4 });
       toast.success("Onboarding Complete! You've earned the 'Achievement Scholar' badge!");
       onComplete();
     } catch (error) {
@@ -32,7 +33,7 @@ function OnboardingStep3({ onComplete }: { onComplete: () => void }) {
 
   return (
     <motion.div
-      key="step3"
+      key="step4"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
@@ -104,7 +105,9 @@ export default function Onboarding() {
       case 1:
         return <WellnessSupport onComplete={() => onCompleteStep(2)} source="onboarding" />;
       case 2:
-        return <OnboardingStep3 onComplete={() => navigate('/dashboard')} />;
+        return <GoalSettingPage onComplete={() => onCompleteStep(3)} />;
+      case 3:
+        return <OnboardingStep4 onComplete={() => navigate('/dashboard')} />;
       default:
         return (
           <motion.div

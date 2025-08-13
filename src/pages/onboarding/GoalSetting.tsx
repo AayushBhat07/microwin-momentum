@@ -14,8 +14,10 @@ import { Infer } from "convex/values";
 
 type Category = Infer<typeof categoryValidator>;
 
+const getLocalDate = () => new Date().toLocaleDateString('en-CA');
+
 export default function GoalSettingPage({ onComplete }: { onComplete: () => void }) {
-  const todaysGoals = useQuery(api.goals.getTodaysGoals);
+  const todaysGoals = useQuery(api.goals.getTodaysGoals, { date: getLocalDate() });
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalCategory, setNewGoalCategory] = useState<Category | "">("");
 
@@ -33,6 +35,7 @@ export default function GoalSettingPage({ onComplete }: { onComplete: () => void
       await createGoal({
         title: newGoalTitle,
         category: newGoalCategory as Category,
+        targetDate: getLocalDate(),
       });
       setNewGoalTitle("");
       setNewGoalCategory("");
@@ -46,8 +49,8 @@ export default function GoalSettingPage({ onComplete }: { onComplete: () => void
   const handleContinue = async () => {
     setIsSubmitting(true);
     try {
-      await completeStep({ step: 2 });
-      toast.success("Step 2 Complete! You've earned the 'Ready for Action' badge!");
+      await completeStep({ step: 3 });
+      toast.success("Step 3 Complete! You've earned the 'Ready for Action' badge!");
       onComplete();
     } catch (error) {
       toast.error("Failed to complete step.");

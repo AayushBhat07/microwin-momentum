@@ -21,9 +21,10 @@ export const completeOnboardingStep = mutation({
     // Award badges for completing steps
     const badgeNames: { [key: number]: string } = {
       1: "Profile Pioneer",
-      2: "Ready for Action",
-      3: "Achievement Scholar",
-      4: "Customization Master",
+      2: "Self-Care Champion",
+      3: "Ready for Action",
+      4: "Achievement Scholar",
+      5: "Customization Master",
     };
 
     const badgeName = badgeNames[args.step];

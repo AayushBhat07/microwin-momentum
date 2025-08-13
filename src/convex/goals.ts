@@ -2,6 +2,31 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUser } from "./users";
 import { categoryValidator } from "./schema";
+import { Doc, Id } from "./_generated/dataModel";
+
+/**
+ * Retrieves all goals for the current user for today.
+ */
+export const getTodaysGoals = query({
+  args: {
+    date: v.string(), // Expect YYYY-MM-DD from client
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      return [];
+    }
+
+    const goals = await ctx.db
+      .query("dailyGoals")
+      .withIndex("by_user_and_date", (q) =>
+        q.eq("userId", user._id).eq("targetDate", args.date)
+      )
+      .collect();
+
+    return goals;
+  },
+});
 
 /**
  * Creates a new daily goal for the authenticated user.
@@ -9,61 +34,34 @@ import { categoryValidator } from "./schema";
 export const create = mutation({
   args: {
     title: v.string(),
-    description: v.optional(v.string()),
     category: categoryValidator,
-    targetDate: v.optional(v.string()),
+    description: v.optional(v.string()),
+    targetDate: v.string(), // Expect YYYY-MM-DD from client
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     if (!user) {
-      throw new Error("User must be authenticated to create a goal.");
+      throw new Error("User not authenticated");
     }
-
-    const today = new Date();
-    const targetDate = args.targetDate || today.toISOString().split('T')[0];
 
     const goalId = await ctx.db.insert("dailyGoals", {
       userId: user._id,
       title: args.title,
       description: args.description,
       category: args.category,
-      targetDate,
+      targetDate: args.targetDate,
       isCompleted: false,
+      completedAt: undefined,
     });
 
-    return goalId;
-  },
-});
-
-/**
- * Retrieves all goals for the current user for today.
- */
-export const getTodaysGoals = query({
-  handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
-    if (!user) {
-      return [];
-    }
-
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
-
-    return await ctx.db
-      .query("dailyGoals")
-      .withIndex("by_user_and_date", (q) =>
-        q
-          .eq("userId", user._id)
-          .eq("targetDate", todayString)
-      )
-      .order("desc")
-      .collect();
+    return await ctx.db.get(goalId);
   },
 });
 
 /**
  * Marks a specific goal as complete.
  */
-export const complete = mutation({
+export const completeGoal = mutation({
   args: {
     goalId: v.id("dailyGoals"),
   },

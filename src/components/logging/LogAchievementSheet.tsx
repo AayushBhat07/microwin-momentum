@@ -26,7 +26,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
   
   const logWin = useAction(api.logWin.logWin);
   const categories = useQuery(api.achievements.getCategories);
-  const completeGoal = useMutation(api.goals.complete);
+  const completeGoal = useMutation(api.goals.completeGoal);
 
   const handleSubmit = async (data: {
     title: string;

@@ -9,32 +9,31 @@ import { Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 
+const getLocalDate = () => new Date().toLocaleDateString('en-CA');
+
 export function DailyGoals() {
+  const dailyGoals = useQuery(api.goals.getTodaysGoals, { date: getLocalDate() });
+  const createGoal = useMutation(api.goals.create);
+  const completeGoal = useMutation(api.goals.completeGoal);
+  const deleteGoal = useMutation(api.goals.remove);
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  const dailyGoals = useQuery(api.goals.getTodaysGoals);
+  const handleAddGoal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGoalTitle.trim()) return;
 
-  const createGoal = useMutation(api.goals.create);
-  const completeGoal = useMutation(api.goals.complete);
-  const deleteGoal = useMutation(api.goals.remove);
-
-  const handleCreateGoal = async () => {
-    if (newGoalTitle.trim() === "") {
-      toast.error("Quest title cannot be empty.");
-      return;
-    }
     setIsCreating(true);
     try {
       await createGoal({
         title: newGoalTitle.trim(),
         category: "personal",
+        targetDate: getLocalDate(),
       });
       setNewGoalTitle("");
-      toast.success("New Quest Added!");
+      toast.success("Goal added!");
     } catch (error) {
-      toast.error("Failed to add quest.");
-      console.error(error);
+      toast.error("Failed to add goal");
     } finally {
       setIsCreating(false);
     }
@@ -73,11 +72,11 @@ export function DailyGoals() {
             placeholder="Add a new quest..."
             value={newGoalTitle}
             onChange={(e) => setNewGoalTitle(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleCreateGoal()}
+            onKeyDown={(e) => e.key === "Enter" && handleAddGoal(e)}
             disabled={isCreating}
             className="font-pixel bg-background/80 focus:ring-secondary"
           />
-          <Button onClick={handleCreateGoal} disabled={isCreating} variant="secondary" className="font-pixel">
+          <Button onClick={handleAddGoal} disabled={isCreating} variant="secondary" className="font-pixel">
             {isCreating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (

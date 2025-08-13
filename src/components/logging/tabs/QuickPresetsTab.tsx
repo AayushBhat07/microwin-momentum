@@ -16,8 +16,10 @@ interface QuickPresetsTabProps {
   onSelect: (goal: Doc<"dailyGoals">) => void;
 }
 
+const getLocalDate = () => new Date().toLocaleDateString('en-CA');
+
 export function QuickPresetsTab({ onSelect }: QuickPresetsTabProps) {
-  const todaysGoals = useQuery(api.goals.getTodaysGoals);
+  const todaysGoals = useQuery(api.goals.getTodaysGoals, { date: getLocalDate() });
   const categories = useQuery(api.achievements.getCategories);
 
   if (todaysGoals === undefined || categories === undefined) {
