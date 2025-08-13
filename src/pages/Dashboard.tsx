@@ -20,12 +20,14 @@ export default function Dashboard() {
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && user?.needsWellnessSetup) {
+    // Redirect to wellness setup if needed, but only when we have a user object
+    if (user && user.needsWellnessSetup) {
       navigate("/wellness-setup");
     }
-  }, [isLoading, user, navigate]);
+  }, [user, navigate]);
   
-  if (isLoading || user?.needsWellnessSetup) {
+  // Primary loading state from useAuth
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>
@@ -33,10 +35,22 @@ export default function Dashboard() {
     );
   }
 
+  // This handles the case where auth is loaded, but the user object is null.
+  // This can happen during initial user creation or if there's an issue.
+  // We show a more appropriate loading message instead of "Please sign in".
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Please sign in to access your dashboard.</p>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="font-pixel text-white text-2xl animate-pulse">Loading your profile...</div>
+      </div>
+    );
+  }
+
+  // If user needs wellness setup, show loader while redirecting via useEffect
+  if (user.needsWellnessSetup) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>
       </div>
     );
   }

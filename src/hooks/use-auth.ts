@@ -9,15 +9,8 @@ export function useAuth() {
   const user = useQuery(api.users.currentUser);
   const { signIn, signOut } = useAuthActions();
 
-  const [isLoading, setIsLoading] = useState(true);
-
-  // This effect updates the loading state once auth is loaded and user data is available
-  // It ensures we only show content when both authentication state and user data are ready
-  useEffect(() => {
-    if (!isAuthLoading && user !== undefined) {
-      setIsLoading(false);
-    }
-  }, [isAuthLoading, user]);
+  // isLoading is true if either auth is loading or the user query is loading
+  const isLoading = isAuthLoading || user === undefined;
 
   return {
     isLoading,
