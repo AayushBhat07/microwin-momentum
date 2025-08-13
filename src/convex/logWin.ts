@@ -28,15 +28,9 @@ export const logWin = action({
     totals: Doc<"user_totals"> | null;
     streak: Doc<"user_streaks"> | null;
     unlockedBadges: Doc<"badges">[];
-  } | { achievement: null, unlockedBadges: [] }> => {
+  }> => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) throw new Error("User not found");
-
-    // Idempotency check
-    const existing = await ctx.runQuery(internal.achievements.getAchievementByClientId, { clientId: args.clientId });
-    if (existing) {
-      return { achievement: existing, unlockedBadges: [] };
-    }
 
     // 1. Create Achievement
     const achievementId = await ctx.runMutation(internal.achievements.createAchievement, {

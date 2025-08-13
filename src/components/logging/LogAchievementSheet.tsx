@@ -70,12 +70,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
       });
 
       if (result && result.achievement) {
-        // This case handles both new achievements and idempotent responses
         postLogSuccess(result as any);
-        if (result.unlockedBadges.length === 0 && result.achievement.clientId === clientId) {
-           // This is an idempotent call, show a different message
-           toast.info("This achievement seems to have been logged already.");
-        }
         onOpenChange(false);
         setActiveTab("text");
         return true;

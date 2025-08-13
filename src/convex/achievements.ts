@@ -183,21 +183,6 @@ export const log = mutation({
   },
 });
 
-export const getAchievementByClientId = internalQuery({
-  args: { clientId: v.string() },
-  handler: async (ctx, { clientId }): Promise<any> => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
-    if (!user) return null;
-
-    return await ctx.db
-      .query("achievements")
-      .withIndex("by_user_and_client_id", (q) =>
-        q.eq("userId", user._id).eq("clientId", clientId)
-      )
-      .unique();
-  },
-});
-
 export const createAchievement = internalMutation({
     args: {
         userId: v.id("users"),
