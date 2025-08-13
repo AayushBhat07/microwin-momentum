@@ -83,16 +83,8 @@ export const evaluateAndAwardBadges = internalAction({
             }
         }
 
-        // Special case for first win, as totalAchievements will be 1
-        if (totalAchievements === 1 && !earnedSlugsSet.has("first_win")) {
-             console.log("Checking special case badge: 'first_win'");
-             const awarded = await ctx.runMutation(internal.badges.awardBadge, {
-                userId,
-                badgeSlug: "first_win",
-                reason: "First achievement logged",
-            });
-            if (awarded) newlyAwarded.push(awarded);
-        }
+        // The "first_win" badge is now handled by the generic "wins" family logic with threshold: 1.
+        // The special case has been removed to avoid redundancy.
 
         console.log(`Finished evaluation. Awarded ${newlyAwarded.length} new badges:`, newlyAwarded.map(b => b.slug));
         return newlyAwarded;

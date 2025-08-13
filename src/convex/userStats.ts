@@ -165,7 +165,8 @@ export const updateStatsForNewWin = internalMutation({
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
     const isPhoto = source === "photo";
     const isVoice = source === "voice";
-    const isText = source === "text";
+    // "text" or "quick" logs fall under the text category for badges
+    const isText = !isPhoto && !isVoice;
 
     // --- 1. Handle User Totals (points, achievements, and mode counts) ---
     const userTotals = await ctx.db
@@ -178,10 +179,10 @@ export const updateStatsForNewWin = internalMutation({
         totalPoints: userTotals.totalPoints + points,
         totalAchievements: userTotals.totalAchievements + 1,
         lastPointsUpdateAt: Date.now(),
+        totalPhotoCount: ((userTotals as any).totalPhotoCount ?? 0) + (isPhoto ? 1 : 0),
+        totalVoiceCount: ((userTotals as any).totalVoiceCount ?? 0) + (isVoice ? 1 : 0),
+        totalTextCount: ((userTotals as any).totalTextCount ?? 0) + (isText ? 1 : 0),
       };
-      if (isPhoto) patchPayload.totalPhotoCount = ((userTotals as any).totalPhotoCount ?? 0) + 1;
-      if (isVoice) patchPayload.totalVoiceCount = ((userTotals as any).totalVoiceCount ?? 0) + 1;
-      if (isText) patchPayload.totalTextCount = ((userTotals as any).totalTextCount ?? 0) + 1;
       
       await ctx.db.patch(userTotals._id, patchPayload);
     } else {

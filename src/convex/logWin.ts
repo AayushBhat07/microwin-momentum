@@ -57,15 +57,18 @@ export const logWin = action({
       userId: user._id,
       achievement,
       userTotals: updatedTotals,
-      userStreak: null, // Streak is handled inside userStats now, but let's pass it for now
+      userStreak: null, // We'll get fresh streak data below
     });
 
-    // 4. Return full payload
+    // 4. Get latest streak info to return to client
+    const streak = await ctx.runQuery(internal.userStats.getStreak, { userId: user._id });
+
+    // 5. Return full payload
     return {
       success: true,
       achievement,
       totals: updatedTotals,
-      streak: null, // This should be updated to return the latest streak info
+      streak,
       badges_unlocked,
     };
   },
