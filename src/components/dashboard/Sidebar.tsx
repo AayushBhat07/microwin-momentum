@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { BarChart3, Star, Clipboard, Camera, Settings } from "lucide-react";
+import { useNavigate } from "react-router";
 
 interface SidebarProps {
   activeTab: string;
@@ -15,16 +16,25 @@ const navItems = [
 ];
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="w-24 bg-black/60 backdrop-blur-sm border-r-2 border-blue-900/80 flex flex-col items-center py-6 space-y-4 font-pixel">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;
+
+        const handleClick = () => {
+          if (item.id === "dashboard") {
+            navigate("/dashboard");
+          }
+          onTabChange(item.id);
+        };
         
         return (
           <motion.button
             key={item.id}
-            onClick={() => onTabChange(item.id)}
+            onClick={handleClick}
             className={`
               w-16 h-16 flex items-center justify-center border-2 border-blue-700
               transition-all duration-200 relative group
@@ -36,6 +46,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label={item.label}
+            aria-current={isActive ? "page" : undefined}
           >
             <Icon className="w-8 h-8" />
             
