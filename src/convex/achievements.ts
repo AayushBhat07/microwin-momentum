@@ -128,10 +128,7 @@ export const internalLogAchievement = mutation({
             clientId: `backfill-${Date.now()}`,
         });
 
-        await ctx.scheduler.runAfter(0, internal.badges.checkAllBadges, {
-            userId,
-            achievement: { title, description, categorySlug, pointsEarned, isPublic, source, _id: achievementId },
-        });
+        // Badge checking is now handled by the award engine
 
         return achievementId;
     }
@@ -166,19 +163,8 @@ export const log = mutation({
       clientId: `log-${Date.now()}`,
     });
 
-    await ctx.scheduler.runAfter(0, internal.badges.checkAllBadges, {
-      userId,
-      achievement: { 
-        title: args.title, 
-        description: args.description, 
-        categorySlug: args.category, 
-        pointsEarned: args.pointsEarned, 
-        isPublic: args.isPublic, 
-        source: args.source, 
-        _id: achievementId 
-      },
-    });
-    
+    // Badge checking is now handled by the award engine
+
     return achievementId;
   },
 });

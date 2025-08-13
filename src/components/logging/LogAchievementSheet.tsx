@@ -61,7 +61,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         title: data.title.trim(),
         description: data.description?.trim(),
         categorySlug: data.categorySlug,
-        source: data.source,
+        mode: data.source,
         photoStorageId: data.photoStorageId,
         audioStorageId: data.audioStorageId,
         tags: data.tags,

@@ -16,6 +16,7 @@ import type {
 import type * as achievements from "../achievements.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
+import type * as awardEngine from "../awardEngine.js";
 import type * as backfill from "../backfill.js";
 import type * as backfillOnboardingBadges from "../backfillOnboardingBadges.js";
 import type * as badges from "../badges.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   achievements: typeof achievements;
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
+  awardEngine: typeof awardEngine;
   backfill: typeof backfill;
   backfillOnboardingBadges: typeof backfillOnboardingBadges;
   badges: typeof badges;

@@ -4,30 +4,28 @@ import { v } from "convex/values";
 import { action, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
+import { evaluateAndAwardBadges } from "./awardEngine";
 
 // Main action to log a win with full gamification
 export const logWin = action({
   args: {
-    clientId: v.string(),
     title: v.string(),
     description: v.optional(v.string()),
     categorySlug: v.string(),
-    source: v.union(
-      v.literal("quick"),
-      v.literal("text"),
-      v.literal("voice"),
-      v.literal("photo")
-    ),
+    mode: v.union(v.literal("text"), v.literal("voice"), v.literal("photo")),
     photoStorageId: v.optional(v.id("_storage")),
     audioStorageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
     isPublic: v.optional(v.boolean()),
+    source: v.optional(v.string()),
+    clientId: v.string(),
   },
   handler: async (ctx, args): Promise<{
+    success: boolean;
     achievement: Doc<"achievements">;
     totals: Doc<"user_totals"> | null;
     streak: Doc<"user_streaks"> | null;
-    unlockedBadges: Doc<"badges">[];
+    badges_unlocked: any[]; // TODO: type this
   }> => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) throw new Error("User not found");
@@ -35,8 +33,15 @@ export const logWin = action({
     // 1. Create Achievement
     const achievementId = await ctx.runMutation(internal.achievements.createAchievement, {
       userId: user._id,
-      ...args,
+      clientId: args.clientId,
+      title: args.title.trim(),
+      description: args.description?.trim() ?? "",
+      categorySlug: args.categorySlug,
+      photoStorageId: args.photoStorageId,
+      audioStorageId: args.audioStorageId,
+      tags: args.tags,
       isPublic: args.isPublic ?? true,
+      source: args.mode,
     });
     const achievement = (await ctx.runQuery(internal.achievements.get, { id: achievementId }))!;
 
@@ -45,24 +50,24 @@ export const logWin = action({
       userId: user._id,
       categorySlug: args.categorySlug,
       points: achievement.pointsEarned,
-      source: args.source,
+      source: args.mode,
     });
 
-    // 3. Check for new badges, passing the fresh stats
-    const unlockedBadges = await ctx.runAction(internal.badges.checkAllBadges, {
+    // 3. Evaluate and award new badges
+    const badges_unlocked = await ctx.runAction(internal.awardEngine.evaluateAndAwardBadges, {
       userId: user._id,
       achievement,
       userTotals: updatedTotals,
+      userStreak: null,
     });
 
-    // 4. Fetch updated streak for return payload
-    const streak = await ctx.runQuery(internal.userStats.getStreak, { userId: user._id });
-
+    // 4. Return full payload
     return {
+      success: true,
       achievement,
-      totals: updatedTotals, // Use the totals we already have
-      streak,
-      unlockedBadges,
+      totals: updatedTotals,
+      streak: null,
+      badges_unlocked,
     };
   },
 });
