@@ -63,13 +63,16 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         description: data.description?.trim(),
         categorySlug: data.categorySlug,
         source: data.source,
-        photoStorageId: data.photoStorageId || data.audioStorageId, // Use photoStorageId for both
+        photoStorageId: data.photoStorageId,
+        audioStorageId: data.audioStorageId,
         tags: data.tags,
         isPublic: data.isPublic ?? true,
         clientId,
       });
 
-      if (result.success) {
+      // The action throws an error on failure, so if we get here, it was successful.
+      // The return value `result` contains the new achievement data.
+      if (result && result.achievement) {
         // Use centralized success handler
         postLogSuccess(result);
         
@@ -79,7 +82,8 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         // Reset to quick tab for next use
         setActiveTab("quick");
       } else {
-        toast.error(result.error || "Failed to log achievement");
+        // This case might happen if the action returns something unexpected but doesn't throw.
+        toast.error("Failed to log achievement. Unexpected response from server.");
       }
     } catch (error: any) {
       console.error("Error logging achievement:", error);
