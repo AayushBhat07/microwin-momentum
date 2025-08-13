@@ -1,29 +1,63 @@
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Coffee, BookOpen, Dumbbell } from "lucide-react";
+import { Loader2, CheckCircle, Star } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import * as Icons from "lucide-react";
+import type { Doc } from "@/convex/_generated/dataModel";
 
-// TODO: Fetch from API
-const presets = [
-  { text: "5-min walk", icon: Dumbbell },
-  { text: "Completed a task", icon: BookOpen },
-  { text: "Texted a friend", icon: Coffee },
-];
+const getIcon = (name: string | undefined): LucideIcon => {
+  if (!name) return Star;
+  const icon = (Icons as any)[name];
+  return icon || Star;
+};
 
 interface QuickPresetsTabProps {
-  onSelect: (text: string) => void;
+  onSelect: (goal: Doc<"dailyGoals">) => void;
 }
 
 export function QuickPresetsTab({ onSelect }: QuickPresetsTabProps) {
+  const todaysGoals = useQuery(api.goals.getTodaysGoals);
+  const categories = useQuery(api.achievements.getCategories);
+
+  if (todaysGoals === undefined || categories === undefined) {
+    return (
+      <div className="flex h-24 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (todaysGoals.length === 0) {
+    return (
+      <div className="flex h-24 items-center justify-center text-center text-sm text-muted-foreground">
+        You have no daily goals set.
+      </div>
+    );
+  }
+
+  const goalsWithIcons = todaysGoals.map((goal) => {
+    const categoryInfo = categories.find((c) => c.slug === goal.category);
+    const Icon = getIcon(categoryInfo?.iconName);
+    return { ...goal, Icon };
+  });
+
   return (
     <div className="grid grid-cols-3 gap-4">
-      {presets.map((preset) => (
+      {goalsWithIcons.map((goal) => (
         <Button
-          key={preset.text}
+          key={goal._id}
           variant="outline"
           className="h-24 flex flex-col gap-2"
-          onClick={() => onSelect(preset.text)}
+          onClick={() => onSelect(goal)}
+          disabled={goal.isCompleted}
         >
-          <preset.icon className="w-6 h-6" />
-          <span className="text-center text-xs">{preset.text}</span>
+          {goal.isCompleted ? (
+            <CheckCircle className="h-6 w-6 text-green-500" />
+          ) : (
+            <goal.Icon className="h-6 w-6" />
+          )}
+          <span className="text-center text-xs">{goal.title}</span>
         </Button>
       ))}
     </div>

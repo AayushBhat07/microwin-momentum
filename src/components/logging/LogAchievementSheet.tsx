@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAction, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { TextLogForm } from "./forms/TextLogForm";
 import { PhotoLogForm } from "./forms/PhotoLogForm";
 import { VoiceLogForm } from "./forms/VoiceLogForm";
-import { Id } from "@/convex/_generated/dataModel";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 
 interface LogAchievementSheetProps {
   open: boolean;
@@ -26,6 +26,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
   
   const logWin = useAction(api.logWin.logWin);
   const categories = useQuery(api.achievements.getCategories);
+  const completeGoal = useMutation(api.goals.complete);
 
   const handleSubmit = async (data: {
     title: string;
@@ -36,21 +37,21 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
     audioStorageId?: Id<"_storage">; // For voice logs
     tags?: string[];
     isPublic?: boolean;
-  }) => {
+  }): Promise<boolean> => {
     if (!user) {
       toast.error("Please sign in to log achievements");
-      return;
+      return false;
     }
 
     // Client-side validation
     if (!data.title.trim()) {
       toast.error("Title is required");
-      return;
+      return false;
     }
 
     if (!data.categorySlug && data.source !== 'quick') {
       toast.error("Category is required");
-      return;
+      return false;
     }
 
     setIsSubmitting(true);
@@ -81,15 +82,37 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         
         // Reset to quick tab for next use
         setActiveTab("quick");
+        return true;
       } else {
         // This case might happen if the action returns something unexpected but doesn't throw.
         toast.error("Failed to log achievement. Unexpected response from server.");
+        return false;
       }
     } catch (error: any) {
       console.error("Error logging achievement:", error);
       toast.error(error.message || "Failed to log achievement");
+      return false;
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleQuickPresetSubmit = async (goal: Doc<"dailyGoals">) => {
+    const success = await handleSubmit({
+      title: goal.title,
+      description: `Completed daily goal: ${goal.title}`,
+      categorySlug: goal.category,
+      source: "quick",
+      isPublic: true,
+    });
+
+    if (success) {
+      try {
+        await completeGoal({ goalId: goal._id });
+      } catch (error) {
+        console.error("Failed to mark goal as complete:", error);
+        toast.error("Achievement logged, but failed to update goal status.");
+      }
     }
   };
 
@@ -123,14 +146,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
 
             <TabsContent value="quick" className="mt-4">
               <QuickPresetsTab 
-                onSelect={(text: string) => {
-                  handleSubmit({
-                    title: text,
-                    categorySlug: "health", // Default category for quick presets
-                    source: "quick",
-                    isPublic: true
-                  });
-                }}
+                onSelect={handleQuickPresetSubmit}
               />
             </TabsContent>
 
