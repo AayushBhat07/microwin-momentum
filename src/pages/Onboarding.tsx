@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Loader2, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileSetupPage from "./onboarding/ProfileSetup";
-import GoalSettingPage from "./onboarding/GoalSetting";
+import WellnessSupport from "./onboarding/WellnessSupport";
 import { useNavigate } from "react-router";
 
 function OnboardingStep3({ onComplete }: { onComplete: () => void }) {
@@ -96,7 +96,7 @@ export default function Onboarding() {
       case 0:
         return <ProfileSetupPage onComplete={() => onCompleteStep(1)} />;
       case 1:
-        return <GoalSettingPage onComplete={() => onCompleteStep(2)} />;
+        return <WellnessSupport onComplete={() => onCompleteStep(2)} />;
       case 2:
         return <OnboardingStep3 onComplete={() => navigate('/dashboard')} />;
       default:

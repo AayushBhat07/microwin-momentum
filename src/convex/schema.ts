@@ -121,6 +121,29 @@ const schema = defineSchema({
     streakStartDate: v.string(), // YYYY-MM-DD format
   }).index("by_user", ["userId"]),
 
+  wellnessIntake: defineTable({
+    userId: v.id("users"),
+    challenges: v.array(v.string()),
+    intensities: v.record(v.string(), v.number()),
+    notes: v.optional(v.string()),
+    privacyFlag: v.boolean(),
+  }).index("by_user", ["userId"]),
+
+  userPresets: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    categorySlug: v.string(),
+    effortMinutes: v.number(),
+    defaultPrivate: v.boolean(),
+    source: v.union(
+      v.literal("onboarding"),
+      v.literal("custom"),
+      v.literal("system")
+    ),
+  })
+  .index("by_user", ["userId"])
+  .index("by_user_and_title", ["userId", "title"]),
+
   user_totals: defineTable({
     userId: v.id("users"),
     totalPoints: v.number(),

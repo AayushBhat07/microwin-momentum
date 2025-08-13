@@ -32,6 +32,7 @@ import type * as seedData from "../seedData.js";
 import type * as userProfile from "../userProfile.js";
 import type * as userStats from "../userStats.js";
 import type * as users from "../users.js";
+import type * as wellness from "../wellness.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   userProfile: typeof userProfile;
   userStats: typeof userStats;
   users: typeof users;
+  wellness: typeof wellness;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
