@@ -9,6 +9,10 @@ import { Zap, Type, Mic, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { postLogSuccess } from "@/lib/postLogSuccess";
 import { v4 as uuidv4 } from "uuid";
+import { TextLogForm } from "./forms/TextLogForm";
+import { PhotoLogForm } from "./forms/PhotoLogForm";
+import { VoiceLogForm } from "./forms/VoiceLogForm";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface LogAchievementSheetProps {
   open: boolean;
@@ -28,7 +32,8 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
     description?: string;
     categorySlug: string;
     source: "quick" | "text" | "voice" | "photo";
-    photoStorageId?: string;
+    photoStorageId?: Id<"_storage">;
+    audioStorageId?: Id<"_storage">; // For voice logs
     tags?: string[];
     isPublic?: boolean;
   }) => {
@@ -43,7 +48,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
       return;
     }
 
-    if (!data.categorySlug) {
+    if (!data.categorySlug && data.source !== 'quick') {
       toast.error("Category is required");
       return;
     }
@@ -58,7 +63,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         description: data.description?.trim(),
         categorySlug: data.categorySlug,
         source: data.source,
-        photoStorageId: data.photoStorageId as any,
+        photoStorageId: data.photoStorageId || data.audioStorageId, // Use photoStorageId for both
         tags: data.tags,
         isPublic: data.isPublic ?? true,
         clientId,
@@ -126,21 +131,27 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
             </TabsContent>
 
             <TabsContent value="text" className="mt-4">
-              <div className="text-center text-blue-300 font-pixel">
-                Text input coming soon...
-              </div>
+              <TextLogForm 
+                categories={categories}
+                onSubmit={handleSubmit as any}
+                isSubmitting={isSubmitting}
+              />
             </TabsContent>
 
             <TabsContent value="voice" className="mt-4">
-              <div className="text-center text-blue-300 font-pixel">
-                Voice input coming soon...
-              </div>
+              <VoiceLogForm
+                categories={categories}
+                onSubmit={handleSubmit as any}
+                isSubmitting={isSubmitting}
+              />
             </TabsContent>
 
             <TabsContent value="photo" className="mt-4">
-              <div className="text-center text-blue-300 font-pixel">
-                Photo input coming soon...
-              </div>
+              <PhotoLogForm
+                categories={categories}
+                onSubmit={handleSubmit as any}
+                isSubmitting={isSubmitting}
+              />
             </TabsContent>
           </Tabs>
         </div>
