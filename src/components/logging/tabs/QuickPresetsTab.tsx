@@ -44,7 +44,7 @@ export function QuickPresetsTab({ onSelect }: QuickPresetsTabProps) {
     );
   }
 
-  const goalsWithIcons = todaysGoals.map((goal) => {
+  const goalsWithIcons = todaysGoals.map((goal: any) => {
     const categoryInfo = categories.find((c) => c.slug === goal.category);
     const Icon = getIcon(categoryInfo?.iconName);
     return { ...goal, Icon };
@@ -52,7 +52,7 @@ export function QuickPresetsTab({ onSelect }: QuickPresetsTabProps) {
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      {goalsWithIcons.map((goal) => (
+      {goalsWithIcons.map((goal: any) => (
         <Button
           key={goal._id}
           variant="outline"

@@ -21,7 +21,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Redirect to wellness setup if needed, but only when we have a user object
-    if (user && user.needsWellnessSetup) {
+    if (user && (user as any).needsWellnessSetup) {
       navigate("/wellness-setup");
     }
   }, [user, navigate]);
@@ -47,7 +47,7 @@ export default function Dashboard() {
   }
 
   // If user needs wellness setup, show loader while redirecting via useEffect
-  if (user && user.needsWellnessSetup) {
+  if (user && (user as any).needsWellnessSetup) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>

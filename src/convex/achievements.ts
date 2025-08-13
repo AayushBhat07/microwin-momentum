@@ -1,4 +1,4 @@
-import { action, internalQuery, query, mutation } from "./_generated/server";
+import { action, internalQuery, query, mutation, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
@@ -181,4 +181,66 @@ export const log = mutation({
     
     return achievementId;
   },
+});
+
+export const getAchievementByClientId = internalQuery({
+  args: { clientId: v.string() },
+  handler: async (ctx, { clientId }): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) return null;
+
+    return await ctx.db
+      .query("achievements")
+      .withIndex("by_user_and_client_id", (q) =>
+        q.eq("userId", user._id).eq("clientId", clientId)
+      )
+      .unique();
+  },
+});
+
+export const createAchievement = internalMutation({
+    args: {
+        userId: v.id("users"),
+        clientId: v.string(),
+        title: v.string(),
+        description: v.optional(v.string()),
+        categorySlug: v.string(),
+        source: v.union(
+            v.literal("quick"),
+            v.literal("text"),
+            v.literal("voice"),
+            v.literal("photo")
+        ),
+        photoStorageId: v.optional(v.id("_storage")),
+        audioStorageId: v.optional(v.id("_storage")),
+        tags: v.optional(v.array(v.string())),
+        isPublic: v.boolean(),
+    },
+    handler: async (ctx, args) => {
+        const { userId, categorySlug, ...rest } = args;
+
+        const categoryDetails = await ctx.db
+            .query("achievement_categories")
+            .withIndex("by_slug", q => q.eq("slug", categorySlug))
+            .unique();
+        
+        const points = categoryDetails?.basePoints ?? 10;
+
+        return await ctx.db.insert("achievements", {
+            userId,
+            categorySlug,
+            pointsEarned: points,
+            loggedAt: Date.now(),
+            category: categorySlug as any, // for compatibility
+            points: points, // for compatibility
+            ...rest
+        });
+    }
+});
+
+export const get = internalQuery({
+    args: { id: v.id("achievements") },
+    handler: async (ctx, { id }) => {
+        return await ctx.db.get(id);
+    }
 });

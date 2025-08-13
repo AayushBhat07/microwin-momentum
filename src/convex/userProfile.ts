@@ -1,7 +1,6 @@
 import { v } from "convex/values";
-import { internalMutation, mutation } from "./_generated/server";
-import { getCurrentUser } from "./users";
-import { api } from "./_generated/api";
+import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 export const updateProfile = mutation({
   args: {
@@ -9,7 +8,7 @@ export const updateProfile = mutation({
     bio: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -30,7 +29,7 @@ export const updateProfile = mutation({
     });
 
     // Call internal mutation to complete step 1
-    await ctx.runMutation(api.onboarding.completeOnboardingStep, { step: 1 });
+    await ctx.runMutation(internal.onboarding.completeOnboardingStepInternal, { step: 1 });
   },
 });
 
@@ -40,7 +39,7 @@ export const updateGeneralProfile = mutation({
     bio: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User not authenticated");
     }

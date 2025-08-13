@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getCurrentUser } from "./users";
+import { internal } from "./_generated/api";
 import { categoryValidator } from "./schema";
 import { Doc, Id } from "./_generated/dataModel";
 
@@ -11,8 +11,8 @@ export const getTodaysGoals = query({
   args: {
     date: v.string(), // Expect YYYY-MM-DD from client
   },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx, args): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       return [];
     }
@@ -38,8 +38,8 @@ export const create = mutation({
     description: v.optional(v.string()),
     targetDate: v.string(), // Expect YYYY-MM-DD from client
   },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx, args): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -66,7 +66,7 @@ export const completeGoal = mutation({
     goalId: v.id("dailyGoals"),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User must be authenticated to complete a goal.");
     }
@@ -97,7 +97,7 @@ export const remove = mutation({
     goalId: v.id("dailyGoals"),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User must be authenticated to delete a goal.");
     }

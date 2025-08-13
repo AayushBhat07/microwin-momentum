@@ -1,4 +1,4 @@
-import { query, internalMutation } from "./_generated/server";
+import { query, internalMutation, internalQuery } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
@@ -149,6 +149,94 @@ export const updateUserDailyStats = internalMutation({
         goalsCompleted: 0, // Assuming goals are handled elsewhere
         categories: ["general"], // Default category
         photoCount: 0, // Default to 0, can be updated if needed
+      });
+    }
+  },
+});
+
+export const getStreak = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("user_streaks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+  },
+});
+
+export const getCategoryTotals = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("userCategoryTotals")
+      .withIndex("by_user_and_category", (q) => q.eq("userId", userId))
+      .collect();
+  },
+});
+
+export const getEarnedBadgeSlugs = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("userBadges")
+      .withIndex("by_user_and_badge", (q) => q.eq("userId", userId))
+      .collect();
+  },
+});
+
+export const updateStatsForNewWin = internalMutation({
+  args: { 
+    userId: v.id("users"), 
+    categorySlug: v.string(), 
+    points: v.number() 
+  },
+  handler: async (ctx, { userId, categorySlug, points }) => {
+    const { internal } = await import("./_generated/api");
+    
+    // Update user totals
+    await ctx.runMutation(internal.userStats.updateUserPoints, { userId, points });
+    
+    // Update streak
+    await ctx.runMutation(internal.userStats.updateUserStreak, { userId });
+    
+    // Update daily stats
+    await ctx.runMutation(internal.userStats.updateUserDailyStats, { userId, points });
+    
+    // Update category totals
+    const categoryTotal = await ctx.db
+      .query("userCategoryTotals")
+      .withIndex("by_user_and_category", (q) => 
+        q.eq("userId", userId).eq("categorySlug", categorySlug))
+      .unique();
+    
+    if (categoryTotal) {
+      await ctx.db.patch(categoryTotal._id, {
+        totalWins: categoryTotal.totalWins + 1,
+      });
+    } else {
+      await ctx.db.insert("userCategoryTotals", {
+        userId,
+        categorySlug,
+        totalWins: 1,
+      });
+    }
+    
+    // Update user totals achievement count
+    const userTotals = await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+    
+    if (userTotals) {
+      await ctx.db.patch(userTotals._id, {
+        totalAchievements: userTotals.totalAchievements + 1,
+      });
+    } else {
+      await ctx.db.insert("user_totals", {
+        userId,
+        totalPoints: points,
+        totalAchievements: 1,
+        lastPointsUpdateAt: Date.now(),
       });
     }
   },

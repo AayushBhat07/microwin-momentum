@@ -19,8 +19,8 @@ export const log = mutation({
     ),
     tags: v.optional(v.array(v.string())),
   },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx, args): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("Must be authenticated");
     }
@@ -170,8 +170,8 @@ export const getCategories = query({
 // Get user's streak status
 export const getStreakStatus = query({
   args: {},
-  handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) return null;
 
     return await ctx.db

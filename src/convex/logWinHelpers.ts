@@ -1,12 +1,12 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
-import { getCurrentUser } from "./users";
+import { internal } from "./_generated/api";
 
 // Internal query to check for duplicates
 export const checkDuplicate = internalQuery({
   args: { clientId: v.string() },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx, args): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -37,8 +37,8 @@ export const createWinWithGameification = internalMutation({
     tags: v.optional(v.array(v.string())),
     isPublic: v.boolean(),
   },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx, args): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User not authenticated");
     }

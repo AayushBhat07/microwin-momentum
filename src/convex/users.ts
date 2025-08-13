@@ -3,18 +3,24 @@ import { v } from "convex/values";
 import { Doc, Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-export const getCurrentUser = async (ctx: { db: any, auth: any }) => {
-  const userId = await getAuthUserId(ctx);
-  if (!userId) {
-    return null;
+export const getCurrentUser = internalQuery({
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+    return await ctx.db.get(userId);
   }
-  return await ctx.db.get(userId);
-};
+});
 
 export const currentUser = query({
   args: {},
   handler: async (ctx) => {
-    return await getCurrentUser(ctx);
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+    return await ctx.db.get(userId);
   },
 });
 

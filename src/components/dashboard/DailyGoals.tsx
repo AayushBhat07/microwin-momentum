@@ -103,7 +103,7 @@ export function DailyGoals() {
             </p>
           )}
           <AnimatePresence>
-            {dailyGoals?.map((goal) => (
+            {dailyGoals?.map((goal: any) => (
               <motion.div
                 key={goal._id}
                 layout

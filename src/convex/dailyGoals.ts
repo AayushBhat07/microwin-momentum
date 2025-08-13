@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
-import { getCurrentUser } from "./users";
+import { internal } from "./_generated/api";
 import { categoryValidator } from "./schema";
 
 /**
@@ -13,8 +13,8 @@ export const create = internalMutation({
     category: categoryValidator,
     targetDate: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx, args): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User must be authenticated to create a goal.");
     }
@@ -39,8 +39,8 @@ export const create = internalMutation({
  * Retrieves all goals for the current user for today.
  */
 export const getTodaysGoals = internalQuery({
-  handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
+  handler: async (ctx): Promise<any> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       return [];
     }
@@ -68,7 +68,7 @@ export const complete = internalMutation({
     goalId: v.id("dailyGoals"),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User must be authenticated to complete a goal.");
     }
@@ -99,7 +99,7 @@ export const remove = internalMutation({
     goalId: v.id("dailyGoals"),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) {
       throw new Error("User must be authenticated to delete a goal.");
     }

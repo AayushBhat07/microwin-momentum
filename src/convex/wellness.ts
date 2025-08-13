@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
-import { getCurrentUser } from "./users";
+import { internal } from "./_generated/api";
 
 // ===== Constants =====
 const SUGGESTION_RULES: Record<string, { categorySlug: string; effortMinutes: number; title: string }[]> = {
@@ -115,7 +115,7 @@ export const saveWellnessAndSuggestions = mutation({
         fromOnboarding: v.optional(v.boolean()),
     },
     handler: async (ctx, { intake, suggestions, fromOnboarding }) => {
-        const user = await getCurrentUser(ctx);
+        const user = await ctx.runQuery(internal.users.getCurrentUser);
         if (!user) throw new Error("User not authenticated");
 
         // 1. Save wellness intake
