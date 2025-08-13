@@ -42,7 +42,7 @@ export default function PreferencesPage() {
   const handleContinue = async () => {
     setIsSubmitting(true);
     try {
-      await completeStep({ step: 4 });
+      await completeStep({ step: 5 });
       toast.success("Setup Complete! You've earned the 'Customization Master' badge!");
       navigate("/dashboard");
     } catch (error) {

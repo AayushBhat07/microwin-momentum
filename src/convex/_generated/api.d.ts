@@ -17,6 +17,7 @@ import type * as achievements from "../achievements.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as backfill from "../backfill.js";
+import type * as backfillOnboardingBadges from "../backfillOnboardingBadges.js";
 import type * as badges from "../badges.js";
 import type * as dailyGoals from "../dailyGoals.js";
 import type * as files from "../files.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
   backfill: typeof backfill;
+  backfillOnboardingBadges: typeof backfillOnboardingBadges;
   badges: typeof badges;
   dailyGoals: typeof dailyGoals;
   files: typeof files;
