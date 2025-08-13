@@ -27,6 +27,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         const handleClick = () => {
           if (item.id === "dashboard") {
             navigate("/dashboard");
+          } else if (item.id === "milestones") {
+            navigate("/milestones");
           }
           onTabChange(item.id);
         };
