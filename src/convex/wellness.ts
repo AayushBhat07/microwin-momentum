@@ -112,8 +112,9 @@ export const saveWellnessAndSuggestions = mutation({
             defaultPrivate: v.boolean(),
             source: v.union(v.literal("onboarding"), v.literal("custom"), v.literal("system")),
         })),
+        fromOnboarding: v.optional(v.boolean()),
     },
-    handler: async (ctx, { intake, suggestions }) => {
+    handler: async (ctx, { intake, suggestions, fromOnboarding }) => {
         const user = await getCurrentUser(ctx);
         if (!user) throw new Error("User not authenticated");
 
@@ -140,10 +141,16 @@ export const saveWellnessAndSuggestions = mutation({
             }
         }
 
-        // 3. Mark onboarding step as complete
-        await ctx.db.patch(user._id, {
-            onboardingStep: 2,
-        });
+        // 3. Mark step as complete
+        const patchData: Partial<typeof user> = {
+            wellnessSetupCompletedAt: Date.now(),
+        };
+
+        if (fromOnboarding) {
+            patchData.onboardingStep = 2;
+        }
+
+        await ctx.db.patch(user._id, patchData);
 
         return { success: true };
     }

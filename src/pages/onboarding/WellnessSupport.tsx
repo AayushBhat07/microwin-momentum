@@ -20,7 +20,12 @@ interface Suggestion {
   source: "onboarding" | "custom" | "system";
 }
 
-export default function WellnessSupport({ onComplete }: { onComplete: () => void }) {
+interface WellnessSupportProps {
+  onComplete: () => void;
+  source?: "onboarding" | "re-entry";
+}
+
+export default function WellnessSupport({ onComplete, source = "onboarding" }: WellnessSupportProps) {
   const trendingChallenges = useQuery(api.wellness.getTrendingChallenges);
   const generateSuggestions = useAction(api.wellness.generateSuggestions);
   const saveWellnessAndSuggestions = useMutation(api.wellness.saveWellnessAndSuggestions);
@@ -128,6 +133,7 @@ export default function WellnessSupport({ onComplete }: { onComplete: () => void
           privacyFlag,
         },
         suggestions: selectedSuggestionObjects,
+        fromOnboarding: source === "onboarding",
       });
       toast.success("Wellness preferences saved! You've earned the 'Self-Care Champion' badge!");
       onComplete();

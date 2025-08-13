@@ -10,7 +10,15 @@ export const currentUser = query({
     if (userId === null) {
       return null;
     }
-    return await ctx.db.get(userId);
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
+
+    const needsWellnessSetup = !user.wellnessSetupCompletedAt;
+
+    return {
+      ...user,
+      needsWellnessSetup,
+    };
   },
 });
 

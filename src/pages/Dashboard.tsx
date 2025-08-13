@@ -10,13 +10,22 @@ import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { FloatingLogButton } from "@/components/logging/FloatingLogButton";
 import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
 import { BadgesMilestonesSection } from "@/components/dashboard/BadgesMilestonesSection";
+import { useNavigate } from "react-router";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && user?.needsWellnessSetup) {
+      navigate("/wellness-setup");
+    }
+  }, [isLoading, user, navigate]);
   
-  if (isLoading) {
+  if (isLoading || user?.needsWellnessSetup) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>

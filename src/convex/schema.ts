@@ -69,6 +69,7 @@ const schema = defineSchema({
     bio: v.optional(v.string()),
     timezone: v.optional(v.string()), // For timezone-aware streak calculation
     onboardingStep: v.optional(v.number()),
+    wellnessSetupCompletedAt: v.optional(v.number()), // For re-entry wellness flow
     
     // Gamification fields
     totalPoints: v.optional(v.number()),

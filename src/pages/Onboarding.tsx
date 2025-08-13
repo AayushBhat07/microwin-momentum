@@ -96,7 +96,7 @@ export default function Onboarding() {
       case 0:
         return <ProfileSetupPage onComplete={() => onCompleteStep(1)} />;
       case 1:
-        return <WellnessSupport onComplete={() => onCompleteStep(2)} />;
+        return <WellnessSupport onComplete={() => onCompleteStep(2)} source="onboarding" />;
       case 2:
         return <OnboardingStep3 onComplete={() => navigate('/dashboard')} />;
       default:
