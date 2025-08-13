@@ -15,7 +15,10 @@ export function RecentUnlocks() {
     );
   }
 
-  const recentBadges = userBadges.slice(0, 6);
+  const recentBadges = (userBadges?.filter(b => b.badgeDetails !== null).slice(0, 6) || []) as Array<{
+    userBadge: any;
+    badgeDetails: NonNullable<any>;
+  }>;
 
   if (recentBadges.length === 0) {
     return (

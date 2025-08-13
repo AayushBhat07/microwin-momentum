@@ -9,7 +9,10 @@ export function BadgesMilestonesSection() {
   const nearMissBadges = useQuery(api.badges.getNearMissBadges);
 
   const recentBadges = userBadges?.slice(0, 6);
-  const featuredBadges = userBadges?.filter(b => b.userBadge.isFeatured);
+  const featuredBadges = userBadges?.filter(b => b.badgeDetails !== null && b.userBadge.isFeatured) as Array<{
+    userBadge: any;
+    badgeDetails: NonNullable<any>;
+  }>;
 
   if (userBadges === undefined || nearMissBadges === undefined) {
     return (
@@ -62,8 +65,8 @@ export function BadgesMilestonesSection() {
         <h2 className="text-2xl font-pixel text-shadow-pixel text-white mb-4">Recent Unlocks</h2>
         {recentBadges && recentBadges.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {recentBadges.map((badge) => (
-              <BadgeCard key={badge.userBadge._id} badge={badge} />
+            {recentBadges.filter(b => b.badgeDetails !== null).map((badge) => (
+              <BadgeCard key={badge.userBadge._id} badge={badge as any} />
             ))}
           </div>
         ) : (

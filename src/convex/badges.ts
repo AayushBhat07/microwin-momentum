@@ -96,14 +96,18 @@ export const getUserBadges = query({
       .collect();
     
     const badgeSlugs = userBadges.map(ub => ub.badgeSlug);
-    const badgeDetails = await Promise.all(
-        badgeSlugs.map(slug => ctx.db.query("badges").withIndex("by_slug", q => q.eq("slug", slug)).unique())
+    const badgeDetailsPromises = badgeSlugs.map(slug => 
+        ctx.db.query("badges").withIndex("by_slug", q => q.eq("slug", slug)).unique()
     );
+    const badgeDetailsResults = await Promise.all(badgeDetailsPromises);
 
-    return userBadges.map((ub, i) => ({
+    const results = userBadges.map((ub, i) => ({
         userBadge: ub,
-        badgeDetails: badgeDetails[i]!
+        badgeDetails: badgeDetailsResults[i]
     }));
+
+    // Filter out any results where badge details were not found
+    return results.filter(r => r.badgeDetails !== null);
   },
 });
 

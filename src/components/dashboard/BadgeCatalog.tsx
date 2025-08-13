@@ -51,7 +51,9 @@ export function BadgeCatalog() {
     if (!catalog || !userBadges) return undefined;
 
     const earnedBadgeMap = new Map(
-      userBadges.map(({ userBadge, badgeDetails }) => [badgeDetails.slug, userBadge])
+      userBadges
+        .filter(({ badgeDetails }) => badgeDetails !== null)
+        .map(({ userBadge, badgeDetails }) => [badgeDetails!.slug, userBadge])
     );
 
     return catalog.map((badge) => {
