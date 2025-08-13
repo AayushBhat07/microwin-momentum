@@ -57,7 +57,6 @@ export const logWin = action({
       userId: user._id,
       achievement,
       userTotals: updatedTotals,
-      userStreak: null, // We'll get fresh streak data below
     });
 
     // 4. Get latest streak info to return to client
