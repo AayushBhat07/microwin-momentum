@@ -4,8 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { QuickPresetsTab } from "./tabs/QuickPresetsTab";
-import { Zap, Type, Mic, Camera } from "lucide-react";
+import { Type, Mic, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { postLogSuccess } from "@/lib/postLogSuccess";
 import { v4 as uuidv4 } from "uuid";
@@ -21,18 +20,17 @@ interface LogAchievementSheetProps {
 
 export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("quick");
+  const [activeTab, setActiveTab] = useState("text");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const logWin = useAction(api.logWin.logWin);
   const categories = useQuery(api.achievements.getCategories);
-  const completeGoal = useMutation(api.goals.completeGoal);
 
   const handleSubmit = async (data: {
     title: string;
     description?: string;
     categorySlug: string;
-    source: "quick" | "text" | "voice" | "photo";
+    source: "text" | "voice" | "photo";
     photoStorageId?: Id<"_storage">;
     audioStorageId?: Id<"_storage">; // For voice logs
     tags?: string[];
@@ -49,7 +47,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
       return false;
     }
 
-    if (!data.categorySlug && data.source !== 'quick') {
+    if (!data.categorySlug) {
       toast.error("Category is required");
       return false;
     }
@@ -71,20 +69,12 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         clientId,
       });
 
-      // The action throws an error on failure, so if we get here, it was successful.
-      // The return value `result` contains the new achievement data.
       if (result && result.achievement) {
-        // Use centralized success handler
         postLogSuccess(result);
-        
-        // Close the sheet
         onOpenChange(false);
-        
-        // Reset to quick tab for next use
-        setActiveTab("quick");
+        setActiveTab("text");
         return true;
       } else {
-        // This case might happen if the action returns something unexpected but doesn't throw.
         toast.error("Failed to log achievement. Unexpected response from server.");
         return false;
       }
@@ -94,25 +84,6 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
       return false;
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleQuickPresetSubmit = async (goal: Doc<"dailyGoals">) => {
-    const success = await handleSubmit({
-      title: goal.title,
-      description: `Completed daily goal: ${goal.title}`,
-      categorySlug: goal.category,
-      source: "quick",
-      isPublic: true,
-    });
-
-    if (success) {
-      try {
-        await completeGoal({ goalId: goal._id });
-      } catch (error) {
-        console.error("Failed to mark goal as complete:", error);
-        toast.error("Achievement logged, but failed to update goal status.");
-      }
     }
   };
 
@@ -129,10 +100,7 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
 
         <div className="mt-6 flex-1 overflow-y-auto -mr-6 pr-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gray-800/50 sticky top-0 z-10 backdrop-blur-sm">
-              <TabsTrigger value="quick" className="data-[state=active]:bg-blue-600">
-                <Zap className="h-4 w-4" />
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 sticky top-0 z-10 backdrop-blur-sm">
               <TabsTrigger value="text" className="data-[state=active]:bg-blue-600">
                 <Type className="h-4 w-4" />
               </TabsTrigger>
@@ -143,12 +111,6 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
                 <Camera className="h-4 w-4" />
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="quick" className="mt-4">
-              <QuickPresetsTab 
-                onSelect={handleQuickPresetSubmit}
-              />
-            </TabsContent>
 
             <TabsContent value="text" className="mt-4">
               <TextLogForm 
