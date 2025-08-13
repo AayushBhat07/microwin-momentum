@@ -3,6 +3,7 @@ import { Trophy, Star } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 interface BadgeCardProps {
   badge: {
@@ -65,6 +66,9 @@ export function BadgeCard({ badge }: BadgeCardProps) {
           className={`text-xs ${rarityTextColor} mt-2 uppercase font-bold tracking-widest`}
         >
           {badgeDetails.rarity}
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          {format(new Date(userBadge.earnedAt), "MMM d, yyyy")}
         </p>
       </div>
     </div>

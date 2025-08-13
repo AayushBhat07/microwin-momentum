@@ -60,9 +60,9 @@ export function ProgressRingCard({ progress, current, target, name, description 
 
         {/* Text content */}
         <h3 className="text-lg text-blue-200 mb-1 font-pixel">{name}</h3>
-        <p className="text-sm text-blue-400 font-pixel text-center">{description}</p>
-        <p className="text-sm text-blue-400 font-pixel">{current} of {target}</p>
-        <p className="text-2xl text-white mt-2 font-pixel">{progress}%</p>
+        <p className="text-sm text-blue-400 font-pixel text-center mb-2">{description}</p>
+        <p className="text-2xl text-white font-pixel">{progress}%</p>
+        <p className="text-sm text-blue-300 font-pixel mt-1">{current} / {target}</p>
       </div>
     </motion.div>
   );
