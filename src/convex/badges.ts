@@ -20,6 +20,7 @@ export const awardBadge = internalMutation({
       .unique();
 
     if (existing) {
+      console.log(`Skipping award: User ${userId} already has badge "${badgeSlug}".`);
       return null; // Already awarded
     }
 
@@ -29,17 +30,17 @@ export const awardBadge = internalMutation({
       .unique();
 
     if (!badge) {
-      console.warn(`Badge with slug "${badgeSlug}" not found.`);
+      console.warn(`Badge with slug "${badgeSlug}" not found in catalog.`);
       return null;
     }
 
+    console.log(`AWARDING badge "${badgeSlug}" to user ${userId}. Reason: ${reason}`);
     await ctx.db.insert("userBadges", {
       userId,
       badgeSlug,
       earnedAt: Date.now(),
     });
 
-    console.log(`Awarded badge "${badgeSlug}" to user ${userId}. Reason: ${reason}`);
     return badge;
   },
 });

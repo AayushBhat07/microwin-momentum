@@ -17,7 +17,6 @@ export const logWin = action({
     audioStorageId: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
     isPublic: v.optional(v.boolean()),
-    source: v.optional(v.string()),
     clientId: v.string(),
   },
   handler: async (ctx, args): Promise<{
@@ -58,7 +57,7 @@ export const logWin = action({
       userId: user._id,
       achievement,
       userTotals: updatedTotals,
-      userStreak: null,
+      userStreak: null, // Streak is handled inside userStats now, but let's pass it for now
     });
 
     // 4. Return full payload
@@ -66,7 +65,7 @@ export const logWin = action({
       success: true,
       achievement,
       totals: updatedTotals,
-      streak: null,
+      streak: null, // This should be updated to return the latest streak info
       badges_unlocked,
     };
   },

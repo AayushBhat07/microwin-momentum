@@ -69,8 +69,8 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
         clientId,
       });
 
-      if (result && result.achievement) {
-        postLogSuccess(result as any);
+      if (result?.success) {
+        postLogSuccess(result);
         onOpenChange(false);
         setActiveTab("text");
         return true;

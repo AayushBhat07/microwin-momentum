@@ -1,45 +1,36 @@
 import { toast } from "sonner";
 import { Doc } from "@/convex/_generated/dataModel";
 
-interface LogResponse {
+type LogResult = {
+  success: boolean;
   achievement: Doc<"achievements">;
   totals: Doc<"user_totals"> | null;
   streak: Doc<"user_streaks"> | null;
-  unlockedBadges: Doc<"badges">[];
-}
+  badges_unlocked: Doc<"badges">[];
+};
 
-export function postLogSuccess(logResponse: LogResponse) {
-  const { achievement, unlockedBadges } = logResponse;
+export const postLogSuccess = (result: LogResult) => {
+  console.log("postLogSuccess received result:", result);
 
-  // Show success toast for the achievement
-  toast.success(`Achievement logged! +${achievement.pointsEarned} points`, {
-    description: achievement.title,
+  // Basic success toast
+  toast.success(`Achievement logged: "${result.achievement.title}"`, {
+    description: `+${result.achievement.pointsEarned} points!`,
   });
 
-  // Show badge celebrations if any badges were unlocked
-  if (unlockedBadges?.length > 0) {
-    // Use a timeout to stagger the badge announcements
-    setTimeout(() => {
-      unlockedBadges.forEach((badge, index) => {
-        setTimeout(() => {
-          toast.success(`🏆 Badge Unlocked: ${badge.name}!`, {
-            description: badge.description,
-            duration: 5000,
-            icon: '🎉',
-          });
-        }, index * 1500); // Stagger each badge toast
-      });
-    }, 1000); // Initial delay after the main achievement toast
+  // Celebrate unlocked badges
+  if (result.badges_unlocked && result.badges_unlocked.length > 0) {
+    result.badges_unlocked.forEach((badge, index) => {
+      setTimeout(() => {
+        toast.success("✨ New Badge Unlocked! ✨", {
+          description: badge.name,
+          icon: "🏆",
+        });
+      }, (index + 1) * 700); // Stagger notifications
+    });
   }
 
-  // Convex's reactivity handles UI updates automatically.
-  // We can still fire events if needed for non-reactive components or animations.
-  
-  // Trigger heatmap pulse animation
-  window.dispatchEvent(new CustomEvent('heatmapPulse', {
-    detail: {
-      date: new Date(achievement.loggedAt).toISOString().split('T')[0],
-      points: achievement.pointsEarned
-    }
-  }));
-}
+  // TODO: Add query invalidation here for react-query or similar
+  // For Convex, live queries should update automatically, but sometimes
+  // a manual refetch might be needed if data is passed between components
+  // without being part of a live query.
+};
