@@ -20,8 +20,8 @@ const formSchema = z.object({
 });
 
 interface VoiceLogFormProps {
-  categories: { slug: string; name: string; color: string; }[];
-  onSubmit: (data: z.infer<typeof formSchema> & { source: "voice", audioStorageId?: Id<"_storage"> }) => Promise<void>;
+  categories: { slug: string; name: string; colorHex: string; }[];
+  onSubmit: (data: any) => void;
   isSubmitting: boolean;
 }
 

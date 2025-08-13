@@ -16,8 +16,8 @@ const formSchema = z.object({
 });
 
 interface TextLogFormProps {
-  categories: { slug: string; name: string; color: string; }[];
-  onSubmit: (data: z.infer<typeof formSchema> & { source: "text" }) => Promise<void>;
+  categories: { slug: string; name: string; colorHex: string; }[];
+  onSubmit: (data: any) => void;
   isSubmitting: boolean;
 }
 

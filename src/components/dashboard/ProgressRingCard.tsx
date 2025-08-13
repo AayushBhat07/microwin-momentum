@@ -2,68 +2,39 @@ import { motion } from "framer-motion";
 import { Sun } from "lucide-react";
 
 interface ProgressRingCardProps {
-  progress: number; // 0-100
-  current: number;
-  target: number;
   name: string;
   description: string;
+  progress: number;
+  current: number;
+  target: number;
 }
 
-export function ProgressRingCard({ progress, current, target, name, description }: ProgressRingCardProps) {
-  const circumference = 2 * Math.PI * 40; // radius of 40
-  const strokeDasharray = circumference;
-  const strokeDashoffset = circumference - (progress / 100) * circumference;
+export function ProgressRingCard({ name, description, progress, current, target }: ProgressRingCardProps) {
+  const percentage = Math.round(progress);
 
   return (
-    <motion.div
-      className="bg-black/60 backdrop-blur-sm p-3 border-2 border-blue-900/80 font-pixel h-full flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="flex flex-col items-center flex-grow justify-center">
-        {/* Progress Ring */}
-        <div className="relative w-24 h-24 mb-3">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-            {/* Background circle */}
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              stroke="var(--blue-900)"
-              strokeWidth="6"
-              fill="none"
-            />
-            {/* Progress circle */}
-            <motion.circle
-              cx="50"
-              cy="50"
-              r="45"
-              stroke="var(--blue-500)"
-              strokeWidth="6"
-              fill="none"
-              strokeLinecap="butt"
-              strokeDasharray={strokeDasharray}
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            />
-          </svg>
-          
-          {/* Center icon */}
+    <div className="bg-card p-4 rounded-lg border flex flex-col items-center text-center h-full shadow-md">
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <div className="p-2 bg-primary/10 rounded-full mb-2 text-primary">
+          <Sun className="w-4 h-4" />
+        </div>
+        <h3 className="text-sm font-semibold tracking-tight">{name}</h3>
+        <p className="text-xs text-muted-foreground mt-1">{description}</p>
+      </div>
+      <div className="w-full text-center mt-3">
+        <p className="text-sm font-bold text-primary mb-2">{`${current.toLocaleString()} / ${target.toLocaleString()}`}</p>
+        <div className="w-full bg-muted rounded-full h-6 border-2 border-foreground/20 overflow-hidden relative">
+          <div 
+            className="bg-primary h-full rounded-full transition-all duration-500" 
+            style={{ width: `${percentage}%` }}
+          />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 bg-blue-900/30 flex items-center justify-center border-2 border-blue-700">
-              <Sun className="w-6 h-6 text-blue-300" />
-            </div>
+            <span className="text-xs font-bold text-primary-foreground mix-blend-difference">
+              {percentage}%
+            </span>
           </div>
         </div>
-
-        {/* Text content */}
-        <h3 className="text-base text-blue-200 mb-1 font-pixel text-center">{name}</h3>
-        <p className="text-xs text-blue-400 font-pixel text-center mb-2 flex-grow">{description}</p>
-        <p className="text-xl text-white font-pixel">{progress}%</p>
-        <p className="text-xs text-blue-300 font-pixel mt-1">{current} / {target}</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
