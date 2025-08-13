@@ -81,7 +81,7 @@ export function BadgeCatalog() {
     );
   }
 
-  const filterCategories = ["all", "wins", "streak", "category", "mode", "special"];
+  const filterCategories = ["all", "wins", "streak", "category", "variety", "mode", "explore", "community", "event"];
 
   return (
     <div>

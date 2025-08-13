@@ -232,7 +232,7 @@ export const evaluateAchievement = internalAction({
 
     // 1. Wins Milestones
     const totalAchievements = user.totalAchievements ? user.totalAchievements + 1 : 1;
-    const winBadges = allBadges.filter((b: any) => b.category === "wins" && b.threshold);
+    const winBadges = allBadges.filter((b: any) => b.family === "wins" && b.threshold);
     for (const badge of winBadges) {
         if (!userBadgeSlugs.has(badge.slug) && totalAchievements >= badge.threshold!) {
             const unlocked = await ctx.runMutation(internal.badges.awardBadge, { userId, badgeSlug: badge.slug });
@@ -241,7 +241,7 @@ export const evaluateAchievement = internalAction({
     }
 
     // 2. Streak Milestones
-    const streakBadges = allBadges.filter((b: any) => b.category === "streak" && b.threshold);
+    const streakBadges = allBadges.filter((b: any) => b.family === "streak" && b.threshold);
     for (const badge of streakBadges) {
         if (!userBadgeSlugs.has(badge.slug) && user.currentStreak === badge.threshold!) {
             const unlocked = await ctx.runMutation(internal.badges.awardBadge, { userId, badgeSlug: badge.slug });
