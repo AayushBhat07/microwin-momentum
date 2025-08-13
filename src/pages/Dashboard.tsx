@@ -47,7 +47,7 @@ export default function Dashboard() {
   }
 
   // If user needs wellness setup, show loader while redirecting via useEffect
-  if (user.needsWellnessSetup) {
+  if (user && user.needsWellnessSetup) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>

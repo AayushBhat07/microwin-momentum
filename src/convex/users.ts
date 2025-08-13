@@ -4,16 +4,11 @@ import { Doc, Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getCurrentUser = async (ctx: { db: any, auth: any }) => {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
     return null;
   }
-  const user = await ctx.db
-    .query("users")
-    .withIndex("email", (q: any) => q.eq("email", identity.email))
-    .unique();
-
-  return user;
+  return await ctx.db.get(userId);
 };
 
 export const currentUser = query({
