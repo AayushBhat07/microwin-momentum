@@ -35,13 +35,17 @@ export const categoryValidator = v.union(
   v.literal("personal"),
 );
 
-export const BADGE_CATEGORIES = v.union(
+export const BADGE_FAMILIES = v.union(
   v.literal("wins"),
   v.literal("streak"),
-  v.literal("onboarding"),
   v.literal("category"),
+  v.literal("variety"),
   v.literal("mode"),
-  v.literal("variety")
+  v.literal("onboarding"),
+  v.literal("explore"),
+  v.literal("community"),
+  v.literal("event"),
+  v.literal("admin")
 );
 
 export const BADGE_RARITY = v.union(
@@ -163,9 +167,11 @@ const schema = defineSchema({
     slug: v.string(),
     name: v.string(),
     description: v.string(),
-    icon: v.string(), // Lucide icon name
-    category: BADGE_CATEGORIES,
+    icon: v.string(), // Lucide icon name or URL
+    family: BADGE_FAMILIES,
+    categorySlug: v.optional(v.string()), // For category mastery badges
     threshold: v.optional(v.number()),
+    window: v.optional(v.union(v.literal("7d"), v.literal("14d"), v.literal("30d"), v.literal("month"))),
     rarity: BADGE_RARITY,
     isActive: v.boolean(),
   }).index("by_slug", ["slug"]),

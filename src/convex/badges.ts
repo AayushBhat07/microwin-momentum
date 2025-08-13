@@ -121,11 +121,11 @@ export const getNearMissBadges = query({
                     let current = 0;
                     const target = badge.threshold!;
 
-                    if (badge.category === "wins") {
+                    if (badge.family === "wins") {
                         current = user.totalAchievements || 0;
-                    } else if (badge.category === "streak") {
+                    } else if (badge.family === "streak") {
                         current = user.currentStreak || 0;
-                    } else if (badge.category === "category" && badge.slug.startsWith("category_mastery_")) {
+                    } else if (badge.family === "category" && badge.slug.startsWith("category_mastery_")) {
                         const slugParts = badge.slug.split('_');
                         if (slugParts.length >= 3) {
                             const categorySlug = slugParts[2];

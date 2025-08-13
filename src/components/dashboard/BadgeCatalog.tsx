@@ -67,7 +67,7 @@ export function BadgeCatalog() {
   const filteredBadges = useMemo(() => {
     if (!badgesWithStatus) return [];
     return badgesWithStatus.filter(b => {
-      const categoryMatch = filter === 'all' || b.badgeDetails.category === filter;
+      const categoryMatch = filter === 'all' || b.badgeDetails.family === filter;
       const statusMatch = statusFilter === 'all' || (statusFilter === 'earned' && b.isEarned) || (statusFilter === 'locked' && !b.isEarned);
       return categoryMatch && statusMatch;
     });
