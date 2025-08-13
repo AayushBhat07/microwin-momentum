@@ -55,17 +55,25 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <motion.div
-              className="mb-8"
+              className="mb-8 flex justify-between items-center"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-4xl font-pixel text-white text-shadow-pixel mb-2">
-                Welcome back, {user.name || 'Champion'}!
-              </h1>
-              <p className="text-blue-300 font-pixel text-lg">
-                Here's your quest log for today.
-              </p>
+              <div>
+                <h1 className="text-4xl font-pixel text-white text-shadow-pixel mb-2">
+                  Welcome back, {user.name || 'Champion'}!
+                </h1>
+                <p className="text-blue-300 font-pixel text-lg">
+                  Here's your quest log for today.
+                </p>
+              </div>
+              <button 
+                onClick={() => setIsLogSheetOpen(true)}
+                className="font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all px-6 py-3 hidden md:block"
+              >
+                Log a Win
+              </button>
             </motion.div>
 
             {/* Main Grid */}
