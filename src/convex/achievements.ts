@@ -1,12 +1,20 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
-import { categoryValidator } from "./schema";
-import { v } from "convex/values";
-import { paginationOptsValidator } from "convex/server";
+import { action, internalQuery, query, mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { Id } from "./_generated/dataModel";
+import { paginationOptsValidator } from "convex/server";
+import { v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
-// Get achievements for the logged-in user
+export const getAllForUser = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("achievements")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
+  },
+});
+
 export const getMyAchievements = query({
   args: {},
   handler: async (ctx) => {
@@ -14,6 +22,7 @@ export const getMyAchievements = query({
     if (!userId) {
       return [];
     }
+    
     return await ctx.db
       .query("achievements")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -22,138 +31,24 @@ export const getMyAchievements = query({
   },
 });
 
-// Get public feed for community features
+export const getCategories = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("achievement_categories").collect();
+  },
+});
+
 export const getPublicFeed = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const achievements = await ctx.db
+    return await ctx.db
       .query("achievements")
       .filter((q) => q.eq(q.field("isPublic"), true))
       .order("desc")
       .paginate(args.paginationOpts);
-
-    const page = await Promise.all(
-      achievements.page.map(async (achievement) => {
-        const user = await ctx.db.get(achievement.userId);
-        return { ...achievement, user };
-      })
-    );
-
-    return { ...achievements, page };
   },
 });
 
-// New internal mutation for creating an achievement
-export const internalCreate = internalMutation({
-  args: {
-    userId: v.id("users"),
-    title: v.string(),
-    description: v.optional(v.string()),
-    category: categoryValidator,
-    pointsEarned: v.number(),
-    photoStorageId: v.optional(v.id("_storage")),
-    isPublic: v.boolean(),
-    source: v.union(
-      v.literal("quick"),
-      v.literal("text"),
-      v.literal("voice"),
-      v.literal("photo")
-    ),
-    tags: v.optional(v.array(v.string())),
-  },
-  handler: async (ctx, args) => {
-    const clientId = `${args.userId}-${Date.now()}-${Math.random()}`;
-
-    const achievementId = await ctx.db.insert("achievements", {
-      userId: args.userId,
-      clientId,
-      categorySlug: args.category,
-      category: args.category,
-      title: args.title,
-      description: args.description,
-      photoStorageId: args.photoStorageId,
-      pointsEarned: args.pointsEarned,
-      points: args.pointsEarned,
-      source: args.source,
-      tags: args.tags,
-      isPublic: args.isPublic,
-      loggedAt: Date.now(),
-    });
-
-    return achievementId;
-  },
-});
-
-// New log action that orchestrates everything
-export const log = action({
-  args: {
-    title: v.string(),
-    description: v.optional(v.string()),
-    category: categoryValidator,
-    pointsEarned: v.number(),
-    photoUrl: v.optional(v.string()),
-    isPublic: v.boolean(),
-    source: v.union(
-      v.literal("quick"),
-      v.literal("text"),
-      v.literal("voice"),
-      v.literal("photo")
-    ),
-    tags: v.optional(v.array(v.string())),
-  },
-  handler: async (ctx, args): Promise<{ unlockedBadges: any[] }> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-    const userId = identity.subject as Id<"users">;
-
-    // 1. Create the achievement
-    const achievementId: Id<"achievements"> = await ctx.runMutation(internal.achievements.internalCreate, {
-      userId,
-      ...args,
-    });
-    
-    const achievement: any = await ctx.runQuery(internal.achievements.get, { id: achievementId });
-    if (!achievement) {
-        return { unlockedBadges: [] };
-    }
-
-    // 2. Update user points
-    await ctx.runMutation(internal.userStats.updateUserPoints, {
-      userId,
-      points: args.pointsEarned,
-    });
-
-    // 3. Update user streak
-    await ctx.runMutation(internal.userStats.updateUserStreak, { userId });
-
-    // 4. Update daily stats
-    await ctx.runMutation(internal.userStats.updateUserDailyStats, {
-      userId,
-      points: args.pointsEarned,
-    });
-
-    // 5. Evaluate and award badges
-    const unlockedBadges: any[] = await ctx.runAction(internal.badges.checkAllBadges, {
-        userId,
-        achievement,
-    });
-
-    // The badge system will handle first win detection automatically
-
-    return { unlockedBadges };
-  },
-});
-
-export const get = internalQuery({
-    args: { id: v.id("achievements") },
-    handler: async (ctx, { id }) => {
-        return await ctx.db.get(id);
-    }
-});
-
-// Get heat map data for calendar visualization
 export const getHeatMapData = query({
   args: {},
   handler: async (ctx) => {
@@ -161,31 +56,23 @@ export const getHeatMapData = query({
     if (!userId) {
       return [];
     }
-
-    const sevenMonthsAgo = new Date();
-    sevenMonthsAgo.setMonth(sevenMonthsAgo.getMonth() - 7);
-
+    
     const achievements = await ctx.db
       .query("achievements")
       .withIndex("by_user", (q) => q.eq("userId", userId))
-      .filter(q => q.gt(q.field("_creationTime"), sevenMonthsAgo.getTime()))
       .collect();
 
-    const dailyStats = achievements.reduce((acc, achievement) => {
+    // Group by date and count
+    const dateMap: Record<string, number> = {};
+    achievements.forEach(achievement => {
       const date = new Date(achievement.loggedAt).toISOString().split('T')[0];
-      if (!acc[date]) {
-        acc[date] = { date, count: 0, points: 0 };
-      }
-      acc[date].count++;
-      acc[date].points += achievement.pointsEarned;
-      return acc;
-    }, {} as Record<string, { date: string; count: number; points: number }>);
+      dateMap[date] = (dateMap[date] || 0) + 1;
+    });
 
-    return Object.values(dailyStats);
+    return Object.entries(dateMap).map(([date, count]) => ({ date, count }));
   },
 });
 
-// Get achievement stats for progress visualization
 export const getAchievementStats = query({
   args: {},
   handler: async (ctx) => {
@@ -193,41 +80,105 @@ export const getAchievementStats = query({
     if (!userId) {
       return null;
     }
-
+    
     const achievements = await ctx.db
       .query("achievements")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
-
-    // Group by category
-    const categoryStats = achievements.reduce((acc, achievement) => {
-      const category = achievement.category;
-      if (!acc[category]) {
-        acc[category] = { name: category, count: 0, points: 0 };
-      }
-      acc[category].count++;
-      acc[category].points += achievement.pointsEarned;
-      return acc;
-    }, {} as Record<string, { name: string; count: number; points: number }>);
-
+    
     return {
+      total: achievements.length,
       totalAchievements: achievements.length,
-      totalPoints: achievements.reduce((sum, a) => sum + a.pointsEarned, 0),
-      categories: Object.values(categoryStats),
+      byCategory: achievements.reduce((acc: Record<string, number>, achievement) => {
+        acc[achievement.categorySlug] = (acc[achievement.categorySlug] || 0) + 1;
+        return acc;
+      }, {}),
+      categories: Object.entries(
+        achievements.reduce((acc: Record<string, number>, achievement) => {
+          acc[achievement.categorySlug] = (acc[achievement.categorySlug] || 0) + 1;
+          return acc;
+        }, {})
+      ).map(([name, count]) => ({ name, count, points: count * 20 }))
     };
   },
 });
 
-// Alias for getUserAchievements (used by gallery components)
-export const getUserAchievements = getMyAchievements;
+export const internalLogAchievement = mutation({
+    args: {
+        title: v.string(),
+        description: v.optional(v.string()),
+        categorySlug: v.string(),
+        pointsEarned: v.number(),
+        isPublic: v.boolean(),
+        source: v.string(),
+        userId: v.id("users"),
+    },
+    handler: async (ctx, { userId, title, description, categorySlug, pointsEarned, isPublic, source }) => {
+        const achievementId = await ctx.db.insert("achievements", {
+            userId,
+            title,
+            description,
+            category: categorySlug as any,
+            categorySlug,
+            points: pointsEarned,
+            pointsEarned,
+            isPublic,
+            source: source as any,
+            loggedAt: Date.now(),
+            clientId: `backfill-${Date.now()}`,
+        });
 
-// Add getCategories query
-export const getCategories = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("achievement_categories")
-      .filter((q) => q.eq(q.field("isActive"), true))
-      .collect();
+        await ctx.scheduler.runAfter(0, internal.badges.checkAllBadges, {
+            userId,
+            achievement: { title, description, categorySlug, pointsEarned, isPublic, source, _id: achievementId },
+        });
+
+        return achievementId;
+    }
+});
+
+export const log = mutation({
+  args: {
+    title: v.string(),
+    description: v.optional(v.string()),
+    category: v.string(),
+    pointsEarned: v.number(),
+    isPublic: v.boolean(),
+    source: v.string(),
+  },
+  handler: async (ctx, args): Promise<any> => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const achievementId = await ctx.db.insert("achievements", {
+      userId,
+      title: args.title,
+      description: args.description,
+      category: args.category as any,
+      categorySlug: args.category,
+      points: args.pointsEarned,
+      pointsEarned: args.pointsEarned,
+      isPublic: args.isPublic,
+      source: args.source as any,
+      loggedAt: Date.now(),
+      clientId: `log-${Date.now()}`,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.badges.checkAllBadges, {
+      userId,
+      achievement: { 
+        title: args.title, 
+        description: args.description, 
+        categorySlug: args.category, 
+        pointsEarned: args.pointsEarned, 
+        isPublic: args.isPublic, 
+        source: args.source, 
+        _id: achievementId 
+      },
+    });
+    
+    return achievementId;
   },
 });

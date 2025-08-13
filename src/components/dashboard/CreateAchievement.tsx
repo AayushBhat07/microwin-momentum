@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAction } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ export function CreateAchievement({ trigger }: CreateAchievementProps = {}) {
   const [isPublic, setIsPublic] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
-  const createAchievement = useAction(api.achievements.log);
+  const createAchievement = useMutation(api.achievements.log);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

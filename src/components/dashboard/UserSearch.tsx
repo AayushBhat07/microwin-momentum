@@ -14,8 +14,8 @@ export function UserSearch() {
   const [searchTerm, setSearchTerm] = useState("");
   
   const searchResults = useQuery(
-    api.users.searchUsers, 
-    searchTerm.trim() ? { searchTerm: searchTerm.trim() } : "skip"
+    api.users.searchUsers,
+    searchTerm.trim() ? { query: searchTerm.trim() } : "skip"
   );
 
   return (

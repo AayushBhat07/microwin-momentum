@@ -28,7 +28,7 @@ export function UserButton({ size = 8 }: UserButtonProps) {
   const initials = user.name
     ? user.name
         .split(" ")
-        .map((n) => n[0])
+        .map((n: string) => n[0])
         .join("")
         .toUpperCase()
     : user.email?.charAt(0).toUpperCase() || "U";

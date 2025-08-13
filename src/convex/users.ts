@@ -32,3 +32,55 @@ export const getUserTotals = internalQuery({
             .unique();
     }
 });
+
+export const getAll = internalQuery({
+    handler: async (ctx) => {
+        return await ctx.db.query("users").collect();
+    }
+});
+
+export const searchUsers = query({
+  args: { query: v.string() },
+  handler: async (ctx, { query }) => {
+    if (!query.trim()) {
+      return [];
+    }
+    
+    return await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.gte("username", query))
+      .take(10);
+  },
+});
+
+export const getProfileByUsername = query({
+  args: { username: v.string() },
+  handler: async (ctx, { username }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+    
+    if (!user) {
+      return null;
+    }
+
+    // Get user achievements
+    const achievements = await ctx.db
+      .query("achievements")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    // Get user badges
+    const userBadges = await ctx.db
+      .query("userBadges")
+      .withIndex("by_user_and_earned_at", (q) => q.eq("userId", user._id))
+      .collect();
+
+    return {
+      ...user,
+      achievements,
+      badges: userBadges,
+    };
+  },
+});

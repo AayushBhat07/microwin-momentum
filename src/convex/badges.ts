@@ -1,8 +1,8 @@
-
 import { internal } from "./_generated/api";
-import { internalAction, internalMutation, query } from "./_generated/server";
+import { internalAction, internalMutation, internalQuery, query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Doc, Id } from "./_generated/dataModel";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 // --- Idempotent Badge Awarding ---
 export const awardBadge = internalMutation({
@@ -45,21 +45,14 @@ export const awardBadge = internalMutation({
 });
 
 // --- Badge Evaluation Engine ---
-// This action will be the central point for checking and awarding all badges.
 export const checkAllBadges = internalAction({
     args: {
         userId: v.id("users"),
-        // We can pass the context of the trigger, e.g., the new achievement
         achievement: v.optional(v.any()), 
     },
     handler: async (ctx, { userId, achievement }): Promise<Doc<"badges">[]> => {
         const newlyAwarded: Doc<"badges">[] = [];
 
-        // In a full implementation, we would check all badge families here
-        // based on the detailed rules provided in the prompt.
-        // For now, this is a placeholder for the full engine.
-        
-        // Example: Check for "first_win" badge
         const userTotals = await ctx.runQuery(internal.users.getUserTotals, { userId });
         if (userTotals?.totalAchievements === 1) {
             const awarded: Doc<"badges"> | null = await ctx.runMutation(internal.badges.awardBadge, {
@@ -70,9 +63,14 @@ export const checkAllBadges = internalAction({
             if (awarded) newlyAwarded.push(awarded);
         }
 
-        // The full engine would continue to check streaks, progress, categories, etc.
-
         return newlyAwarded;
+    }
+});
+
+export const getBadgeCatalogInternal = internalQuery({
+    args: {},
+    handler: async (ctx) => {
+        return await ctx.db.query("badges").collect();
     }
 });
 
@@ -84,9 +82,13 @@ export const getCatalog = query({
 });
 
 export const getUserBadges = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    // In a real app, you'd verify ownership or that the profile is public
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
     const userBadges = await ctx.db
       .query("userBadges")
       .withIndex("by_user_and_earned_at", (q) => q.eq("userId", userId))
@@ -99,8 +101,83 @@ export const getUserBadges = query({
     );
 
     return userBadges.map((ub, i) => ({
-        ...ub,
-        details: badgeDetails[i]
+        userBadge: ub,
+        badgeDetails: badgeDetails[i]!
     }));
+  },
+});
+
+export const featureBadge = mutation({
+  args: {
+    badgeSlug: v.string(),
+    isFeatured: v.boolean(),
+  },
+  handler: async (ctx, { badgeSlug, isFeatured }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const userBadge = await ctx.db
+      .query("userBadges")
+      .withIndex("by_user_and_badge", (q) =>
+        q.eq("userId", userId).eq("badgeSlug", badgeSlug)
+      )
+      .unique();
+
+    if (!userBadge) {
+      throw new Error("Badge not found");
+    }
+
+    await ctx.db.patch(userBadge._id, {
+      isFeatured,
+    });
+  },
+});
+
+export const getNearMissBadges = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
+    // Get user stats for progress calculation
+    const userTotals = await ctx.db
+      .query("user_totals")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    const totalAchievements = userTotals?.totalAchievements || 0;
+
+    // Return near-miss badges with progress
+    const nearMissBadges = [];
+    
+    // Example: First Win badge (if user has 0 achievements)
+    if (totalAchievements === 0) {
+      nearMissBadges.push({
+        _id: "wins_1",
+        name: "First Victory",
+        description: "Log your first achievement",
+        progress: 0,
+        current: 0,
+        target: 1
+      });
+    }
+    
+    // Example: 10 Wins badge (if user has 1-9 achievements)
+    if (totalAchievements > 0 && totalAchievements < 10) {
+      nearMissBadges.push({
+        _id: "wins_10",
+        name: "Getting Started",
+        description: "Log 10 achievements",
+        progress: (totalAchievements / 10) * 100,
+        current: totalAchievements,
+        target: 10
+      });
+    }
+
+    return nearMissBadges;
   },
 });

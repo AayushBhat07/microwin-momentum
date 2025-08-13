@@ -12,12 +12,12 @@ export function AchievementFeed() {
   const [activeTab, setActiveTab] = useState("my");
 
   const myAchievements = useQuery(api.achievements.getMyAchievements, {});
-  const publicFeed = useQuery(api.achievements.getPublicFeed, { 
+  const publicFeedResult = useQuery(api.achievements.getPublicFeed, { 
     paginationOpts: { numItems: 20, cursor: null }
   });
 
   const isLoadingMy = myAchievements === undefined;
-  const isLoadingPublic = publicFeed === undefined;
+  const isLoadingPublic = publicFeedResult === undefined;
 
   return (
     <Card>
@@ -66,10 +66,10 @@ export function AchievementFeed() {
               <div className="flex justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            ) : publicFeed && publicFeed.page.length > 0 ? (
+            ) : publicFeedResult && publicFeedResult.page.length > 0 ? (
               <div className="space-y-3">
                 <AnimatePresence>
-                  {publicFeed.page.map((achievement: Doc<"achievements">, index: number) => (
+                  {publicFeedResult.page.map((achievement: Doc<"achievements">, index: number) => (
                     <motion.div
                       key={achievement._id}
                       initial={{ opacity: 0, y: -20 }}
