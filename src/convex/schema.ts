@@ -198,6 +198,9 @@ const schema = defineSchema({
     achievementsCount: v.number(),
     pointsEarned: v.number(),
     goalsCompleted: v.number(),
+    // for badge rolling windows
+    categories: v.array(v.string()),
+    photoCount: v.number(),
   }).index("by_user_and_date", ["userId", "date"]),
 
   dailyGoals: defineTable({

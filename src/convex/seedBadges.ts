@@ -1,422 +1,80 @@
 import { internalMutation } from "./_generated/server";
+import { v } from "convex/values";
+
+const badgeData = [
+  // 1. Total Wins (Progress)
+  { slug: "wins_1", name: "First Win!", description: "Log your very first win.", icon: "Award", family: "wins", threshold: 1, rarity: "common", isActive: true },
+  { slug: "wins_10", name: "Win Collector", description: "Log 10 wins.", icon: "Medal", family: "wins", threshold: 10, rarity: "common", isActive: true },
+  { slug: "wins_25", name: "Winning Habit", description: "Log 25 wins.", icon: "Medal", family: "wins", threshold: 25, rarity: "common", isActive: true },
+  { slug: "wins_50", name: "Serious Winner", description: "Log 50 wins.", icon: "Trophy", family: "wins", threshold: 50, rarity: "uncommon", isActive: true },
+  { slug: "wins_100", name: "Centurion", description: "Log 100 wins.", icon: "Trophy", family: "wins", threshold: 100, rarity: "uncommon", isActive: true },
+  { slug: "wins_250", name: "Win Machine", description: "Log 250 wins.", icon: "Gem", family: "wins", threshold: 250, rarity: "rare", isActive: true },
+  { slug: "wins_500", name: "Victory Incarnate", description: "Log 500 wins.", icon: "Gem", family: "wins", threshold: 500, rarity: "rare", isActive: true },
+  { slug: "wins_1000", name: "Legend of Winning", description: "Log 1,000 wins.", icon: "Crown", family: "wins", threshold: 1000, rarity: "epic", isActive: true },
+
+  // 2. Streaks (Daily Consistency)
+  { slug: "streak_3", name: "On a Roll", description: "Maintain a 3-day streak.", icon: "Flame", family: "streak", threshold: 3, rarity: "common", isActive: true },
+  { slug: "streak_7", name: "Week of Wins", description: "Maintain a 7-day streak.", icon: "Flame", family: "streak", threshold: 7, rarity: "uncommon", isActive: true },
+  { slug: "streak_14", name: "Fortnight of Fire", description: "Maintain a 14-day streak.", icon: "Flame", family: "streak", threshold: 14, rarity: "uncommon", isActive: true },
+  { slug: "streak_30", name: "Monthly Momentum", description: "Maintain a 30-day streak.", icon: "Flame", family: "streak", threshold: 30, rarity: "rare", isActive: true },
+  { slug: "streak_100", name: "100 Days of Dedication", description: "Maintain a 100-day streak.", icon: "Flame", family: "streak", threshold: 100, rarity: "epic", isActive: true },
+  { slug: "streak_365", name: "Year of Victory", description: "Maintain a 365-day streak.", icon: "Flame", family: "streak", threshold: 365, rarity: "epic", isActive: true },
+
+  // 3. Category Mastery
+  { slug: "health_10", name: "Health Novice", description: "Log 10 Health & Fitness wins.", icon: "Heart", family: "category", categorySlug: "health", threshold: 10, rarity: "common", isActive: true },
+  { slug: "health_25", name: "Fitness Fanatic", description: "Log 25 Health & Fitness wins.", icon: "HeartPulse", family: "category", categorySlug: "health", threshold: 25, rarity: "uncommon", isActive: true },
+  { slug: "work_10", name: "Productivity Pro", description: "Log 10 Work & Career wins.", icon: "Briefcase", family: "category", categorySlug: "work", threshold: 10, rarity: "common", isActive: true },
+  { slug: "work_25", name: "Career Captain", description: "Log 25 Work & Career wins.", icon: "Briefcase", family: "category", categorySlug: "work", threshold: 25, rarity: "uncommon", isActive: true },
+  { slug: "learning_10", name: "Curious Mind", description: "Log 10 Learning & Growth wins.", icon: "BookOpen", family: "category", categorySlug: "learning", threshold: 10, rarity: "common", isActive: true },
+  { slug: "learning_25", name: "Knowledge Seeker", description: "Log 25 Learning & Growth wins.", icon: "BrainCircuit", family: "category", categorySlug: "learning", threshold: 25, rarity: "uncommon", isActive: true },
+  { slug: "social_10", name: "Social Butterfly", description: "Log 10 Social wins.", icon: "Users", family: "category", categorySlug: "social", threshold: 10, rarity: "common", isActive: true },
+  { slug: "social_25", name: "Relationship Rockstar", description: "Log 25 Social wins.", icon: "Users", family: "category", categorySlug: "social", threshold: 25, rarity: "uncommon", isActive: true },
+  { slug: "creative_10", name: "Creative Spark", description: "Log 10 Creative wins.", icon: "Palette", family: "category", categorySlug: "creative", threshold: 10, rarity: "common", isActive: true },
+  { slug: "creative_25", name: "Hobby Hero", description: "Log 25 Creative wins.", icon: "Palette", family: "category", categorySlug: "creative", threshold: 25, rarity: "uncommon", isActive: true },
+  { slug: "personal_10", name: "Self-Care Starter", description: "Log 10 Personal Care wins.", icon: "Sparkles", family: "category", categorySlug: "personal", threshold: 10, rarity: "common", isActive: true },
+  { slug: "personal_25", name: "Mindful Master", description: "Log 25 Personal Care wins.", icon: "Sparkles", family: "category", categorySlug: "personal", threshold: 25, rarity: "uncommon", isActive: true },
+
+  // 4. Variety (Breadth)
+  { slug: "variety_7d_3cats", name: "Versatile Victor", description: "Log wins in 3 different categories in 7 days.", icon: "Shapes", family: "variety", threshold: 3, window: "7d", rarity: "uncommon", isActive: true },
+  { slug: "variety_14d_4cats", name: "Dynamic Dabbler", description: "Log wins in 4 different categories in 14 days.", icon: "Shapes", family: "variety", threshold: 4, window: "14d", rarity: "rare", isActive: true },
+  { slug: "variety_month_5cats", name: "Jack of All Trades", description: "Log wins in 5 different categories in 30 days.", icon: "Shapes", family: "variety", threshold: 5, window: "30d", rarity: "epic", isActive: true },
+
+  // 5. Mode/Medium (Exploration)
+  { slug: "first_text", name: "Word Weaver", description: "Log your first win using text.", icon: "Type", family: "mode", rarity: "common", isActive: true },
+  { slug: "first_voice", name: "Orator", description: "Log your first win using your voice.", icon: "Mic", family: "mode", rarity: "common", isActive: true },
+  { slug: "first_photo", name: "Photographer", description: "Log your first win with a photo.", icon: "Camera", family: "mode", rarity: "common", isActive: true },
+  { slug: "photo_7_in_30", name: "Shutterbug", description: "Log 7 wins with photos in 30 days.", icon: "Camera", family: "mode", threshold: 7, window: "30d", rarity: "rare", isActive: true },
+
+  // 6. Onboarding/Starter
+  { slug: "welcome", name: "Welcome Aboard!", description: "Create your account and start your journey.", icon: "Hand", family: "onboarding", rarity: "common", isActive: true },
+  { slug: "profile_complete", name: "Identity Verified", description: "Complete your user profile.", icon: "UserCheck", family: "onboarding", rarity: "common", isActive: true },
+  { slug: "first_win_onboarding", name: "Ready for Action", description: "Log your very first win during onboarding.", icon: "Rocket", family: "onboarding", rarity: "common", isActive: true },
+  { slug: "streak_intro", name: "First Steps", description: "Set up your first daily goals.", icon: "Footprints", family: "onboarding", rarity: "common", isActive: true },
+
+  // 7. Exploration/Feature Adoption
+  { slug: "try_usersearch", name: "Explorer", description: "Use the user search feature for the first time.", icon: "Search", family: "explore", rarity: "common", isActive: true },
+  { slug: "try_badgewall", name: "Trophy Hunter", description: "Visit your badge wall for the first time.", icon: "Shield", family: "explore", rarity: "common", isActive: true },
+  { slug: "try_milestones", name: "Goal Setter", description: "Check out your milestones.", icon: "Flag", family: "explore", rarity: "common", isActive: true },
+
+  // 8. Admin/Manual
+  { slug: "spotlight_user", name: "Community Spotlight", description: "Awarded for outstanding community contributions.", icon: "Star", family: "admin", rarity: "epic", isActive: true },
+  { slug: "community_hero", name: "Community Hero", description: "A special award for being a hero in the community.", icon: "HeartHandshake", family: "admin", rarity: "epic", isActive: true },
+];
 
 export const seedBadges = internalMutation({
   args: {},
   handler: async (ctx) => {
-    // Clear existing badges
     const existingBadges = await ctx.db.query("badges").collect();
-    for (const badge of existingBadges) {
-      await ctx.db.delete(badge._id);
+    if (existingBadges.length > 0) {
+      console.log("Badges table is not empty, skipping seed.");
+      return "Badges table already seeded.";
     }
 
-    const badges = [
-      // === ONBOARDING FAMILY ===
-      {
-        slug: "welcome",
-        name: "Welcome Aboard!",
-        description: "You've taken the first step on your journey to greatness.",
-        icon: "👋",
-        family: "onboarding" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "profile_complete",
-        name: "Profile Master",
-        description: "Your profile is complete and ready to shine.",
-        icon: "✨",
-        family: "onboarding" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "first_win",
-        name: "First Victory",
-        description: "Every journey begins with a single step. You've taken yours!",
-        icon: "🎯",
-        family: "onboarding" as const,
-        threshold: 1,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "streak_intro",
-        name: "Streak Starter",
-        description: "You've discovered the power of consistency.",
-        icon: "🔥",
-        family: "onboarding" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-
-      // === WINS FAMILY ===
-      {
-        slug: "wins_5",
-        name: "Getting Started",
-        description: "5 wins under your belt. You're building momentum!",
-        icon: "🌱",
-        family: "wins" as const,
-        threshold: 5,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "wins_10",
-        name: "Double Digits",
-        description: "10 wins achieved! You're finding your rhythm.",
-        icon: "🎯",
-        family: "wins" as const,
-        threshold: 10,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "wins_25",
-        name: "Quarter Century",
-        description: "25 wins! You're proving that consistency pays off.",
-        icon: "🏆",
-        family: "wins" as const,
-        threshold: 25,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "wins_50",
-        name: "Half Century",
-        description: "50 wins! You're becoming unstoppable.",
-        icon: "⭐",
-        family: "wins" as const,
-        threshold: 50,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "wins_100",
-        name: "Centurion",
-        description: "100 wins! You've joined the elite ranks of achievers.",
-        icon: "👑",
-        family: "wins" as const,
-        threshold: 100,
-        window: undefined,
-        rarity: "rare" as const,
-        isActive: true,
-      },
-      {
-        slug: "wins_250",
-        name: "Champion",
-        description: "250 wins! Your dedication is truly inspiring.",
-        icon: "🏅",
-        family: "wins" as const,
-        threshold: 250,
-        window: undefined,
-        rarity: "rare" as const,
-        isActive: true,
-      },
-      {
-        slug: "wins_500",
-        name: "Legend",
-        description: "500 wins! You've achieved legendary status.",
-        icon: "🌟",
-        family: "wins" as const,
-        threshold: 500,
-        window: undefined,
-        rarity: "epic" as const,
-        isActive: true,
-      },
-
-      // === STREAK FAMILY ===
-      {
-        slug: "streak_3",
-        name: "Hot Streak",
-        description: "3 days in a row! You're building a powerful habit.",
-        icon: "🔥",
-        family: "streak" as const,
-        threshold: 3,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "streak_7",
-        name: "Week Warrior",
-        description: "7 days straight! You've conquered a full week.",
-        icon: "⚡",
-        family: "streak" as const,
-        threshold: 7,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "streak_14",
-        name: "Fortnight Force",
-        description: "14 days! Two weeks of unstoppable momentum.",
-        icon: "💪",
-        family: "streak" as const,
-        threshold: 14,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "streak_30",
-        name: "Monthly Master",
-        description: "30 days! You've built a habit that will last a lifetime.",
-        icon: "🎖️",
-        family: "streak" as const,
-        threshold: 30,
-        window: undefined,
-        rarity: "rare" as const,
-        isActive: true,
-      },
-      {
-        slug: "streak_60",
-        name: "Streak Sage",
-        description: "60 days! Your consistency is truly remarkable.",
-        icon: "🧙",
-        family: "streak" as const,
-        threshold: 60,
-        window: undefined,
-        rarity: "rare" as const,
-        isActive: true,
-      },
-      {
-        slug: "streak_100",
-        name: "Centurion Streak",
-        description: "100 days! You've achieved the impossible.",
-        icon: "🏛️",
-        family: "streak" as const,
-        threshold: 100,
-        window: undefined,
-        rarity: "epic" as const,
-        isActive: true,
-      },
-
-      // === CATEGORY MASTERY FAMILY ===
-      {
-        slug: "category_mastery_health_20",
-        name: "Health Hero",
-        description: "20 health wins! Your body is your temple.",
-        icon: "💚",
-        family: "category" as const,
-        categorySlug: "health",
-        threshold: 20,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "category_mastery_work_20",
-        name: "Career Climber",
-        description: "20 work wins! You're building your professional empire.",
-        icon: "💼",
-        family: "category" as const,
-        categorySlug: "work",
-        threshold: 20,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "category_mastery_learning_20",
-        name: "Knowledge Seeker",
-        description: "20 learning wins! Your mind is your greatest asset.",
-        icon: "📚",
-        family: "category" as const,
-        categorySlug: "learning",
-        threshold: 20,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "category_mastery_social_20",
-        name: "Social Butterfly",
-        description: "20 social wins! You're building meaningful connections.",
-        icon: "🦋",
-        family: "category" as const,
-        categorySlug: "social",
-        threshold: 20,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "category_mastery_creative_20",
-        name: "Creative Genius",
-        description: "20 creative wins! Your imagination knows no bounds.",
-        icon: "🎨",
-        family: "category" as const,
-        categorySlug: "creative",
-        threshold: 20,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "category_mastery_personal_20",
-        name: "Self-Care Champion",
-        description: "20 personal care wins! You're investing in yourself.",
-        icon: "✨",
-        family: "category" as const,
-        categorySlug: "personal",
-        threshold: 20,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-
-      // === MODE FAMILY ===
-      {
-        slug: "voice_first",
-        name: "Voice Pioneer",
-        description: "Your first voice win! Speaking your success into existence.",
-        icon: "🎤",
-        family: "mode" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "photo_first",
-        name: "Picture Perfect",
-        description: "Your first photo win! A picture is worth a thousand victories.",
-        icon: "📸",
-        family: "mode" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "photo_7_in_30",
-        name: "Snapshot Specialist",
-        description: "7 photo wins in 30 days! You're capturing success.",
-        icon: "📷",
-        family: "mode" as const,
-        threshold: 7,
-        window: "30d" as const,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-
-      // === VARIETY FAMILY ===
-      {
-        slug: "variety_3_categories",
-        name: "Well-Rounded",
-        description: "Wins in 3 different categories! You're building a balanced life.",
-        icon: "🌈",
-        family: "variety" as const,
-        threshold: 3,
-        window: undefined,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-      {
-        slug: "variety_all_categories",
-        name: "Renaissance Soul",
-        description: "Wins in all 6 categories! You're truly living life to the fullest.",
-        icon: "🎭",
-        family: "variety" as const,
-        threshold: 6,
-        window: undefined,
-        rarity: "rare" as const,
-        isActive: true,
-      },
-
-      // === EXPLORE FAMILY ===
-      {
-        slug: "explore_milestones",
-        name: "Progress Tracker",
-        description: "You've discovered the milestones page! Knowledge is power.",
-        icon: "🗺️",
-        family: "explore" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-      {
-        slug: "explore_profile",
-        name: "Self Reflection",
-        description: "You've visited your profile! Self-awareness is the first step to growth.",
-        icon: "🪞",
-        family: "explore" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-
-      // === COMMUNITY FAMILY ===
-      {
-        slug: "community_feature_badge",
-        name: "Showcase Star",
-        description: "You've featured your first badge! Sharing success inspires others.",
-        icon: "⭐",
-        family: "community" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "common" as const,
-        isActive: true,
-      },
-
-      // === EVENT FAMILY ===
-      {
-        slug: "event_new_year",
-        name: "New Year, New You",
-        description: "Started your journey in the new year! Fresh beginnings await.",
-        icon: "🎊",
-        family: "event" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "rare" as const,
-        isActive: true,
-      },
-      {
-        slug: "event_weekend_warrior",
-        name: "Weekend Warrior",
-        description: "5 wins on weekends this month! You don't take breaks from greatness.",
-        icon: "⚔️",
-        family: "event" as const,
-        threshold: 5,
-        window: "month" as const,
-        rarity: "uncommon" as const,
-        isActive: true,
-      },
-
-      // === ADMIN FAMILY ===
-      {
-        slug: "admin_beta_tester",
-        name: "Beta Hero",
-        description: "Thank you for helping us build something amazing!",
-        icon: "🚀",
-        family: "admin" as const,
-        threshold: undefined,
-        window: undefined,
-        rarity: "epic" as const,
-        isActive: true,
-      },
-    ];
-
-    // Insert all badges
-    for (const badge of badges) {
-      await ctx.db.insert("badges", badge);
+    console.log(`Seeding ${badgeData.length} badges...`);
+    for (const badge of badgeData) {
+      await ctx.db.insert("badges", badge as any);
     }
-
-    console.log(`Seeded ${badges.length} badges successfully!`);
-    return { success: true, count: badges.length };
+    console.log("Badge seeding complete.");
+    return `Seeded ${badgeData.length} badges.`;
   },
 });

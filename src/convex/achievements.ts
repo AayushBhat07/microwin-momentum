@@ -135,19 +135,12 @@ export const log = action({
     });
 
     // 5. Evaluate and award badges
-    const unlockedBadges: any[] = await ctx.runAction(internal.badges.evaluateAchievement, {
+    const unlockedBadges: any[] = await ctx.runAction(internal.badges.checkAllBadges, {
         userId,
         achievement,
     });
 
-    // Award first_win badge if it's the first achievement
-    const user = await ctx.runQuery(internal.users.get, { userId });
-    if (user && user.totalAchievements === 1) {
-        const firstWinBadge = await ctx.runMutation(internal.badges.evaluateOnboarding, { userId, step: "first_win" });
-        if (firstWinBadge) {
-            unlockedBadges.push(firstWinBadge);
-        }
-    }
+    // The badge system will handle first win detection automatically
 
     return { unlockedBadges };
   },

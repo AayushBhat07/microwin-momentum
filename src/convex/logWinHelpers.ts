@@ -177,6 +177,8 @@ export const createWinWithGameification = internalMutation({
         achievementsCount: 1,
         pointsEarned: totalPoints,
         goalsCompleted: 0,
+        categories: [args.categorySlug],
+        photoCount: args.photoStorageId ? 1 : 0,
       });
     }
 

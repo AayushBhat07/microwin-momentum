@@ -147,6 +147,8 @@ export const updateUserDailyStats = internalMutation({
         achievementsCount: 1,
         pointsEarned: points,
         goalsCompleted: 0, // Assuming goals are handled elsewhere
+        categories: ["general"], // Default category
+        photoCount: 0, // Default to 0, can be updated if needed
       });
     }
   },
