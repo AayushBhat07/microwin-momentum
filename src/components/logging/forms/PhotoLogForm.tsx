@@ -51,12 +51,13 @@ export function PhotoLogForm({ categories, onSubmit, isSubmitting }: PhotoLogFor
       });
       const { storageId } = await result.json();
       
+      // Upload is done, now call the parent submit handler
+      setIsUploading(false);
       await onSubmit({ ...data, source: "photo", photoStorageId: storageId });
 
     } catch (error) {
       toast.error("Failed to upload photo.");
       console.error(error);
-    } finally {
       setIsUploading(false);
     }
   };
