@@ -136,10 +136,15 @@ export const updateUserDailyStats = internalMutation({
       )
       .unique();
 
+    const isPhoto = source === "photo";
+    const isVoice = source === "voice";
+    const isText = source === "text";
+
     if (dailyStat) {
       await ctx.db.patch(dailyStat._id, {
         achievementsCount: dailyStat.achievementsCount + 1,
         pointsEarned: dailyStat.pointsEarned + points,
+        photoCount: dailyStat.photoCount + (isPhoto ? 1 : 0),
       });
     } else {
       await ctx.db.insert("userStats", {
@@ -149,8 +154,25 @@ export const updateUserDailyStats = internalMutation({
         pointsEarned: points,
         goalsCompleted: 0, // Assuming goals are handled elsewhere
         categories: ["general"], // Default category
-        photoCount: 0, // Default to 0, can be updated if needed
+        photoCount: isPhoto ? 1 : 0,
       });
+    }
+
+    // Also update the lifetime totals for specific modes
+    if (isPhoto || isVoice || isText) {
+      const userTotals = await ctx.db
+        .query("user_totals")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .unique();
+      
+      if (userTotals) {
+        const patchPayload: any = {};
+        if (isPhoto) patchPayload.totalPhotoCount = ((userTotals as any).totalPhotoCount ?? 0) + 1;
+        if (isVoice) patchPayload.totalVoiceCount = ((userTotals as any).totalVoiceCount ?? 0) + 1;
+        if (isText) patchPayload.totalTextCount = ((userTotals as any).totalTextCount ?? 0) + 1;
+        
+        await ctx.db.patch(userTotals._id, patchPayload);
+      }
     }
   },
 });

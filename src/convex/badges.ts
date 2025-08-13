@@ -64,6 +64,9 @@ export const checkAllBadges = internalAction({
         const categoryMap = new Map(categoryTotals.map((c: any) => [c.categorySlug, c.totalWins]));
         const totalAchievements = userTotals?.totalAchievements ?? 0;
         const currentStreak = userStreak?.currentStreak ?? 0;
+        const totalPhotoCount = (userTotals as any)?.totalPhotoCount ?? 0;
+        const totalVoiceCount = (userTotals as any)?.totalVoiceCount ?? 0;
+        const totalTextCount = (userTotals as any)?.totalTextCount ?? 0;
 
         // 2. Evaluate all unearned badges
         for (const badge of allBadges) {
@@ -84,6 +87,15 @@ export const checkAllBadges = internalAction({
                         if (badge.categorySlug) {
                             const categoryCount = categoryMap.get(badge.categorySlug) ?? 0;
                             if (categoryCount >= (badge.threshold || 0)) shouldAward = true;
+                        }
+                        break;
+                    case "mode":
+                        if (badge.modeType === "photo" && totalPhotoCount >= badge.threshold) {
+                            shouldAward = true;
+                        } else if (badge.modeType === "voice" && totalVoiceCount >= badge.threshold) {
+                            shouldAward = true;
+                        } else if (badge.modeType === "text" && totalTextCount >= badge.threshold) {
+                            shouldAward = true;
                         }
                         break;
                 }

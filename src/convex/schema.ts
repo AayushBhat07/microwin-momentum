@@ -170,6 +170,7 @@ const schema = defineSchema({
     description: v.string(),
     icon_url: v.string(), // Lucide icon name or URL
     family: BADGE_FAMILIES,
+    modeType: v.optional(v.union(v.literal("photo"), v.literal("voice"), v.literal("text"), v.literal("quick"))),
     categorySlug: v.optional(v.string()), // For category mastery badges
     threshold: v.optional(v.number()),
     window: v.optional(v.union(v.literal("7d"), v.literal("14d"), v.literal("30d"), v.literal("month"))),
