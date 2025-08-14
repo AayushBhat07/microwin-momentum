@@ -67,6 +67,16 @@ export const saveWellnessAndSuggestions = mutation({
             notes: intake.consentToSaveNotes ? intake.notes : undefined,
         });
 
+        // Clear previous onboarding presets before adding new ones
+        const oldOnboardingPresets = await ctx.db
+            .query("userPresets")
+            .withIndex("by_user_and_source", q => q.eq("userId", user._id).eq("source", "onboarding"))
+            .collect();
+        
+        for (const preset of oldOnboardingPresets) {
+            await ctx.db.delete(preset._id);
+        }
+
         // 2. Save selected suggestions to user presets
         for (const suggestion of suggestions) {
             const existing = await ctx.db.query("userPresets")
