@@ -83,3 +83,24 @@ export const debugUserPresets = query({
     return presets.map(p => ({ title: p.title, source: p.source, categorySlug: p.categorySlug }));
   },
 });
+
+export const deleteAllMyPresets = mutation({
+  args: {},
+  handler: async (ctx): Promise<{ deletedCount: number }> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const presets = await ctx.db
+      .query("userPresets")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    for (const preset of presets) {
+      await ctx.db.delete(preset._id);
+    }
+
+    return { deletedCount: presets.length };
+  },
+});
