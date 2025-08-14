@@ -25,7 +25,7 @@ export const generateSuggestionsWithAI = internalAction({
     handler: async (ctx, { challenges, intensities }) => {
         const apiKey = process.env.OPENROUTER_API_KEY;
         if (!apiKey) {
-            throw new Error("OPENROUTER_API_KEY environment variable not set.");
+            throw new Error("OPENROUTER_API_KEY environment variable not set. Please add it in your project settings.");
         }
 
         const openai = new OpenAI({
@@ -42,25 +42,29 @@ The user has rated the intensity of these challenges as follows (out of 5): ${in
 
 Please generate 7 unique, actionable, and empathetic micro-goals to help them.
 The goals should be very small, taking 1-10 minutes to complete.
-Return the goals as a valid JSON array of objects. Do not include any other text or explanations in your response, only the JSON.
+
+Return the goals as a valid JSON object. Do not include any other text or explanations in your response, only the JSON.
+The JSON object must have a single key named "suggestions" which contains an array of goal objects.
 Each object must have the following properties:
 - "title": a string for the goal's title.
 - "categorySlug": a string for the category. It must be one of the following values: ${categorySlugs}.
 - "effortMinutes": a number representing the time in minutes to complete the goal (1-10).
 
 Example response:
-[
-  {
-    "title": "Step outside and take 3 deep breaths",
-    "categorySlug": "personal",
-    "effortMinutes": 2
-  },
-  {
-    "title": "Write down one task that can wait until tomorrow",
-    "categorySlug": "work",
-    "effortMinutes": 3
-  }
-]
+{
+  "suggestions": [
+    {
+      "title": "Step outside and take 3 deep breaths",
+      "categorySlug": "personal",
+      "effortMinutes": 2
+    },
+    {
+      "title": "Write down one task that can wait until tomorrow",
+      "categorySlug": "work",
+      "effortMinutes": 3
+    }
+  ]
+}
 `;
 
         try {
@@ -76,31 +80,24 @@ Example response:
                 throw new Error("AI returned an empty response.");
             }
             
-            // The model might wrap the array in a root object, so we need to handle that.
-            let parsedResponse;
+            let suggestions;
             try {
-                const rawParsed = JSON.parse(responseContent);
-                // Check if the response is an object with a single array-valued key
-                if (typeof rawParsed === 'object' && !Array.isArray(rawParsed)) {
-                    const keys = Object.keys(rawParsed);
-                    if (keys.length > 0 && Array.isArray(rawParsed[keys[0]])) {
-                        parsedResponse = rawParsed[keys[0]];
-                    } else {
-                        // It's an object but not in the expected wrapper format
-                        throw new Error("AI response is an object but not in the expected format.");
-                    }
-                } else if (Array.isArray(rawParsed)) {
-                    parsedResponse = rawParsed;
+                const parsed = JSON.parse(responseContent);
+                if (parsed && Array.isArray(parsed.suggestions)) {
+                    suggestions = parsed.suggestions;
+                } else if (Array.isArray(parsed)) {
+                    // Fallback for models that might ignore the prompt and return an array directly
+                    suggestions = parsed;
                 } else {
-                    throw new Error("AI response is not a JSON array or a wrapping object.");
+                    console.error("AI response was not in the expected format.", { responseContent });
+                    throw new Error("AI returned data in an unexpected format.");
                 }
             } catch (e) {
-                 console.error("Failed to parse AI response:", e);
+                 console.error("Failed to parse AI JSON response:", e, { responseContent });
                  throw new Error("AI returned invalid JSON.");
             }
 
-
-            return parsedResponse.map((s: any) => ({
+            return suggestions.map((s: any) => ({
                 ...s,
                 defaultPrivate: true,
                 source: 'system' as const
@@ -108,14 +105,7 @@ Example response:
 
         } catch (error) {
             console.error("Error calling OpenRouter:", error);
-            // Fallback to a simple default goal if AI fails
-            return [{
-                title: "Take a 2-minute stretch break",
-                categorySlug: "health",
-                effortMinutes: 2,
-                defaultPrivate: true,
-                source: 'system' as const
-            }];
+            throw new Error("Failed to get suggestions from AI service. Please check your API key and the service status.");
         }
     },
 });
