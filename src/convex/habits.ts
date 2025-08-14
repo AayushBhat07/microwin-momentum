@@ -17,15 +17,22 @@ export const getOnboardingHabits = query({
       return [];
     }
 
-    // Fetches presets that were specifically created during the "onboarding" process.
-    const habits: Doc<"userPresets">[] = await ctx.db
+    // Fetches presets that were specifically created during the "onboarding" process
+    const onboardingHabits: Doc<"userPresets">[] = await ctx.db
       .query("userPresets")
       .withIndex("by_user_and_source", (q) =>
         q.eq("userId", user._id).eq("source", "onboarding")
       )
       .collect();
+      
+    const customHabits: Doc<"userPresets">[] = await ctx.db
+      .query("userPresets")
+      .withIndex("by_user_and_source", (q) =>
+        q.eq("userId", user._id).eq("source", "custom")
+      )
+      .collect();
 
-    return habits;
+    return [...onboardingHabits, ...customHabits];
   },
 });
 
@@ -116,4 +123,25 @@ export const createHabitFromGoal = internalMutation({
        });
        console.log("Created habit: " + title);
    }
+});
+
+export const debugUserPresets = query({
+  args: {},
+  handler: async (ctx): Promise<{ error: string } | { userId: Id<"users">; totalPresets: number; presets: Doc<"userPresets">[] }> => {
+    const user: Doc<"users"> | null = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) {
+      return { error: "Not authenticated" };
+    }
+
+    const allPresets: Doc<"userPresets">[] = await ctx.db
+      .query("userPresets")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    return {
+      userId: user._id,
+      totalPresets: allPresets.length,
+      presets: allPresets,
+    };
+  },
 });
