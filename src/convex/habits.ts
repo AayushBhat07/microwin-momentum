@@ -29,6 +29,37 @@ export const getOnboardingHabits = query({
   },
 });
 
+export const completeOnboardingHabit = mutation({
+  args: {
+    presetId: v.id("userPresets"),
+  },
+  handler: async (ctx, { presetId }) => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const preset = await ctx.db.get(presetId);
+    if (!preset || preset.userId !== user._id) {
+      throw new Error("Preset not found or not owned by user");
+    }
+
+    // This will create an achievement, award points, and update streaks
+    await ctx.runMutation(internal.achievements.createAchievement, {
+      userId: user._id,
+      clientId: `habit-${presetId}-${Date.now()}`,
+      title: preset.title,
+      description: "",
+      categorySlug: preset.categorySlug,
+      source: "quick",
+      isPublic: !preset.defaultPrivate,
+    });
+
+    // We can return something to confirm, e.g., the title of the completed habit
+    return { title: preset.title };
+  },
+});
+
 export const backfillHabits = mutation({
     args: {},
     handler: async (ctx): Promise<{ success: boolean; message: string }> => {
