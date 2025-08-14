@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Heart, Shield, Plus, X } from "lucide-react";
+import { Loader2, Heart, Shield, Plus, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ACHIEVEMENT_CATEGORIES } from "@/convex/schema";
 
@@ -270,34 +270,36 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
         {/* Generated Suggestions */}
         <div className="space-y-2">
           <Label className="text-sm font-medium font-pixel">Suggested micro-goals</Label>
-          <div className="grid gap-2 max-h-48 overflow-y-auto p-1">
-            {suggestions.map((suggestion) => (
-              <div
-                key={suggestion.title}
-                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                  selectedSuggestions.has(suggestion.title)
-                    ? "bg-primary/10 border-primary"
-                    : "bg-secondary hover:bg-secondary/80"
-                }`}
-                onClick={() => handleSuggestionToggle(suggestion.title)}
-              >
-                <div className="flex-1">
-                  <p className="text-base font-medium font-pixel">{suggestion.title}</p>
-                  <p className="text-xs text-muted-foreground font-pixel">
-                    {suggestion.effortMinutes} min • {ACHIEVEMENT_CATEGORIES.find(c => c.slug === suggestion.categorySlug)?.name}
-                  </p>
+          <div className="grid gap-3 max-h-64 overflow-y-auto p-2">
+            {suggestions.map((suggestion) => {
+              const isSelected = selectedSuggestions.has(suggestion.title);
+              return (
+                <div
+                  key={suggestion.title}
+                  className={`flex items-center justify-between p-3 cursor-pointer transition-all duration-150 border-2 ${
+                    isSelected
+                      ? 'border-primary shadow-[2px_2px_0px_var(--color-primary)] bg-primary/10'
+                      : 'border-foreground/20 shadow-[2px_2px_0px_#00000090] bg-secondary hover:shadow-[1px_1px_0px_#00000090] hover:translate-x-px hover:translate-y-px'
+                  }`}
+                  onClick={() => handleSuggestionToggle(suggestion.title)}
+                >
+                  <div className="flex-1 pr-4">
+                    <p className="text-base font-medium font-pixel">{suggestion.title}</p>
+                    <p className="text-xs text-muted-foreground font-pixel">
+                      {suggestion.effortMinutes} min • {ACHIEVEMENT_CATEGORIES.find(c => c.slug === suggestion.categorySlug)?.name}
+                    </p>
+                  </div>
+                  <div className={`w-6 h-6 border-2 flex items-center justify-center ${isSelected ? 'border-primary bg-primary/20' : 'border-foreground/30'}`}>
+                    {isSelected && <Check className="w-5 h-5 text-primary" />}
+                  </div>
                 </div>
-                <Checkbox
-                  checked={selectedSuggestions.has(suggestion.title)}
-                  onChange={() => {}} // Handled by parent click
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Add Custom Goal */}
-        <div className="space-y-3 p-4 bg-secondary rounded-lg">
+        <div className="space-y-3 p-4 border-2 border-foreground/20 shadow-[2px_2px_0px_#00000090]">
           <Label className="text-sm font-medium font-pixel">Add your own micro-goal</Label>
           <div className="flex gap-2">
             <input
