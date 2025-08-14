@@ -50,6 +50,32 @@ export const getWeeklyStats = query({
   },
 });
 
+export const getTodayStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return {
+        todayPoints: 0,
+        todayAchievements: 0,
+      };
+    }
+
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+    // Get today's stats from userStats table
+    const todayStats = await ctx.db
+      .query("userStats")
+      .withIndex("by_user_and_date", (q) => q.eq("userId", userId).eq("date", today))
+      .unique();
+
+    return {
+      todayPoints: todayStats?.pointsEarned || 0,
+      todayAchievements: todayStats?.achievementsCount || 0,
+    };
+  },
+});
+
 export const updateUserPoints = internalMutation({
   args: { userId: v.id("users"), points: v.number() },
   handler: async (ctx, { userId, points }) => {

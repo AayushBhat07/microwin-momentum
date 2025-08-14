@@ -12,6 +12,7 @@ import { GoalsRadarChart } from "@/components/goals/GoalsRadarChart";
 
 export default function GoalsPage() {
   const quests = useQuery(api.habits.getDailyQuests);
+  const todayStats = useQuery(api.userStats.getTodayStats);
   const completeQuest = useMutation(api.habits.completeDailyQuest);
   const deleteAllPresets = useMutation(api.habits.deleteAllMyPresets);
   const [completedQuestIds, setCompletedQuestIds] = useState<Set<Id<"userPresets">>>(new Set());
@@ -35,7 +36,7 @@ export default function GoalsPage() {
     }
   };
 
-  const isLoading = quests === undefined || !backgroundUrl;
+  const isLoading = quests === undefined || !backgroundUrl || todayStats === undefined;
 
   const inProgressQuests = quests?.filter(q => !completedQuestIds.has(q._id)) ?? [];
   const completedQuests = quests?.filter(q => completedQuestIds.has(q._id)) ?? [];
@@ -71,6 +72,16 @@ export default function GoalsPage() {
               <p className="text-lg text-blue-300 max-w-2xl mx-auto">
                 Complete these micro-goals from your wellness setup.
               </p>
+              {todayStats && (
+                <div className="mt-4 flex justify-center gap-6">
+                  <div className="bg-black/30 border-2 border-yellow-500 px-4 py-2 rounded">
+                    <span className="text-yellow-400 font-bold">Today's XP: {todayStats.todayPoints}</span>
+                  </div>
+                  <div className="bg-black/30 border-2 border-green-500 px-4 py-2 rounded">
+                    <span className="text-green-400 font-bold">Quests Done: {todayStats.todayAchievements}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {quests && quests.length > 0 && (
