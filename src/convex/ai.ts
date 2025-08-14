@@ -65,7 +65,7 @@ Example response:
 
         try {
             const completion = await openai.chat.completions.create({
-                model: "anthropic/claude-3-haiku",
+                model: "mistralai/mixtral-8x7b-instruct",
                 messages: [{ role: "user", content: prompt }],
                 temperature: 0.8,
                 response_format: { type: "json_object" },
