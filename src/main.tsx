@@ -22,6 +22,7 @@ import UserProfilePage from "./pages/UserProfilePage.tsx";
 import WellnessSetupPage from "./pages/WellnessSetupPage.tsx";
 import MilestonesPage from "./pages/MilestonesPage.tsx";
 import HabitsPage from "./pages/HabitsPage.tsx";
+import Onboarding from "./pages/Onboarding.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -62,6 +63,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             
             {/* Protected Routes */}
+            <Route path="/onboarding" element={<Protected><Onboarding /></Protected>} />
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
             <Route path="/onboarding/profile" element={<Protected><ProfileSetupPage onComplete={() => {}} /></Protected>} />
             <Route path="/onboarding/goals" element={<Protected><GoalSettingPage onComplete={() => {}} /></Protected>} />
