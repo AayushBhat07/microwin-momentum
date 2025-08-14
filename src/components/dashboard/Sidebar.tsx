@@ -31,6 +31,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             navigate("/milestones");
           } else if (item.id === "goals") {
             navigate("/goals");
+          } else if (item.id === "memories") {
+            navigate("/memories");
           } else if (item.id === "settings") {
             navigate("/settings");
           }
