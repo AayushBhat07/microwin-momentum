@@ -28,8 +28,8 @@ export const updateProfile = mutation({
       bio: args.bio,
     });
 
-    // Call internal mutation to complete step 1
-    await ctx.runMutation(internal.onboarding.completeOnboardingStepInternal, { step: 1 });
+    // Update user's onboarding progress directly
+    await ctx.db.patch(user._id, { onboardingStep: 1 });
   },
 });
 

@@ -148,6 +148,7 @@ const schema = defineSchema({
     ),
   })
   .index("by_user", ["userId"])
+  .index("by_user_and_source", ["userId", "source"])
   .index("by_user_and_title", ["userId", "title"]),
 
   user_totals: defineTable({

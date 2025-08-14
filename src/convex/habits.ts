@@ -16,8 +16,9 @@ export const getOnboardingHabits = query({
     // Fetches presets that were specifically created during the "onboarding" process.
     const habits: Doc<"userPresets">[] = await ctx.db
       .query("userPresets")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .filter((q) => q.eq(q.field("source"), "onboarding"))
+      .withIndex("by_user_and_source", (q) =>
+        q.eq("userId", user._id).eq("source", "onboarding")
+      )
       .collect();
 
     return habits;

@@ -1,70 +1,48 @@
+import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { internalMutation, mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 export const completeOnboardingStep = mutation({
-  args: {
-    step: v.number(),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
+    args: { step: v.number() },
+    handler: async (ctx, { step }) => {
+        const user = await ctx.runQuery(internal.users.getCurrentUser);
+        if (!user) {
+            throw new Error("User must be authenticated.");
+        }
 
-    // Update onboarding step
-    await ctx.db.patch(user._id, {
-      onboardingStep: args.step,
-    });
+        // When completing the goal-setting step (step 3), convert today's goals into habits.
+        if (step === 3) {
+            const todayString = new Date().toISOString().split('T')[0];
+            const todaysGoals = await ctx.db
+                .query("dailyGoals")
+                .withIndex("by_user_and_date", (q) =>
+                    q.eq("userId", user._id).eq("targetDate", todayString)
+                )
+                .collect();
 
-    // Award "Welcome" on the first step
-    if (args.step === 1) {
-      await ctx.runMutation(internal.badges.awardBadge, {
-        userId: user._id,
-        badgeSlug: "welcome",
-        reason: "Completed first onboarding step",
-      });
-    }
+            for (const goal of todaysGoals) {
+                // Avoid creating duplicate presets if this step is somehow repeated.
+                const existingPreset = await ctx.db
+                    .query("userPresets")
+                    .withIndex("by_user_and_title", (q) =>
+                        q.eq("userId", user._id).eq("title", goal.title)
+                    )
+                    .first();
 
-    // Award "Profile Complete" badge for completing profile step.
-    if (args.step === 1) {
-      await ctx.runMutation(internal.badges.awardBadge, {
-        userId: user._id,
-        badgeSlug: "profile_complete",
-        reason: `Completed onboarding step ${args.step}`,
-      });
-    }
-  },
-});
+                if (!existingPreset) {
+                    await ctx.db.insert("userPresets", {
+                        userId: user._id,
+                        title: goal.title,
+                        categorySlug: goal.category,
+                        effortMinutes: 0, // Default value, can be customized later
+                        defaultPrivate: false,
+                        source: "onboarding",
+                    });
+                }
+            }
+        }
 
-export const completeOnboardingStepInternal = internalMutation({
-  args: {
-    step: v.number(),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-
-    // Update onboarding step
-    await ctx.db.patch(user._id, {
-      onboardingStep: args.step,
-    });
-
-    // Award badges
-    if (args.step === 1) {
-      await ctx.runMutation(internal.badges.awardBadge, {
-        userId: user._id,
-        badgeSlug: "welcome",
-        reason: "Completed first onboarding step",
-      });
-      
-      await ctx.runMutation(internal.badges.awardBadge, {
-        userId: user._id,
-        badgeSlug: "profile_complete",
-        reason: `Completed onboarding step ${args.step}`,
-      });
-    }
-  },
+        // Update user's onboarding progress
+        await ctx.db.patch(user._id, { onboardingStep: step });
+    },
 });
