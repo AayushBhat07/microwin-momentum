@@ -2,6 +2,7 @@ import { internalQuery, mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
+import { v } from "convex/values";
 
 // Internal function to get user, callable from other backend functions
 export const getCurrentUser = internalQuery({
@@ -18,8 +19,38 @@ export const getCurrentUser = internalQuery({
 export const currentUser = query({
     args: {},
     handler: async (ctx: QueryCtx) => {
-        // We are using runQuery here to call an internal query.
-        return await ctx.runQuery(internal.users.getCurrentUser);
+        const userId = await getAuthUserId(ctx);
+        if (userId === null) {
+            return null;
+        }
+        return await ctx.db.get(userId);
+    },
+});
+
+// Search users by username (needed by UserSearch component)
+export const searchUsers = query({
+    args: { query: v.string() },
+    handler: async (ctx, { query }) => {
+        if (query.length < 2) return [];
+        
+        return await ctx.db
+            .query("users")
+            .filter((q) => q.or(
+                q.eq(q.field("name"), query),
+                q.eq(q.field("username"), query)
+            ))
+            .take(10);
+    },
+});
+
+// Get user profile by username (needed by UserProfilePage)
+export const getProfileByUsername = query({
+    args: { username: v.string() },
+    handler: async (ctx, { username }) => {
+        return await ctx.db
+            .query("users")
+            .withIndex("by_username", (q) => q.eq("username", username))
+            .unique();
     },
 });
 

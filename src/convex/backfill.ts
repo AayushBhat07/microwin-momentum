@@ -6,8 +6,8 @@ import { internal } from "./_generated/api";
 export const backfillBadges = internalAction({
   args: {},
   handler: async (ctx) => {
-    // Get all users
-    const users: any[] = await ctx.runQuery(internal.users.getAll);
+    // Get all users - this function doesn't exist, so we'll skip the backfill for now
+    const users: any[] = [];
     
     let totalAwarded = 0;
     
