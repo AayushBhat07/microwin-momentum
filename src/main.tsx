@@ -15,7 +15,6 @@ import ProfilePage from "./pages/Profile.tsx";
 import LoginPage from "@/pages/Login.tsx";
 import VerifyEmailPage from "./pages/VerifyEmail.tsx";
 import ProfileSetupPage from "./pages/onboarding/ProfileSetup.tsx";
-import GoalSettingPage from "./pages/onboarding/GoalSetting.tsx";
 import AchievementIntroPage from "./pages/onboarding/AchievementIntro.tsx";
 import PreferencesPage from "./pages/onboarding/Preferences.tsx";
 import UserProfilePage from "./pages/UserProfilePage.tsx";
@@ -67,7 +66,6 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/onboarding" element={<Protected><Onboarding /></Protected>} />
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
             <Route path="/onboarding/profile" element={<Protected><ProfileSetupPage onComplete={() => {}} /></Protected>} />
-            <Route path="/onboarding/goals" element={<Protected><GoalSettingPage onComplete={() => {}} /></Protected>} />
             <Route path="/onboarding/achievements" element={<Protected><AchievementIntroPage /></Protected>} />
             <Route path="/onboarding/preferences" element={<Protected><PreferencesPage /></Protected>} />
             <Route path="/wellness-setup" element={<Protected><WellnessSetupPage /></Protected>} />
