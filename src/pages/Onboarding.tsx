@@ -81,11 +81,21 @@ export default function Onboarding() {
     );
   }
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
         <p>You need to sign in to continue.</p>
         <AuthButton />
+      </div>
+    );
+  }
+
+  // If we are authenticated but the user object is still loading, show a spinner.
+  // This prevents rendering the steps before the user data is ready.
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner className="h-12 w-12" />
       </div>
     );
   }

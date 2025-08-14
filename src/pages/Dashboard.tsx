@@ -14,43 +14,28 @@ import { useNavigate } from "react-router";
 import { useEffect } from "react";
 
 export default function Dashboard() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
 
   useEffect(() => {
-    // Redirect to wellness setup if needed, but only when we have a user object
-    if (user && (user as any).needsWellnessSetup) {
-      navigate("/wellness-setup");
+    if (!isLoading) {
+      if (isAuthenticated && !user) {
+        // If authenticated but no user profile, start onboarding
+        navigate("/onboarding");
+      } else if (user && (user as any).needsWellnessSetup) {
+        // Existing user needs to complete a specific step
+        navigate("/wellness-setup");
+      }
     }
-  }, [user, navigate]);
-  
-  // Primary loading state from useAuth
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>
-      </div>
-    );
-  }
+  }, [user, isLoading, isAuthenticated, navigate]);
 
-  // This handles the case where auth is loaded, but the user object is null.
-  // This can happen during initial user creation or if there's an issue.
-  // We show a more appropriate loading message instead of "Please sign in".
-  if (!user) {
+  // Show a loading screen while auth state is being determined or if we are waiting for redirection.
+  if (isLoading || (isAuthenticated && !user)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="font-pixel text-white text-2xl animate-pulse">Loading your profile...</div>
-      </div>
-    );
-  }
-
-  // If user needs wellness setup, show loader while redirecting via useEffect
-  if (user && (user as any).needsWellnessSetup) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -76,7 +61,7 @@ export default function Dashboard() {
             >
               <div>
                 <h1 className="text-4xl font-pixel text-white text-shadow-pixel mb-2">
-                  Welcome back, {user.name || 'Champion'}!
+                  Welcome back, {user?.name || 'Champion'}!
                 </h1>
                 <p className="text-blue-300 font-pixel text-lg">
                   Here's your quest log for today.
