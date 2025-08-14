@@ -116,41 +116,66 @@ export default function GoalsPage() {
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
                         >
-                          <div 
-                            className={`
-                              p-4 transition-all duration-200 border-2
-                              ${isCompleted 
-                                ? 'bg-green-800/50 border-green-500 text-gray-400' 
-                                : 'bg-black/30 border-blue-900/80 text-white hover:bg-blue-900/50'
-                              }
-                            `}
-                          >
-                            <div className="flex-1 pr-4">
-                              <p className="text-base font-pixel mb-2">{quest.title}</p>
-                              <p className={`text-xs font-pixel ${isCompleted ? 'text-gray-500' : 'text-blue-300'}`}>
-                                {quest.effortMinutes > 0 ? `${quest.effortMinutes} min • ` : ''}{quest.categorySlug}
-                              </p>
-                            </div>
-                            <div className="mt-4">
-                              <Button
-                                onClick={() => handleCompleteQuest(quest._id)}
-                                disabled={isCompleted || isCompleting}
-                                className={`w-full font-pixel text-base transition-all ${
-                                  isCompleted 
-                                    ? 'bg-green-600 text-white border-2 border-green-700 cursor-not-allowed'
-                                    : 'bg-blue-600 text-white border-2 border-blue-700 shadow-[2px_2px_0px_#000] hover:bg-blue-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
-                                }`}
-                              >
-                                {isCompleting ? (
-                                  <Loader2 className="w-5 h-5 animate-spin" />
-                                ) : isCompleted ? (
-                                  <div className="flex items-center justify-center">
-                                    <Check className="w-5 h-5 mr-2" /> Quest Complete!
-                                  </div>
-                                ) : (
-                                  'Complete Quest'
-                                )}
-                              </Button>
+                          {/* Retro Trading Card Design */}
+                          <div className={`
+                            font-pixel rounded-lg transition-all duration-300
+                            ${isCompleted
+                              ? 'bg-stone-400 border-stone-500'
+                              : 'bg-stone-200 border-stone-400'
+                            }
+                            border-2 shadow-lg relative overflow-hidden
+                          `}>
+                            <div className={`
+                              p-3 border-4 
+                              ${isCompleted ? 'border-stone-500/50' : 'border-white/60'}
+                            `}>
+                              
+                              <div className="flex justify-between items-center mb-3 pb-2 border-b-2 border-stone-400/50">
+                                <span className={`
+                                  text-xs uppercase tracking-widest
+                                  ${isCompleted ? 'text-stone-600' : 'text-stone-500'}
+                                `}>
+                                  {quest.categorySlug}
+                                </span>
+                                <span className={`
+                                  text-xs font-bold
+                                  ${isCompleted ? 'text-stone-600' : 'text-stone-500'}
+                                `}>
+                                  {quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}
+                                </span>
+                              </div>
+
+                              <div className="h-20 flex items-center justify-center text-center mb-3 px-2">
+                                <p className={`
+                                  text-lg leading-tight font-bold
+                                  ${isCompleted ? 'text-stone-700 line-through' : 'text-slate-800'}
+                                `}>
+                                  {quest.title}
+                                </p>
+                              </div>
+
+                              <div className="pt-2">
+                                <Button
+                                  onClick={() => handleCompleteQuest(quest._id)}
+                                  disabled={isCompleted || isCompleting}
+                                  className={`w-full font-pixel text-base transition-all uppercase
+                                    ${isCompleted 
+                                      ? 'bg-green-700 text-white border-2 border-green-800 cursor-not-allowed'
+                                      : 'bg-sky-600 text-white border-2 border-sky-800 shadow-[2px_2px_0px_#404040] hover:bg-sky-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
+                                    }
+                                  `}
+                                >
+                                  {isCompleting ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                  ) : isCompleted ? (
+                                    <div className="flex items-center justify-center">
+                                      <Check className="w-5 h-5 mr-2" /> Done
+                                    </div>
+                                  ) : (
+                                    'Complete'
+                                  )}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </motion.div>
