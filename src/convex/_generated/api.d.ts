@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as achievements from "../achievements.js";
+import type * as ai from "../ai.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as awardEngine from "../awardEngine.js";
@@ -51,6 +52,7 @@ import type * as wellness from "../wellness.js";
  */
 declare const fullApi: ApiFromModules<{
   achievements: typeof achievements;
+  ai: typeof ai;
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
   awardEngine: typeof awardEngine;
