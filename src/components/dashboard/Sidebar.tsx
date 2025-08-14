@@ -10,7 +10,7 @@ interface SidebarProps {
 const navItems = [
   { id: "dashboard", icon: BarChart3, label: "Dashboard", color: "bg-teal-500" },
   { id: "milestones", icon: Star, label: "Milestones", color: "bg-pink-500" },
-  { id: "habits", icon: Clipboard, label: "Habits", color: "bg-yellow-500" },
+  { id: "goals", icon: Clipboard, label: "Goals", color: "bg-yellow-500" },
   { id: "memories", icon: Camera, label: "Memories", color: "bg-orange-500" },
   { id: "settings", icon: Settings, label: "Settings", color: "bg-gray-500" },
 ];
