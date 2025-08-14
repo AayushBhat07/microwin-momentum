@@ -301,13 +301,13 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
         {/* Add Custom Goal */}
         <div className="space-y-3 p-4 border-2 border-foreground/20 shadow-[2px_2px_0px_#00000090]">
           <Label className="text-sm font-medium font-pixel">Add your own micro-goal</Label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <input
               type="text"
               placeholder="e.g., Write one sentence in my journal"
               value={customGoal}
               onChange={(e) => setCustomGoal(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border rounded-md bg-background min-w-0 font-pixel"
+              className="flex-1 basis-48 px-3 py-2 text-sm border rounded-md bg-background min-w-0 font-pixel"
             />
             <select
               value={customCategory}
