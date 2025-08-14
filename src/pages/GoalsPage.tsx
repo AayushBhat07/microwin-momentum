@@ -116,34 +116,34 @@ export default function GoalsPage() {
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
                         >
-                          {/* Pokemon Card Design */}
+                          {/* Pokemon Card Design - Dark Theme */}
                           <div className={`
                             font-pixel rounded-xl transition-all duration-300
-                            ${isCompleted ? 'bg-gray-400 border-gray-500' : 'bg-yellow-300 border-4 border-yellow-500'}
+                            ${isCompleted ? 'bg-gray-600 border-gray-700' : 'bg-gray-900 border-4 border-blue-500'}
                             shadow-lg p-1
                           `}>
-                            <div className={`bg-white rounded-md border-2 ${isCompleted ? 'border-gray-500' : 'border-gray-400'}`}>
+                            <div className={`bg-gray-800 rounded-md border-2 ${isCompleted ? 'border-gray-700' : 'border-gray-600'}`}>
                               {/* Card Header */}
-                              <div className={`flex justify-between items-center p-2 rounded-t-md ${isCompleted ? 'bg-gray-300' : 'bg-gray-100'}`}>
-                                <h3 className={`text-base font-bold ${isCompleted ? 'text-gray-600' : 'text-gray-800'}`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
+                              <div className={`flex justify-between items-center p-2 rounded-t-md ${isCompleted ? 'bg-gray-700' : 'bg-black/20'}`}>
+                                <h3 className={`text-base font-bold ${isCompleted ? 'text-gray-400' : 'text-white'}`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
                                 <div className="flex items-center gap-2">
-                                  <span className={`text-xs font-bold ${isCompleted ? 'text-gray-600' : 'text-red-600'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                                  <span className={`text-xs font-bold ${isCompleted ? 'text-gray-400' : 'text-yellow-400'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
                                 </div>
                               </div>
 
                               {/* "Image" section */}
-                              <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 ${isCompleted ? 'border-gray-400 bg-gray-200' : 'border-yellow-400 bg-gray-50'}`}>
-                                <p className={`text-lg leading-tight font-bold px-2 ${isCompleted ? 'text-gray-700 line-through' : 'text-slate-800'}`}>
+                              <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 ${isCompleted ? 'border-gray-600 bg-gray-700' : 'border-blue-800 bg-black/30'}`}>
+                                <p className={`text-lg leading-tight font-bold px-2 ${isCompleted ? 'text-gray-400 line-through' : 'text-white'}`}>
                                   {quest.title}
                                 </p>
                               </div>
 
                               {/* Description / "Attacks" */}
-                              <div className={`p-2 mx-2 mb-2 border-2 ${isCompleted ? 'bg-gray-200 border-gray-300' : 'bg-gray-100 border-gray-300'}`}>
-                                <p className={`text-xs ${isCompleted ? 'text-gray-600' : 'text-gray-700'}`}>
+                              <div className={`p-2 mx-2 mb-2 border-2 ${isCompleted ? 'bg-gray-700 border-gray-600' : 'bg-black/20 border-gray-700'}`}>
+                                <p className={`text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-300'}`}>
                                   Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
                                 </p>
-                                <p className={`text-xs mt-1 ${isCompleted ? 'text-gray-600' : 'text-gray-700'}`}>
+                                <p className={`text-xs mt-1 ${isCompleted ? 'text-gray-400' : 'text-gray-300'}`}>
                                   A small step towards a greater victory. Complete this quest to build your streak.
                                 </p>
                               </div>
@@ -156,7 +156,7 @@ export default function GoalsPage() {
                                   className={`w-full font-pixel text-base transition-all uppercase
                                     ${isCompleted 
                                       ? 'bg-green-700 text-white border-2 border-green-800 cursor-not-allowed'
-                                      : 'bg-red-500 text-white border-2 border-red-700 shadow-[2px_2px_0px_#404040] hover:bg-red-600 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
+                                      : 'bg-red-500 text-white border-2 border-red-700 shadow-[2px_2px_0px_#000] hover:bg-red-600 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
                                     }
                                   `}
                                 >
@@ -172,7 +172,7 @@ export default function GoalsPage() {
                                 </Button>
                               </div>
                                {/* Footer */}
-                               <div className={`text-center text-xs p-1 border-t-2 ${isCompleted ? 'text-gray-500 border-gray-300' : 'text-gray-500 border-gray-200'}`}>
+                               <div className={`text-center text-xs p-1 border-t-2 ${isCompleted ? 'text-gray-500 border-gray-600' : 'text-gray-400 border-gray-700'}`}>
                                     <p>Quest Card - Level Up Your Life</p>
                                </div>
                             </div>
