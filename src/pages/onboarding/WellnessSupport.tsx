@@ -156,7 +156,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
             Help us understand what you're working through so we can suggest personalized micro-goals.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-8">
           {/* Trending Challenges */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">What challenges are you facing? (Select all that apply)</Label>
