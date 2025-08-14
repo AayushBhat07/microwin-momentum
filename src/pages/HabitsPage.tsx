@@ -6,6 +6,7 @@ import { Loader2, ClipboardList, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useLazyImage } from "@/hooks/use-lazy-image";
 
 const HabitCard = ({ habit }: { habit: any }) => {
   return (
@@ -29,6 +30,7 @@ export default function HabitsPage() {
   const backfillHabits = useMutation(api.habits.backfillHabits);
   const [isRestoring, setIsRestoring] = useState(false);
   const [activeTab, setActiveTab] = useState("habits");
+  const backgroundUrl = useLazyImage("/assets/onboarding1.png");
 
   const handleRestore = async () => {
     setIsRestoring(true);
@@ -48,10 +50,21 @@ export default function HabitsPage() {
     }
   };
 
+  if (habits === undefined || !backgroundUrl) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <Loader2 className="h-12 w-12 text-blue-400 animate-spin mx-auto" />
+      </div>
+    );
+  }
+
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-fixed" 
-      style={{ backgroundImage: "url('/assets/onboarding1.png')" }}
+      className="min-h-screen bg-cover bg-center bg-fixed transition-opacity duration-1000" 
+      style={{ 
+        backgroundImage: `url(${backgroundUrl})`,
+        opacity: backgroundUrl ? 1 : 0,
+      }}
     >
       <div className="min-h-screen bg-black/60 flex">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -69,12 +82,6 @@ export default function HabitsPage() {
                 These are the core habits you committed to during onboarding.
               </p>
             </motion.div>
-
-            {habits === undefined && (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-              </div>
-            )}
 
             {habits && habits.length === 0 && (
               <div className="text-center py-12 bg-black/30 border-2 border-dashed border-blue-800">

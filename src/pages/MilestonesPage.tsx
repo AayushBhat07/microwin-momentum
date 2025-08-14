@@ -6,16 +6,19 @@ import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
 import { NearMissMilestones } from "@/components/dashboard/NearMissMilestones";
 import { RecentUnlocks } from "@/components/dashboard/RecentUnlocks";
 import { BadgeCatalog } from "@/components/dashboard/BadgeCatalog";
+import { useLazyImage } from "@/hooks/use-lazy-image";
+import { Loader2 } from "lucide-react";
 
 export default function MilestonesPage() {
   const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("milestones");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
+  const backgroundUrl = useLazyImage("/assets/onboarding1.png");
 
-  if (isLoading) {
+  if (isLoading || !backgroundUrl) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="font-pixel text-white text-2xl animate-pulse">Loading...</div>
+        <Loader2 className="h-12 w-12 text-blue-400 animate-spin mx-auto" />
       </div>
     );
   }
@@ -30,8 +33,11 @@ export default function MilestonesPage() {
 
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-fixed" 
-      style={{ backgroundImage: "url('/assets/onboarding1.png')" }}
+      className="min-h-screen bg-cover bg-center bg-fixed transition-opacity duration-1000" 
+      style={{ 
+        backgroundImage: `url(${backgroundUrl})`,
+        opacity: backgroundUrl ? 1 : 0,
+      }}
     >
       <div className="min-h-screen bg-black/60 flex">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />

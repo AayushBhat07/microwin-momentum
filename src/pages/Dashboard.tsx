@@ -1,24 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { HeatMapCard } from "@/components/dashboard/HeatMapCard";
 import { UserSearch } from "@/components/dashboard/UserSearch";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
-import { FloatingLogButton } from "@/components/logging/FloatingLogButton";
 import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
 import { BadgesMilestonesSection } from "@/components/dashboard/BadgesMilestonesSection";
 import { useNavigate } from "react-router";
-import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useLazyImage } from "@/hooks/use-lazy-image";
 
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
+  const backgroundUrl = useLazyImage("/assets/onboarding1.png");
 
   useEffect(() => {
     if (!isLoading) {
@@ -33,13 +31,11 @@ export default function Dashboard() {
   }, [user, isLoading, isAuthenticated, navigate]);
 
   // Show a loading screen while auth state is being determined or if we are waiting for redirection.
-  if (isLoading || (isAuthenticated && !user)) {
+  if (isLoading || (isAuthenticated && !user) || !backgroundUrl) {
     return (
       <div 
-        className="min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center" 
-        style={{ backgroundImage: "url('/assets/onboarding1.png')" }}
+        className="min-h-screen bg-black flex items-center justify-center" 
       >
-        <div className="absolute inset-0 min-h-screen bg-black/60" />
         <div className="z-10 text-center">
           <div className="font-pixel text-white text-3xl mb-4 animate-pulse">Loading Your Quest Log...</div>
           <Loader2 className="h-12 w-12 text-blue-400 animate-spin mx-auto" />
@@ -50,8 +46,11 @@ export default function Dashboard() {
 
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-fixed" 
-      style={{ backgroundImage: "url('/assets/onboarding1.png')" }}
+      className="min-h-screen bg-cover bg-center bg-fixed transition-opacity duration-1000" 
+      style={{ 
+        backgroundImage: `url(${backgroundUrl})`,
+        opacity: backgroundUrl ? 1 : 0,
+      }}
     >
       <div className="min-h-screen bg-black/60 flex">
         {/* Sidebar */}
