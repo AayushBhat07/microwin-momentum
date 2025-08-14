@@ -41,14 +41,14 @@ export default function ProfileSetupPage({ onComplete }: { onComplete?: () => vo
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-      <CardHeader className="font-pixel">
-        <CardTitle>Set Up Your Profile</CardTitle>
-        <CardDescription>Choose a unique username and tell us a bit about yourself.</CardDescription>
+      <CardHeader className="font-pixel text-center">
+        <CardTitle className="text-white text-shadow-pixel text-2xl">Set Up Your Profile</CardTitle>
+        <CardDescription className="text-blue-300">Choose a unique username and tell us a bit about yourself.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 p-8">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username" className="font-pixel text-white">Username</Label>
             <Input
               id="username"
               value={username}
@@ -57,21 +57,23 @@ export default function ProfileSetupPage({ onComplete }: { onComplete?: () => vo
               required
               minLength={3}
               disabled={isSubmitting}
+              className="font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-300/50 focus:border-blue-500"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bio">Bio (Optional)</Label>
+            <Label htmlFor="bio" className="font-pixel text-white">Bio (Optional)</Label>
             <Textarea
               id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Your personal motto or a short intro."
               disabled={isSubmitting}
+              className="font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-300/50 focus:border-blue-500 min-h-[80px]"
             />
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button type="submit" disabled={isSubmitting} className="w-full font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Continue
           </Button>
