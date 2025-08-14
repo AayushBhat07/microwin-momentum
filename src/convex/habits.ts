@@ -46,7 +46,7 @@ export const backfillHabits = mutation({
             await ctx.runMutation(internal.habits.createHabitFromGoal, {
                 userId: user._id,
                 title: goal.title,
-                categorySlug: goal.category,
+                categorySlug: (goal.category as string).toLowerCase() as any,
             });
         }
 
