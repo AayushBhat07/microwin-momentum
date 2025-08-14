@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function ProfileSetupPage({ onComplete }: { onComplete: () => void }) {
+export default function ProfileSetupPage({ onComplete }: { onComplete?: () => void }) {
   const { user } = useAuth();
   const [username, setUsername] = useState(user?.username || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -26,9 +26,12 @@ export default function ProfileSetupPage({ onComplete }: { onComplete: () => voi
     }
     setIsSubmitting(true);
     try {
-      await updateProfile({ username, bio });
+      // Now we advance the step directly in this mutation
+      await updateProfile({ username, bio, onboardingStep: 1 });
       toast.success("Profile updated! Welcome!");
-      onComplete();
+      // The onComplete prop is no longer needed as the user object will reactively update
+      // and the parent component will render the next step.
+      if (onComplete) onComplete();
     } catch (error: any) {
       toast.error(error.data?.message || "Failed to update profile. Username might be taken.");
     } finally {

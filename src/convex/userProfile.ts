@@ -1,62 +1,38 @@
+import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const updateProfile = mutation({
-  args: {
-    username: v.string(),
-    bio: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
+    args: {
+        username: v.string(),
+        bio: v.optional(v.string()),
+        onboardingStep: v.optional(v.number()),
+    },
+    handler: async (ctx, { username, bio, onboardingStep }) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            throw new Error("User must be authenticated to update profile.");
+        }
 
-    // Check for username uniqueness
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_username", (q) => q.eq("username", args.username))
-      .unique();
+        // Check if username is already taken by another user
+        const existingUser = await ctx.db
+            .query("users")
+            .withIndex("by_username", (q) => q.eq("username", username))
+            .unique();
 
-    if (existingUser && existingUser._id !== user._id) {
-      throw new Error("Username is already taken.");
-    }
+        if (existingUser && existingUser._id !== userId) {
+            throw new Error("Username is already taken. Please choose another one.");
+        }
 
-    await ctx.db.patch(user._id, {
-      username: args.username,
-      bio: args.bio,
-    });
+        const dataToPatch: { username: string; bio?: string; onboardingStep?: number } = {
+            username: username,
+            bio: bio,
+        };
 
-    // Update user's onboarding progress directly
-    await ctx.db.patch(user._id, { onboardingStep: 1 });
-  },
-});
+        if (onboardingStep !== undefined) {
+            dataToPatch.onboardingStep = onboardingStep;
+        }
 
-export const updateGeneralProfile = mutation({
-  args: {
-    username: v.string(),
-    bio: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.users.getCurrentUser);
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-
-    // Check for username uniqueness
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_username", (q) => q.eq("username", args.username))
-      .unique();
-
-    if (existingUser && existingUser._id !== user._id) {
-      throw new Error("Username is already taken.");
-    }
-
-    await ctx.db.patch(user._id, {
-      username: args.username,
-      bio: args.bio,
-    });
-  },
+        await ctx.db.patch(userId, dataToPatch);
+    },
 });

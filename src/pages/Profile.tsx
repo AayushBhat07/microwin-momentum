@@ -20,7 +20,7 @@ function EditProfileDialog({ user }: { user: any }) {
   const [username, setUsername] = useState(user.username ?? "");
   const [bio, setBio] = useState(user.bio ?? "");
   const [isOpen, setIsOpen] = useState(false);
-  const updateProfile = useMutation(api.userProfile.updateGeneralProfile);
+  const updateProfile = useMutation(api.userProfile.updateProfile);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
