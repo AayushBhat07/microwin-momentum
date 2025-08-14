@@ -218,7 +218,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
               placeholder="Anything else you'd like us to know..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-300/50 focus:border-blue-500 min-h-[80px]"
+              className="font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-200/70 focus:border-blue-500 min-h-[80px]"
             />
             {notes && (
               <div className="flex items-center space-x-2">
@@ -228,7 +228,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                   onCheckedChange={(checked) => setConsentToSaveNotes(checked === true)}
                   className="w-4 h-4 border-2 bg-black/30 border-blue-700 text-blue-400 focus:ring-blue-500"
                 />
-                <Label htmlFor="consent-notes" className="text-xs text-blue-300 cursor-pointer">
+                <Label htmlFor="consent-notes" className="text-xs text-blue-200 cursor-pointer">
                   I consent to saving these notes
                 </Label>
               </div>
