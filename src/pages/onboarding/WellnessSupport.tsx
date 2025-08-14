@@ -150,16 +150,16 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
         <CardHeader className="font-pixel text-center">
           <div className="flex items-center gap-2 justify-center">
             <Heart className="w-6 h-6 text-pink-400" />
-            <CardTitle className="text-white text-shadow-pixel text-2xl">Wellness Support</CardTitle>
+            <CardTitle className="text-gray-900 text-shadow-pixel text-2xl">Wellness Support</CardTitle>
           </div>
-          <CardDescription className="text-blue-300">
+          <CardDescription className="text-gray-600">
             Help us understand what you're working through.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 p-8 font-pixel">
           {/* Trending Challenges */}
           <div className="space-y-3">
-            <Label className="text-base text-white">What challenges are you facing?</Label>
+            <Label className="text-base text-gray-900">What challenges are you facing?</Label>
             {trendingChallenges === undefined ? (
               <div className="flex justify-center py-4">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
@@ -173,9 +173,9 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                         id={challenge.slug}
                         checked={selectedChallenges.includes(challenge.slug)}
                         onCheckedChange={() => handleChallengeToggle(challenge.slug)}
-                        className="w-5 h-5 border-2 bg-black/30 border-blue-700 text-blue-400 focus:ring-blue-500"
+                        className="w-5 h-5 border-2 bg-gray-50 border-blue-400 text-blue-600 focus:ring-blue-500"
                       />
-                      <Label htmlFor={challenge.slug} className="cursor-pointer text-white text-base">
+                      <Label htmlFor={challenge.slug} className="cursor-pointer text-gray-800 text-base">
                         {challenge.label}
                       </Label>
                     </div>
@@ -185,7 +185,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                         animate={{ opacity: 1, height: "auto" }}
                         className="ml-8 space-y-2"
                       >
-                        <Label className="text-sm text-blue-300">
+                        <Label className="text-sm text-gray-600">
                           How intense is this?
                         </Label>
                         <Slider
@@ -196,7 +196,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                           step={1}
                           className="w-full"
                         />
-                        <div className="flex justify-between text-xs text-blue-300/80">
+                        <div className="flex justify-between text-xs text-gray-500">
                           <span>Mild</span>
                           <span>Very Intense</span>
                         </div>
@@ -210,7 +210,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
 
           {/* Optional Notes */}
           <div className="space-y-3">
-            <Label htmlFor="notes" className="text-base text-white">
+            <Label htmlFor="notes" className="text-base text-gray-900">
               Additional context (optional)
             </Label>
             <Textarea
@@ -218,7 +218,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
               placeholder="Anything else you'd like us to know..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-200/70 focus:border-blue-500 min-h-[80px]"
+              className="font-pixel bg-white border-2 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 min-h-[80px]"
             />
             {notes && (
               <div className="flex items-center space-x-2">
@@ -226,9 +226,9 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                   id="consent-notes"
                   checked={consentToSaveNotes}
                   onCheckedChange={(checked) => setConsentToSaveNotes(checked === true)}
-                  className="w-4 h-4 border-2 bg-black/30 border-blue-700 text-blue-400 focus:ring-blue-500"
+                  className="w-4 h-4 border-2 bg-gray-50 border-blue-400 text-blue-600 focus:ring-blue-500"
                 />
-                <Label htmlFor="consent-notes" className="text-xs text-blue-200 cursor-pointer">
+                <Label htmlFor="consent-notes" className="text-xs text-gray-600 cursor-pointer">
                   I consent to saving these notes
                 </Label>
               </div>
@@ -252,15 +252,15 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
       <CardHeader className="font-pixel text-center">
-        <CardTitle className="text-white text-shadow-pixel text-2xl">Your Micro-Goals</CardTitle>
-        <CardDescription className="text-blue-300">
+        <CardTitle className="text-gray-900 text-shadow-pixel text-2xl">Your Micro-Goals</CardTitle>
+        <CardDescription className="text-gray-600">
           Select the goals that feel right for you.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 p-8">
         {/* Generated Suggestions */}
         <div className="space-y-3">
-          <Label className="text-base font-pixel text-white">Suggested for you</Label>
+          <Label className="text-base font-pixel text-gray-900">Suggested for you</Label>
           <div className="grid gap-3 max-h-64 overflow-y-auto p-2 -mr-2">
             {suggestions.map((suggestion) => {
               const isSelected = selectedSuggestions.has(suggestion.title);
@@ -270,19 +270,19 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                   className={`
                     flex items-center justify-between p-3 cursor-pointer transition-all duration-200 border-2
                     ${isSelected 
-                      ? 'bg-blue-600/80 border-blue-400 text-white shadow-[2px_2px_0px_#FFF]' 
-                      : 'bg-black/30 border-blue-900/80 text-white hover:bg-blue-900/50'
+                      ? 'bg-blue-600 border-blue-400 text-white shadow-[2px_2px_0px_#000]' 
+                      : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200'
                     }
                   `}
                   onClick={() => handleSuggestionToggle(suggestion.title)}
                 >
                   <div className="flex-1 pr-4">
                     <p className="text-base font-pixel">{suggestion.title}</p>
-                    <p className={`text-xs font-pixel ${isSelected ? 'text-blue-200' : 'text-blue-300'}`}>
+                    <p className={`text-xs font-pixel ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
                       {suggestion.effortMinutes} min • {ACHIEVEMENT_CATEGORIES.find(c => c.slug === suggestion.categorySlug)?.name}
                     </p>
                   </div>
-                  <div className={`w-6 h-6 border-2 flex items-center justify-center ${isSelected ? 'border-white bg-blue-500' : 'border-blue-700'}`}>
+                  <div className={`w-6 h-6 border-2 flex items-center justify-center ${isSelected ? 'border-white bg-blue-500' : 'border-gray-400'}`}>
                     {isSelected && <Check className="w-5 h-5 text-white" />}
                   </div>
                 </div>
@@ -292,23 +292,23 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
         </div>
 
         {/* Add Custom Goal */}
-        <div className="space-y-3 p-4 border-2 border-blue-900/80 bg-black/30">
-          <Label className="text-base font-pixel text-white">Add your own</Label>
+        <div className="space-y-3 p-4 border-2 border-gray-300 bg-gray-50">
+          <Label className="text-base font-pixel text-gray-900">Add your own</Label>
           <div className="flex flex-wrap gap-2">
             <input
               type="text"
               placeholder="e.g., Drink a glass of water"
               value={customGoal}
               onChange={(e) => setCustomGoal(e.target.value)}
-              className="flex-1 basis-48 px-3 py-2 text-sm font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-300/50 focus:border-blue-500"
+              className="flex-1 basis-48 px-3 py-2 text-sm font-pixel bg-white border-2 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500"
             />
             <select
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
-              className="px-3 py-2 text-sm font-pixel bg-black/30 border-2 border-blue-900/80 text-white"
+              className="px-3 py-2 text-sm font-pixel bg-white border-2 border-gray-300 text-gray-900"
             >
               {ACHIEVEMENT_CATEGORIES.map((cat) => (
-                <option key={cat.slug} value={cat.slug} className="bg-black text-white">
+                <option key={cat.slug} value={cat.slug} className="bg-white text-gray-900">
                   {cat.name}
                 </option>
               ))}
@@ -319,12 +319,12 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
           </div>
         </div>
 
-        <p className="text-sm text-blue-300 font-pixel text-center">
+        <p className="text-sm text-gray-600 font-pixel text-center">
           Selected: {selectedSuggestions.size} micro-goals
         </p>
       </CardContent>
       <CardFooter className="flex gap-4">
-        <Button variant="outline" onClick={() => setStep("challenges")} className="w-full font-pixel text-lg bg-black/30 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-900/50 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
+        <Button variant="outline" onClick={() => setStep("challenges")} className="w-full font-pixel text-lg bg-white text-gray-800 border-2 border-gray-300 shadow-[4px_4px_0px_#ccc] hover:bg-gray-100 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
           Back
         </Button>
         <Button 
