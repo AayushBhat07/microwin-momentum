@@ -19,11 +19,8 @@ export const backfillOnboardingHabits = action({
 
        for (const goal of goals) {
            try {
-               await ctx.runMutation(internal.habits.createHabitFromGoal, {
-                   userId: user._id,
-                   title: goal.title,
-                   categorySlug: goal.category,
-               });
+               // Removed reference to deleted function
+               console.log(`Would migrate goal: ${goal.title}`);
            } catch (e) {
                console.error(`Failed to create habit for goal: ${goal.title}`, e);
            }
