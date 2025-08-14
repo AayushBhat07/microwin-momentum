@@ -55,7 +55,7 @@ export default function GoalSettingPage({ onComplete }: { onComplete: () => void
   const handleContinue = async () => {
     setIsSubmitting(true);
     try {
-      await completeStep({ step: 3 });
+      await completeStep({ step: 3, date: getLocalDate() });
       toast.success("Step 3 Complete! You've earned the 'Ready for Action' badge!");
       onComplete();
     } catch (error) {
