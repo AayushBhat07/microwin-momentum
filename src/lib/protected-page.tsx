@@ -21,25 +21,19 @@ export function Protected({ children }: { children: React.ReactNode }) {
     // If user is authenticated, proceed with onboarding and routing logic
     if (user) {
       const onboardingStep = user.onboardingStep ?? 0;
-      const isOnboardingComplete = onboardingStep >= 4;
+      const isOnboardingComplete = onboardingStep >= 2; // Onboarding now has 2 steps (0, 1)
       const currentPath = location.pathname;
       const searchParams = new URLSearchParams(location.search);
       const redirect = searchParams.get('redirect');
 
       // 3. Handle onboarding redirection
       if (!isOnboardingComplete) {
-        const onboardingPaths = [
-          "/onboarding/profile",
-          "/onboarding/goals",
-          "/onboarding/achievements",
-          "/onboarding/preferences",
-        ];
-        const targetOnboardingPath = onboardingPaths[onboardingStep];
-        
-        if (currentPath !== targetOnboardingPath) {
-          navigate(targetOnboardingPath, { replace: true });
+        // If user is not done with onboarding, and they are not on an onboarding path,
+        // redirect them to the main onboarding page.
+        if (!currentPath.startsWith("/onboarding")) {
+          navigate("/onboarding", { replace: true });
         }
-        return; // Render the onboarding step
+        return; // Allow rendering of the current onboarding step
       }
 
       // 4. Handle post-onboarding routing
@@ -68,6 +62,6 @@ export function Protected({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // 4. If all checks pass, render the requested component
+  // If all checks pass, render the requested component
   return <>{children}</>;
 }
