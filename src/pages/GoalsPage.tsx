@@ -36,6 +36,9 @@ export default function GoalsPage() {
 
   const isLoading = quests === undefined || !backgroundUrl;
 
+  const inProgressQuests = quests?.filter(q => !completedQuestIds.has(q._id)) ?? [];
+  const completedQuests = quests?.filter(q => completedQuestIds.has(q._id)) ?? [];
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -101,86 +104,141 @@ export default function GoalsPage() {
                     Clear All Goals
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <AnimatePresence>
-                    {quests.map((quest, index) => {
-                      const isCompleted = completedQuestIds.has(quest._id);
-                      const isCompleting = completingId === quest._id;
 
-                      return (
-                        <motion.div
-                          key={quest._id}
-                          layout
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
-                        >
-                          {/* Pokemon Card Design - Dark Theme */}
-                          <div className={`
-                            font-pixel rounded-xl transition-all duration-300
-                            ${isCompleted ? 'bg-gray-600 border-gray-700' : 'bg-gray-900 border-4 border-blue-500'}
-                            shadow-lg p-1
-                          `}>
-                            <div className={`bg-gray-800 rounded-md border-2 ${isCompleted ? 'border-gray-700' : 'border-gray-600'}`}>
-                              {/* Card Header */}
-                              <div className={`flex justify-between items-center p-2 rounded-t-md ${isCompleted ? 'bg-gray-700' : 'bg-black/20'}`}>
-                                <h3 className={`text-base font-bold ${isCompleted ? 'text-gray-400' : 'text-white'}`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-xs font-bold ${isCompleted ? 'text-gray-400' : 'text-yellow-400'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                {/* In-Progress Quests */}
+                <div className="mb-12">
+                  <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">In-Progress Quests ({inProgressQuests.length})</h2>
+                  {inProgressQuests.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <AnimatePresence>
+                        {inProgressQuests.map((quest, index) => {
+                          const isCompleting = completingId === quest._id;
+                          return (
+                            <motion.div
+                              key={quest._id}
+                              layout
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.3, delay: index * 0.05 }}
+                            >
+                              {/* Card Component */}
+                              <div className={`
+                                font-pixel rounded-xl transition-all duration-300
+                                bg-gray-900 border-4 border-blue-500
+                                shadow-lg p-1
+                              `}>
+                                <div className={`bg-gray-800 rounded-md border-2 border-gray-600`}>
+                                  <div className={`flex justify-between items-center p-2 rounded-t-md bg-black/20`}>
+                                    <h3 className={`text-base font-bold text-white`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
+                                    <div className="flex items-center gap-2">
+                                      <span className={`text-xs font-bold text-yellow-400`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                                    </div>
+                                  </div>
+                                  <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 border-blue-800 bg-black/30`}>
+                                    <p className={`text-lg leading-tight font-bold px-2 text-white`}>
+                                      {quest.title}
+                                    </p>
+                                  </div>
+                                  <div className={`p-2 mx-2 mb-2 border-2 bg-black/20 border-gray-700`}>
+                                    <p className={`text-xs text-gray-300`}>
+                                      Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
+                                    </p>
+                                    <p className={`text-xs mt-1 text-gray-300`}>
+                                      A small step towards a greater victory. Complete this quest to build your streak.
+                                    </p>
+                                  </div>
+                                  <div className="p-2">
+                                    <Button
+                                      onClick={() => handleCompleteQuest(quest._id)}
+                                      disabled={isCompleting}
+                                      className={`w-full font-pixel text-base transition-all uppercase bg-green-600 text-white border-2 border-green-700 shadow-[2px_2px_0px_#000] hover:bg-green-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none`}
+                                    >
+                                      {isCompleting ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                      ) : (
+                                        'Complete Quest'
+                                      )}
+                                    </Button>
+                                  </div>
+                                  <div className={`text-center text-xs p-1 border-t-2 text-gray-400 border-gray-700`}>
+                                    <p>Quest Card - Level Up Your Life</p>
+                                  </div>
                                 </div>
                               </div>
+                            </motion.div>
+                          )
+                        })}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <p className="text-center text-blue-300">No quests in progress. Great job!</p>
+                  )}
+                </div>
 
-                              {/* "Image" section */}
-                              <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 ${isCompleted ? 'border-gray-600 bg-gray-700' : 'border-blue-800 bg-black/30'}`}>
-                                <p className={`text-lg leading-tight font-bold px-2 ${isCompleted ? 'text-gray-400 line-through' : 'text-white'}`}>
-                                  {quest.title}
-                                </p>
-                              </div>
-
-                              {/* Description / "Attacks" */}
-                              <div className={`p-2 mx-2 mb-2 border-2 ${isCompleted ? 'bg-gray-700 border-gray-600' : 'bg-black/20 border-gray-700'}`}>
-                                <p className={`text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-300'}`}>
-                                  Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
-                                </p>
-                                <p className={`text-xs mt-1 ${isCompleted ? 'text-gray-400' : 'text-gray-300'}`}>
-                                  A small step towards a greater victory. Complete this quest to build your streak.
-                                </p>
-                              </div>
-
-                              {/* Complete Button */}
-                              <div className="p-2">
-                                <Button
-                                  onClick={() => handleCompleteQuest(quest._id)}
-                                  disabled={isCompleted || isCompleting}
-                                  className={`w-full font-pixel text-base transition-all uppercase
-                                    ${isCompleted 
-                                      ? 'bg-green-700 text-white border-2 border-green-800 cursor-not-allowed'
-                                      : 'bg-green-600 text-white border-2 border-green-700 shadow-[2px_2px_0px_#000] hover:bg-green-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
-                                    }
-                                  `}
-                                >
-                                  {isCompleting ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                  ) : isCompleted ? (
+                {/* Completed Quests */}
+                <div>
+                  <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">Completed Quests ({completedQuests.length})</h2>
+                  {completedQuests.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <AnimatePresence>
+                        {completedQuests.map((quest, index) => (
+                          <motion.div
+                            key={quest._id}
+                            layout
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                          >
+                            {/* Card Component */}
+                            <div className={`
+                              font-pixel rounded-xl transition-all duration-300
+                              bg-gray-600 border-gray-700
+                              shadow-lg p-1 opacity-70
+                            `}>
+                              <div className={`bg-gray-800 rounded-md border-2 border-gray-700`}>
+                                <div className={`flex justify-between items-center p-2 rounded-t-md bg-gray-700`}>
+                                  <h3 className={`text-base font-bold text-gray-400`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-bold text-gray-400`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                                  </div>
+                                </div>
+                                <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 border-gray-600 bg-gray-700`}>
+                                  <p className={`text-lg leading-tight font-bold px-2 text-gray-400 line-through`}>
+                                    {quest.title}
+                                  </p>
+                                </div>
+                                <div className={`p-2 mx-2 mb-2 border-2 bg-gray-700 border-gray-600`}>
+                                  <p className={`text-xs text-gray-400`}>
+                                    Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
+                                  </p>
+                                  <p className={`text-xs mt-1 text-gray-400`}>
+                                    A small step towards a greater victory. Complete this quest to build your streak.
+                                  </p>
+                                </div>
+                                <div className="p-2">
+                                  <Button
+                                    disabled={true}
+                                    className={`w-full font-pixel text-base transition-all uppercase bg-green-700 text-white border-2 border-green-800 cursor-not-allowed`}
+                                  >
                                     <div className="flex items-center justify-center">
                                       <Check className="w-5 h-5 mr-2" /> Done
                                     </div>
-                                  ) : (
-                                    'Complete Quest'
-                                  )}
-                                </Button>
+                                  </Button>
+                                </div>
+                                <div className={`text-center text-xs p-1 border-t-2 text-gray-500 border-gray-600`}>
+                                  <p>Quest Card - Level Up Your Life</p>
+                                </div>
                               </div>
-                               {/* Footer */}
-                               <div className={`text-center text-xs p-1 border-t-2 ${isCompleted ? 'text-gray-500 border-gray-600' : 'text-gray-400 border-gray-700'}`}>
-                                    <p>Quest Card - Level Up Your Life</p>
-                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )
-                    })}
-                  </AnimatePresence>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <p className="text-center text-blue-300">No quests completed yet. Let's get to it!</p>
+                  )}
                 </div>
               </>
             )}
