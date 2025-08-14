@@ -68,3 +68,18 @@ export const completeDailyQuest = mutation({
     return { title: preset.title };
   },
 });
+
+export const debugUserPresets = query({
+  args: {},
+  handler: async (ctx): Promise<Array<{ title: string; source: string; categorySlug: string }>> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) return [];
+    
+    const presets = await ctx.db
+      .query("userPresets")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    
+    return presets.map(p => ({ title: p.title, source: p.source, categorySlug: p.categorySlug }));
+  },
+});
