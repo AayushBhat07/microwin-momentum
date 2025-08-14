@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Link } from "react-router";
 import { useLazyImage } from "@/hooks/use-lazy-image";
+import { GoalsRadarChart } from "@/components/goals/GoalsRadarChart";
 
 export default function GoalsPage() {
   const quests = useQuery(api.habits.getDailyQuests);
@@ -71,6 +72,10 @@ export default function GoalsPage() {
                 Complete these micro-goals from your wellness setup.
               </p>
             </div>
+
+            {quests && quests.length > 0 && (
+              <GoalsRadarChart quests={quests} completedQuestIds={completedQuestIds} />
+            )}
 
             {quests.length === 0 ? (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
