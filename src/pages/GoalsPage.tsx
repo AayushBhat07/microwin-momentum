@@ -116,52 +116,47 @@ export default function GoalsPage() {
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
                         >
-                          {/* Retro Trading Card Design */}
+                          {/* Pokemon Card Design */}
                           <div className={`
-                            font-pixel rounded-lg transition-all duration-300
-                            ${isCompleted
-                              ? 'bg-stone-400 border-stone-500'
-                              : 'bg-stone-200 border-stone-400'
-                            }
-                            border-2 shadow-lg relative overflow-hidden
+                            font-pixel rounded-xl transition-all duration-300
+                            ${isCompleted ? 'bg-gray-400 border-gray-500' : 'bg-yellow-300 border-4 border-yellow-500'}
+                            shadow-lg p-1
                           `}>
-                            <div className={`
-                              p-3 border-4 
-                              ${isCompleted ? 'border-stone-500/50' : 'border-white/60'}
-                            `}>
-                              
-                              <div className="flex justify-between items-center mb-3 pb-2 border-b-2 border-stone-400/50">
-                                <span className={`
-                                  text-xs uppercase tracking-widest
-                                  ${isCompleted ? 'text-stone-600' : 'text-stone-500'}
-                                `}>
-                                  {quest.categorySlug}
-                                </span>
-                                <span className={`
-                                  text-xs font-bold
-                                  ${isCompleted ? 'text-stone-600' : 'text-stone-500'}
-                                `}>
-                                  {quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}
-                                </span>
+                            <div className={`bg-white rounded-md border-2 ${isCompleted ? 'border-gray-500' : 'border-gray-400'}`}>
+                              {/* Card Header */}
+                              <div className={`flex justify-between items-center p-2 rounded-t-md ${isCompleted ? 'bg-gray-300' : 'bg-gray-100'}`}>
+                                <h3 className={`text-base font-bold ${isCompleted ? 'text-gray-600' : 'text-gray-800'}`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-xs font-bold ${isCompleted ? 'text-gray-600' : 'text-red-600'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                                </div>
                               </div>
 
-                              <div className="h-20 flex items-center justify-center text-center mb-3 px-2">
-                                <p className={`
-                                  text-lg leading-tight font-bold
-                                  ${isCompleted ? 'text-stone-700 line-through' : 'text-slate-800'}
-                                `}>
+                              {/* "Image" section */}
+                              <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 ${isCompleted ? 'border-gray-400 bg-gray-200' : 'border-yellow-400 bg-gray-50'}`}>
+                                <p className={`text-lg leading-tight font-bold px-2 ${isCompleted ? 'text-gray-700 line-through' : 'text-slate-800'}`}>
                                   {quest.title}
                                 </p>
                               </div>
 
-                              <div className="pt-2">
+                              {/* Description / "Attacks" */}
+                              <div className={`p-2 mx-2 mb-2 border-2 ${isCompleted ? 'bg-gray-200 border-gray-300' : 'bg-gray-100 border-gray-300'}`}>
+                                <p className={`text-xs ${isCompleted ? 'text-gray-600' : 'text-gray-700'}`}>
+                                  Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
+                                </p>
+                                <p className={`text-xs mt-1 ${isCompleted ? 'text-gray-600' : 'text-gray-700'}`}>
+                                  A small step towards a greater victory. Complete this quest to build your streak.
+                                </p>
+                              </div>
+
+                              {/* Complete Button */}
+                              <div className="p-2">
                                 <Button
                                   onClick={() => handleCompleteQuest(quest._id)}
                                   disabled={isCompleted || isCompleting}
                                   className={`w-full font-pixel text-base transition-all uppercase
                                     ${isCompleted 
                                       ? 'bg-green-700 text-white border-2 border-green-800 cursor-not-allowed'
-                                      : 'bg-sky-600 text-white border-2 border-sky-800 shadow-[2px_2px_0px_#404040] hover:bg-sky-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
+                                      : 'bg-red-500 text-white border-2 border-red-700 shadow-[2px_2px_0px_#404040] hover:bg-red-600 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
                                     }
                                   `}
                                 >
@@ -172,10 +167,14 @@ export default function GoalsPage() {
                                       <Check className="w-5 h-5 mr-2" /> Done
                                     </div>
                                   ) : (
-                                    'Complete'
+                                    'Complete Quest'
                                   )}
                                 </Button>
                               </div>
+                               {/* Footer */}
+                               <div className={`text-center text-xs p-1 border-t-2 ${isCompleted ? 'text-gray-500 border-gray-300' : 'text-gray-500 border-gray-200'}`}>
+                                    <p>Quest Card - Level Up Your Life</p>
+                               </div>
                             </div>
                           </div>
                         </motion.div>
