@@ -147,34 +147,35 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
   if (step === "challenges") {
     return (
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-        <CardHeader className="font-pixel">
-          <div className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-pink-500" />
-            <CardTitle>Wellness Support</CardTitle>
+        <CardHeader className="font-pixel text-center">
+          <div className="flex items-center gap-2 justify-center">
+            <Heart className="w-6 h-6 text-pink-400" />
+            <CardTitle className="text-white text-shadow-pixel text-2xl">Wellness Support</CardTitle>
           </div>
-          <CardDescription>
-            Help us understand what you're working through so we can suggest personalized micro-goals.
+          <CardDescription className="text-blue-300">
+            Help us understand what you're working through.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 p-8">
+        <CardContent className="space-y-6 p-8 font-pixel">
           {/* Trending Challenges */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">What challenges are you facing? (Select all that apply)</Label>
+            <Label className="text-base text-white">What challenges are you facing?</Label>
             {trendingChallenges === undefined ? (
               <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-3">
                 {trendingChallenges.map((challenge) => (
-                  <div key={challenge.slug} className="space-y-2">
-                    <div className="flex items-center space-x-2">
+                  <div key={challenge.slug} className="space-y-3">
+                    <div className="flex items-center space-x-3">
                       <Checkbox
                         id={challenge.slug}
                         checked={selectedChallenges.includes(challenge.slug)}
                         onCheckedChange={() => handleChallengeToggle(challenge.slug)}
+                        className="w-5 h-5 border-2 bg-black/30 border-blue-700 text-blue-400 focus:ring-blue-500"
                       />
-                      <Label htmlFor={challenge.slug} className="cursor-pointer">
+                      <Label htmlFor={challenge.slug} className="cursor-pointer text-white text-base">
                         {challenge.label}
                       </Label>
                     </div>
@@ -182,10 +183,10 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="ml-6 space-y-2"
+                        className="ml-8 space-y-2"
                       >
-                        <Label className="text-xs text-muted-foreground">
-                          How intense is this challenge? (1 = mild, 5 = very intense)
+                        <Label className="text-sm text-blue-300">
+                          How intense is this?
                         </Label>
                         <Slider
                           value={[intensities[challenge.slug] || 3]}
@@ -195,9 +196,9 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                           step={1}
                           className="w-full"
                         />
-                        <div className="flex justify-between text-xs text-muted-foreground">
+                        <div className="flex justify-between text-xs text-blue-300/80">
                           <span>Mild</span>
-                          <span>Intense</span>
+                          <span>Very Intense</span>
                         </div>
                       </motion.div>
                     )}
@@ -209,15 +210,15 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
 
           {/* Optional Notes */}
           <div className="space-y-3">
-            <Label htmlFor="notes" className="text-sm font-medium">
+            <Label htmlFor="notes" className="text-base text-white">
               Additional context (optional)
             </Label>
             <Textarea
               id="notes"
-              placeholder="Anything else you'd like us to know about your situation..."
+              placeholder="Anything else you'd like us to know..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="min-h-[80px]"
+              className="font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-300/50 focus:border-blue-500 min-h-[80px]"
             />
             {notes && (
               <div className="flex items-center space-x-2">
@@ -225,33 +226,23 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                   id="consent-notes"
                   checked={consentToSaveNotes}
                   onCheckedChange={(checked) => setConsentToSaveNotes(checked === true)}
+                  className="w-4 h-4 border-2 bg-black/30 border-blue-700 text-blue-400 focus:ring-blue-500"
                 />
-                <Label htmlFor="consent-notes" className="text-xs text-muted-foreground cursor-pointer">
-                  I consent to saving these notes to improve my experience
+                <Label htmlFor="consent-notes" className="text-xs text-blue-300 cursor-pointer">
+                  I consent to saving these notes
                 </Label>
               </div>
             )}
-          </div>
-
-          {/* Privacy Setting */}
-          <div className="flex items-center space-x-2 p-3 bg-secondary rounded-lg">
-            <Shield className="w-4 h-4 text-blue-500" />
-            <div className="flex-1">
-              <Label className="text-sm font-medium">Privacy</Label>
-              <p className="text-xs text-muted-foreground">
-                Your wellness information will be kept private and used only to personalize your experience.
-              </p>
-            </div>
           </div>
         </CardContent>
         <CardFooter>
           <Button 
             onClick={handleGenerateSuggestions} 
             disabled={selectedChallenges.length === 0 || isGenerating}
-            className="w-full"
+            className="w-full font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
           >
             {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Get Personalized Micro-Goals
+            Get Micro-Goals
           </Button>
         </CardFooter>
       </motion.div>
@@ -260,37 +251,39 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-      <CardHeader className="font-pixel">
-        <CardTitle>Your Personalized Micro-Goals</CardTitle>
-        <CardDescription>
-          Select the micro-goals that feel right for you. These will become quick-log presets.
+      <CardHeader className="font-pixel text-center">
+        <CardTitle className="text-white text-shadow-pixel text-2xl">Your Micro-Goals</CardTitle>
+        <CardDescription className="text-blue-300">
+          Select the goals that feel right for you.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 p-8">
         {/* Generated Suggestions */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium font-pixel">Suggested micro-goals</Label>
-          <div className="grid gap-3 max-h-64 overflow-y-auto p-2">
+        <div className="space-y-3">
+          <Label className="text-base font-pixel text-white">Suggested for you</Label>
+          <div className="grid gap-3 max-h-64 overflow-y-auto p-2 -mr-2">
             {suggestions.map((suggestion) => {
               const isSelected = selectedSuggestions.has(suggestion.title);
               return (
                 <div
                   key={suggestion.title}
-                  className={`flex items-center justify-between p-3 cursor-pointer transition-all duration-150 border-2 ${
-                    isSelected
-                      ? 'border-primary shadow-[2px_2px_0px_var(--color-primary)] bg-primary/10'
-                      : 'border-foreground/20 shadow-[2px_2px_0px_#00000090] bg-secondary hover:shadow-[1px_1px_0px_#00000090] hover:translate-x-px hover:translate-y-px'
-                  }`}
+                  className={`
+                    flex items-center justify-between p-3 cursor-pointer transition-all duration-200 border-2
+                    ${isSelected 
+                      ? 'bg-blue-600/80 border-blue-400 text-white shadow-[2px_2px_0px_#FFF]' 
+                      : 'bg-black/30 border-blue-900/80 text-white hover:bg-blue-900/50'
+                    }
+                  `}
                   onClick={() => handleSuggestionToggle(suggestion.title)}
                 >
                   <div className="flex-1 pr-4">
-                    <p className="text-base font-medium font-pixel">{suggestion.title}</p>
-                    <p className="text-xs text-muted-foreground font-pixel">
+                    <p className="text-base font-pixel">{suggestion.title}</p>
+                    <p className={`text-xs font-pixel ${isSelected ? 'text-blue-200' : 'text-blue-300'}`}>
                       {suggestion.effortMinutes} min • {ACHIEVEMENT_CATEGORIES.find(c => c.slug === suggestion.categorySlug)?.name}
                     </p>
                   </div>
-                  <div className={`w-6 h-6 border-2 flex items-center justify-center ${isSelected ? 'border-primary bg-primary/20' : 'border-foreground/30'}`}>
-                    {isSelected && <Check className="w-5 h-5 text-primary" />}
+                  <div className={`w-6 h-6 border-2 flex items-center justify-center ${isSelected ? 'border-white bg-blue-500' : 'border-blue-700'}`}>
+                    {isSelected && <Check className="w-5 h-5 text-white" />}
                   </div>
                 </div>
               );
@@ -299,45 +292,45 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
         </div>
 
         {/* Add Custom Goal */}
-        <div className="space-y-3 p-4 border-2 border-foreground/20 shadow-[2px_2px_0px_#00000090]">
-          <Label className="text-sm font-medium font-pixel">Add your own micro-goal</Label>
+        <div className="space-y-3 p-4 border-2 border-blue-900/80 bg-black/30">
+          <Label className="text-base font-pixel text-white">Add your own</Label>
           <div className="flex flex-wrap gap-2">
             <input
               type="text"
-              placeholder="e.g., Write one sentence in my journal"
+              placeholder="e.g., Drink a glass of water"
               value={customGoal}
               onChange={(e) => setCustomGoal(e.target.value)}
-              className="flex-1 basis-48 px-3 py-2 text-sm border rounded-md bg-background min-w-0 font-pixel"
+              className="flex-1 basis-48 px-3 py-2 text-sm font-pixel bg-black/30 border-2 border-blue-900/80 text-white placeholder:text-blue-300/50 focus:border-blue-500"
             />
             <select
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
-              className="px-3 py-2 text-sm border rounded-md bg-background font-pixel"
+              className="px-3 py-2 text-sm font-pixel bg-black/30 border-2 border-blue-900/80 text-white"
             >
               {ACHIEVEMENT_CATEGORIES.map((cat) => (
-                <option key={cat.slug} value={cat.slug}>
+                <option key={cat.slug} value={cat.slug} className="bg-black text-white">
                   {cat.name}
                 </option>
               ))}
             </select>
-            <Button size="sm" onClick={handleAddCustomGoal} disabled={!customGoal.trim()}>
+            <Button size="sm" onClick={handleAddCustomGoal} disabled={!customGoal.trim()} className="bg-blue-600 text-white border-2 border-blue-700 shadow-[2px_2px_0px_#000] hover:bg-blue-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all">
               <Plus className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-blue-300 font-pixel text-center">
           Selected: {selectedSuggestions.size} micro-goals
         </p>
       </CardContent>
-      <CardFooter className="flex gap-2">
-        <Button variant="outline" onClick={() => setStep("challenges")} className="flex-1">
+      <CardFooter className="flex gap-4">
+        <Button variant="outline" onClick={() => setStep("challenges")} className="w-full font-pixel text-lg bg-black/30 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-900/50 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
           Back
         </Button>
         <Button 
           onClick={handleSubmit} 
           disabled={selectedSuggestions.size === 0 || isSubmitting}
-          className="flex-1"
+          className="w-full font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Continue
