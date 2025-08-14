@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { categoryValidator } from "./schema";
 import { Doc, Id } from "./_generated/dataModel";
+import { internalQuery } from "./_generated/server";
 
 /**
  * Retrieves all goals for the current user for today.
@@ -110,4 +111,18 @@ export const remove = mutation({
     await ctx.db.delete(args.goalId);
     return { success: true };
   },
+});
+
+export const getAllForUser = internalQuery({
+   args: {},
+   handler: async (ctx): Promise<Doc<"dailyGoals">[]> => {
+       const user: Doc<"users"> | null = await ctx.runQuery(internal.users.getCurrentUser);
+       if (!user) {
+           return [];
+       }
+       return await ctx.db
+           .query("dailyGoals")
+           .withIndex("by_user", (q) => q.eq("userId", user._id))
+           .collect();
+   }
 });

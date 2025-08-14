@@ -1,31 +1,75 @@
-import { internalMutation } from "./_generated/server";
+import { mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 
-const slugMapping: Record<string, string> = {
-  "welcome-aboard": "welcome",
-  "profile-master": "profile_complete",
-  "wins_1": "first_win",
-  "wins_10": "wins_10",
-  "wins_50": "wins_50",
-  "wins_100": "wins_100",
-  // Add other mappings here if any other slugs changed.
-  // The ones from the old seed file that are not in the new one are omitted.
-};
-
-export const syncBadgeSlugs = internalMutation({
+/**
+ * Backfills habits (userPresets) for users who completed onboarding
+ * but for whom the goals-to-habits conversion failed.
+ */
+export const backfillOnboardingHabits = mutation({
   handler: async (ctx) => {
-    let updatedCount = 0;
-    for (const [oldSlug, newSlug] of Object.entries(slugMapping)) {
-      const userBadgesToUpdate = await ctx.db
-        .query("userBadges")
-        .filter((q) => q.eq(q.field("badgeSlug"), oldSlug))
-        .collect();
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) {
+      throw new Error("User must be authenticated.");
+    }
 
-      for (const userBadge of userBadgesToUpdate) {
-        await ctx.db.patch(userBadge._id, { badgeSlug: newSlug });
-        updatedCount++;
+    // 1. Only run for users who have passed the goal-setting step.
+    if (!user.onboardingStep || user.onboardingStep < 3) {
+      return { success: false, message: "Onboarding not completed yet." };
+    }
+
+    // 2. Check if they already have onboarding habits. If so, they don't need a backfill.
+    const existingHabits = await ctx.db
+      .query("userPresets")
+      .withIndex("by_user_and_source", (q) =>
+        q.eq("userId", user._id).eq("source", "onboarding")
+      )
+      .collect();
+
+    if (existingHabits.length > 0) {
+      return { success: true, message: "Habits already exist. No backfill needed." };
+    }
+
+    // 3. Find the user's very first set of daily goals. These are assumed to be their onboarding goals.
+    const firstGoal = await ctx.db
+      .query("dailyGoals")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .order("asc") // Order by _creationTime
+      .first();
+
+    if (!firstGoal) {
+      return { success: true, message: "No daily goals found to create habits from." };
+    }
+
+    // 4. Get all goals created on that same target date.
+    const onboardingDate = firstGoal.targetDate;
+    const onboardingGoals = await ctx.db
+      .query("dailyGoals")
+      .withIndex("by_user_and_date", (q) =>
+        q.eq("userId", user._id).eq("targetDate", onboardingDate)
+      )
+      .collect();
+
+    if (onboardingGoals.length === 0) {
+        return { success: true, message: "Could not find goals from onboarding day." };
+    }
+
+    // 5. Create habits from these goals.
+    let count = 0;
+    for (const goal of onboardingGoals) {
+      const existing = await ctx.db.query("userPresets").withIndex("by_user_and_title", q => q.eq("userId", user._id).eq("title", goal.title)).first();
+      if (!existing) {
+        await ctx.db.insert("userPresets", {
+            userId: user._id,
+            title: goal.title,
+            categorySlug: goal.category,
+            effortMinutes: 0,
+            defaultPrivate: false,
+            source: "onboarding",
+        });
+        count++;
       }
     }
-    console.log(`Synced ${updatedCount} user badge slugs.`);
-    return { updatedCount };
+
+    return { success: true, message: `Successfully restored ${count} habits!` };
   },
 });
