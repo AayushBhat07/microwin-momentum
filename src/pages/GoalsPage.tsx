@@ -60,7 +60,7 @@ export default function GoalsPage() {
                   Visit the wellness setup to get your personalized quests.
                 </p>
                 <Button asChild className="font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
-                  <Link to="/onboarding">Start Setup</Link>
+                  <Link to="/wellness-setup">Start Setup</Link>
                 </Button>
             </div>
           </motion.div>
