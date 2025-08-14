@@ -20,27 +20,15 @@ interface LogAchievementSheetProps {
 }
 
 const DebugButton = () => {
-  const debugStats = useQuery(api.debug.getMyStatsAndBadgesForDebugging);
-
   const handleClick = () => {
-    if (debugStats) {
-      console.log("--- VLY DEBUG DATA ---");
-      console.log(JSON.stringify(debugStats, null, 2));
-      toast.info("Debug data has been printed to the browser console. Please copy it and paste it in the chat.");
-    } else {
-      console.log("Debug data not available yet.");
-      toast.error("Debug data not ready. Please try again in a moment.");
-    }
+    console.log("Debug functionality temporarily disabled.");
+    toast.info("Debug functionality temporarily disabled.");
   };
 
   return (
-    <div className="mt-auto pt-4 border-t border-dashed border-yellow-500/50">
-      <h3 className="text-yellow-400 font-semibold text-sm">Developer Debug Tools</h3>
-      <p className="text-xs text-gray-400 mb-2">Click the button below to print your current user stats to the browser's developer console.</p>
-      <Button onClick={handleClick} variant="outline" className="w-full border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-400">
-        Run Debug Check & Copy Data
-      </Button>
-    </div>
+    <Button onClick={handleClick} variant="outline" size="sm" className="mt-4">
+      Debug
+    </Button>
   );
 };
 

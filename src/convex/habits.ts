@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Doc } from "./_generated/dataModel";
 import { internalMutation } from "./_generated/server";
@@ -27,6 +27,31 @@ export const getOnboardingHabits = query({
 
     return habits;
   },
+});
+
+export const backfillHabits = mutation({
+    args: {},
+    handler: async (ctx): Promise<{ success: boolean; message: string }> => {
+        const user: Doc<"users"> | null = await ctx.runQuery(internal.users.getCurrentUser);
+        if (!user) {
+            throw new Error("Not authenticated");
+        }
+
+        const goals: Doc<"dailyGoals">[] = await ctx.runQuery(internal.goals.getAllForUser);
+        if (!goals || goals.length === 0) {
+            return { success: false, message: "No past goals found." };
+        }
+
+        for (const goal of goals) {
+            await ctx.runMutation(internal.habits.createHabitFromGoal, {
+                userId: user._id,
+                title: goal.title,
+                categorySlug: goal.category,
+            });
+        }
+
+        return { success: true, message: `Restored habits from ${goals.length} goals.` };
+    }
 });
 
 export const createHabitFromGoal = internalMutation({
