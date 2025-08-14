@@ -119,7 +119,7 @@ export const createHabitFromGoal = internalMutation({
            categorySlug,
            effortMinutes: 0,
            defaultPrivate: false,
-           source: "onboarding",
+           source: "legacy",
        });
        console.log("Created habit: " + title);
    }

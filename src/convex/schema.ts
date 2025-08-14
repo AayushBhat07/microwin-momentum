@@ -144,7 +144,8 @@ const schema = defineSchema({
     source: v.union(
       v.literal("onboarding"),
       v.literal("custom"),
-      v.literal("system")
+      v.literal("system"),
+      v.literal("legacy") // Add legacy source for migrated goals
     ),
   })
   .index("by_user", ["userId"])
