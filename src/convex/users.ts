@@ -1,7 +1,21 @@
-import { internalQuery, query } from "./_generated/server";
+import { internalQuery, query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Doc, Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
+
+export const deleteAccount = mutation({
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User must be authenticated to delete their account.");
+    }
+
+    // This is a simplified deletion. In a real app, you'd want to delete
+    // all associated data (achievements, goals, etc.) in a more robust way,
+    // likely using an action to transactionally delete everything.
+    await ctx.db.delete(userId);
+  },
+});
 
 export const getCurrentUser = internalQuery({
   handler: async (ctx) => {
