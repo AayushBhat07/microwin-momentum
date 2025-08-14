@@ -156,7 +156,7 @@ export default function GoalsPage() {
                                   className={`w-full font-pixel text-base transition-all uppercase
                                     ${isCompleted 
                                       ? 'bg-green-700 text-white border-2 border-green-800 cursor-not-allowed'
-                                      : 'bg-red-500 text-white border-2 border-red-700 shadow-[2px_2px_0px_#000] hover:bg-red-600 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
+                                      : 'bg-green-600 text-white border-2 border-green-700 shadow-[2px_2px_0px_#000] hover:bg-green-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none'
                                     }
                                   `}
                                 >
