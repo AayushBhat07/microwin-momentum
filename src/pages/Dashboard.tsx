@@ -12,6 +12,7 @@ import { LogAchievementSheet } from "@/components/logging/LogAchievementSheet";
 import { BadgesMilestonesSection } from "@/components/dashboard/BadgesMilestonesSection";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -34,8 +35,15 @@ export default function Dashboard() {
   // Show a loading screen while auth state is being determined or if we are waiting for redirection.
   if (isLoading || (isAuthenticated && !user)) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="font-pixel text-white text-2xl animate-pulse">Loading your profile...</div>
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center" 
+        style={{ backgroundImage: "url('/assets/onboarding1.png')" }}
+      >
+        <div className="absolute inset-0 min-h-screen bg-black/60" />
+        <div className="z-10 text-center">
+          <div className="font-pixel text-white text-3xl mb-4 animate-pulse">Loading Your Quest Log...</div>
+          <Loader2 className="h-12 w-12 text-blue-400 animate-spin mx-auto" />
+        </div>
       </div>
     );
   }
