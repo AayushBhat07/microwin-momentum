@@ -69,7 +69,7 @@ Example response:
 
         try {
             const completion = await openai.chat.completions.create({
-                model: "mistralai/mixtral-8x7b-instruct",
+                model: "deepseek/deepseek-chat-v3-0324:free",
                 messages: [{ role: "user", content: prompt }],
                 temperature: 0.8,
                 response_format: { type: "json_object" },
