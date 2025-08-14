@@ -269,8 +269,8 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
       <CardContent className="space-y-4">
         {/* Generated Suggestions */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Suggested micro-goals</Label>
-          <div className="grid gap-2 max-h-48 overflow-y-auto">
+          <Label className="text-sm font-medium font-pixel">Suggested micro-goals</Label>
+          <div className="grid gap-2 max-h-48 overflow-y-auto p-1">
             {suggestions.map((suggestion) => (
               <div
                 key={suggestion.title}
@@ -282,8 +282,8 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
                 onClick={() => handleSuggestionToggle(suggestion.title)}
               >
                 <div className="flex-1">
-                  <p className="text-sm font-medium">{suggestion.title}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-base font-medium font-pixel">{suggestion.title}</p>
+                  <p className="text-xs text-muted-foreground font-pixel">
                     {suggestion.effortMinutes} min • {ACHIEVEMENT_CATEGORIES.find(c => c.slug === suggestion.categorySlug)?.name}
                   </p>
                 </div>
@@ -297,20 +297,20 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
         </div>
 
         {/* Add Custom Goal */}
-        <div className="space-y-3 p-3 bg-secondary rounded-lg">
-          <Label className="text-sm font-medium">Add your own micro-goal</Label>
+        <div className="space-y-3 p-4 bg-secondary rounded-lg">
+          <Label className="text-sm font-medium font-pixel">Add your own micro-goal</Label>
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="e.g., Write one sentence in my journal"
               value={customGoal}
               onChange={(e) => setCustomGoal(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border rounded-md bg-background"
+              className="flex-1 px-3 py-2 text-sm border rounded-md bg-background min-w-0 font-pixel"
             />
             <select
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
-              className="px-3 py-2 text-sm border rounded-md bg-background"
+              className="px-3 py-2 text-sm border rounded-md bg-background font-pixel"
             >
               {ACHIEVEMENT_CATEGORIES.map((cat) => (
                 <option key={cat.slug} value={cat.slug}>
