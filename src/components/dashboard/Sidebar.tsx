@@ -1,77 +1,81 @@
-import { motion } from "framer-motion";
-import { LayoutDashboard, Star, Trophy, Heart, Settings, User, Camera } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Link, useLocation } from "react-router";
+import { Home, Target, Trophy, Settings, User, BrainCircuit, Star, Sun, Moon, MemoryStick } from "lucide-react";
+import { UserButton } from "@/components/auth/UserButton";
+import { useAuth } from "@/hooks/use-auth";
 
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
-const navItems = [
-  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", color: "bg-teal-500" },
-  { href: "/goals", icon: Star, label: "Goals" },
-  { href: "/habits", icon: Heart, label: "Habits" },
-  { href: "/milestones", icon: Trophy, label: "Milestones" },
-  { href: "/memories", icon: Camera, label: "Memories" },
-  { id: "settings", icon: Settings, label: "Settings", color: "bg-gray-500" },
-];
-
-const bottomNavItems = [
-  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", color: "bg-teal-500" },
-  { id: "milestones", icon: Star, label: "Milestones", color: "bg-pink-500" },
-  { id: "goals", icon: Clipboard, label: "Goals", color: "bg-yellow-500" },
-  { id: "memories", icon: Camera, label: "Memories", color: "bg-orange-500" },
-  { id: "settings", icon: Settings, label: "Settings", color: "bg-gray-500" },
-];
-
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
-  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+
+  const navItems = [
+    { id: "dashboard", icon: Home, label: "Dashboard", path: "/dashboard" },
+    { id: "goals", icon: Target, label: "Goals", path: "/goals" },
+    { id: "memories", icon: MemoryStick, label: "Memories", path: "/memories" },
+    { id: "milestones", icon: Trophy, label: "Milestones", path: "/milestones" },
+    { id: "profile", icon: User, label: "Profile", path: `/profile/${user?._id}` },
+  ];
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="w-24 bg-black/30 backdrop-blur-md border-r-2 border-blue-900/50 flex flex-col items-center py-6 space-y-4 font-pixel">
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = activeTab === item.id;
+    <div className="w-64 bg-black/40 backdrop-blur-md border-r-2 border-blue-900/80 flex flex-col justify-between p-4 font-pixel text-white">
+      <div>
+        {/* Logo */}
+        <div className="mb-10 text-center">
+          <Link to="/dashboard" className="flex items-center justify-center gap-2">
+            <BrainCircuit className="w-10 h-10 text-blue-400" />
+            <span className="text-2xl font-bold tracking-widest text-shadow-pixel">LevelUp</span>
+          </Link>
+        </div>
 
-        const handleClick = () => {
-          if (item.href) {
-            navigate(item.href);
-          } else if (item.id === "dashboard") {
-            navigate("/dashboard");
-          } else if (item.id === "settings") {
-            navigate("/settings");
-          }
-          if (item.id) {
-            onTabChange(item.id);
-          }
-        };
-        
-        return (
-          <motion.button
-            key={item.id}
-            onClick={handleClick}
-            className={`
-              w-16 h-16 flex items-center justify-center border-2
-              transition-all duration-200 relative group
-              ${isActive 
-                ? `bg-blue-500/50 border-blue-400 text-white shadow-[4px_4px_0px_#00000090] -translate-x-1 -translate-y-1` 
-                : 'bg-black/30 border-blue-800/70 text-white hover:bg-black/50 hover:border-blue-600'
-              }
-            `}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label={item.label}
-            aria-current={isActive ? "page" : undefined}
-          >
-            <Icon className="w-8 h-8" />
-            
-            {/* Tooltip */}
-            <div className="absolute left-full ml-4 px-2 py-1 bg-blue-900/90 backdrop-blur-sm text-white text-xs rounded-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-blue-700">
-              {item.label}
-            </div>
-          </motion.button>
-        );
-      })}
+        {/* Navigation */}
+        <nav className="space-y-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.id}
+              to={item.path}
+              onClick={() => onTabChange(item.id)}
+              className={`
+                flex items-center gap-3 px-4 py-3 transition-all duration-200
+                ${isActive(item.path)
+                  ? 'bg-blue-600/80 border-2 border-blue-500 text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]'
+                  : 'bg-black/30 border-2 border-transparent hover:bg-blue-900/60 hover:border-blue-700'
+                }
+              `}
+            >
+              <item.icon className="w-6 h-6" />
+              <span className="text-lg">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      {/* Bottom Section */}
+      <div className="space-y-4">
+        {/* Theme Toggle - Disabled for now */}
+        <div className="flex items-center justify-around bg-black/30 p-2 border-2 border-blue-900/80">
+          <button className="p-2">
+            <Sun className="w-5 h-5" />
+          </button>
+          <button className="p-2">
+            <Moon className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* User Profile */}
+        <div className="flex items-center gap-3 p-2 bg-black/30 border-2 border-blue-900/80">
+          <UserButton />
+          <div className="flex-grow overflow-hidden">
+            <p className="text-sm font-bold truncate">{user?.name}</p>
+            <p className="text-xs text-blue-300 truncate">{user?.email}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
