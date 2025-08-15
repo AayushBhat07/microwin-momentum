@@ -15,7 +15,7 @@ const dummyPlayers = [
 export function UserSearch() {
   return (
     <div className="relative group bg-black/60 backdrop-blur-sm p-4 rounded-lg border-2 border-blue-900/80 h-full">
-      <div className="transition-all duration-300 group-hover:blur-sm group-hover:brightness-50">
+      <div className="transition-all duration-150 group-hover:blur-sm group-hover:brightness-50">
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300 h-4 w-4" />
           <Input
@@ -32,17 +32,17 @@ export function UserSearch() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="flex items-center justify-between p-3 rounded-md border border-blue-800/50"
+              className="flex items-center justify-between p-3 rounded-md border border-blue-800/50 gap-2"
             >
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-blue-700">
+              <div className="flex items-center gap-3 min-w-0">
+                <Avatar className="h-10 w-10 border-2 border-blue-700 flex-shrink-0">
                   <AvatarImage src={user.image} />
                   <AvatarFallback className="bg-blue-900 text-blue-300 font-pixel">
                     {user.username?.charAt(0)?.toUpperCase() || "P"}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-pixel text-white">@{user.username}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-pixel text-white truncate">@{user.username}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="outline" className="text-xs font-pixel border-yellow-600/50 text-yellow-400 bg-yellow-900/20">
                       <Star className="h-3 w-3 mr-1" />
@@ -55,7 +55,7 @@ export function UserSearch() {
                   </div>
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="font-pixel bg-blue-800/50 border-blue-700 text-white" disabled>
+              <Button variant="outline" size="sm" className="font-pixel bg-blue-800/50 border-blue-700 text-white flex-shrink-0" disabled>
                 Profile
               </Button>
             </motion.div>
