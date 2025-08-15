@@ -15,7 +15,7 @@ const dummyPlayers = [
 export function UserSearch() {
   return (
     <div className="relative group bg-black/60 backdrop-blur-sm p-4 rounded-lg border-2 border-blue-900/80 h-full">
-      <div className="transition-all duration-150 group-hover:blur-sm group-hover:brightness-50">
+      <div className="transition-all duration-150 group-hover:blur-sm group-hover:brightness-50 h-full">
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300 h-4 w-4" />
           <Input
