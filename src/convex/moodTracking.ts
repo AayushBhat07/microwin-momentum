@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { api, internal } from "./_generated/api";
 
 export const saveMoodEntry = mutation({
   args: {
@@ -21,13 +22,14 @@ export const saveMoodEntry = mutation({
       .filter((q) => q.eq(q.field("period"), period))
       .first();
 
+    let entryId;
     if (existing) {
       // Update existing entry
       await ctx.db.patch(existing._id, { mood, note });
-      return existing._id;
+      entryId = existing._id;
     } else {
       // Create new entry
-      return await ctx.db.insert("moodEntries", {
+      entryId = await ctx.db.insert("moodEntries", {
         userId,
         mood,
         note,
@@ -35,6 +37,22 @@ export const saveMoodEntry = mutation({
         date: today,
       });
     }
+
+    // --- New AI Trigger Logic ---
+    const allMoodEntries = await ctx.db
+      .query("moodEntries")
+      .withIndex("by_user_and_date", (q) => q.eq("userId", userId))
+      .collect();
+
+    // After every 3rd mood entry, generate a new micro-plan
+    if (allMoodEntries.length > 0 && allMoodEntries.length % 3 === 0) {
+      await ctx.scheduler.runAfter(0, internal.aiPlanning.generateMicroGoals, {
+        userId,
+      });
+    }
+    // --- End New AI Trigger Logic ---
+
+    return entryId;
   },
 });
 

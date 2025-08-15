@@ -1,12 +1,11 @@
 "use node";
 
-import { internalAction, internalQuery, mutation, query } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { api, internal } from "./_generated/api";
 import OpenAI from "openai";
 
-export const generateDailyPlan = internalAction({
+export const generateMicroGoals = internalAction({
   args: {
     userId: v.id("users"),
   },
@@ -18,83 +17,51 @@ export const generateDailyPlan = internalAction({
     }
 
     try {
-      // Get user's recent mood entries (last 7 days)
-      const moodEntries = await ctx.runQuery(internal.aiPlanningMutations.getUserMoodHistory, { userId });
-      
-      // Get user's recent achievements (last 7 days)
-      const achievements = await ctx.runQuery(internal.aiPlanningMutations.getUserAchievementHistory, { userId });
-
-      // Get user's current goals/presets
-      const presets = await ctx.runQuery(internal.aiPlanningMutations.getUserPresets, { userId });
+      // Get user's most recent mood entry
+      const latestMood = await ctx.runQuery(internal.aiPlanningMutations.getLatestUserMood, { userId });
+      if (!latestMood) {
+        console.log("No mood entries found for user, skipping AI plan.");
+        return;
+      }
 
       const openai = new OpenAI({
         apiKey: apiKey,
         baseURL: "https://openrouter.ai/api/v1",
       });
 
-      const today = new Date();
-      const dates = [0, 1, 2].map(offset => {
-        const date = new Date(today);
-        date.setDate(today.getDate() + offset);
-        return date.toISOString().split('T')[0];
-      });
+      const today = new Date().toISOString().split('T')[0];
 
       const prompt = `
-You are a compassionate AI wellness coach. Based on the user's recent mood and achievement data, create a personalized 3-day micro-goal plan.
+You are a compassionate AI wellness coach. Based on the user's latest mood entry, create a personalized micro-goal plan for today.
 
-Today's date is ${dates[0]}. The plan should be for today, tomorrow, and the day after (${dates[0]}, ${dates[1]}, ${dates[2]}).
+User's latest mood: ${latestMood.mood}
+Optional note: ${latestMood.note || "N/A"}
 
-Recent mood entries: ${JSON.stringify(moodEntries)}
-Recent achievements: ${JSON.stringify(achievements)}
-User's goal presets: ${JSON.stringify(presets)}
-
-Create a 3-day plan with 2-4 micro-goals per day. Each goal should:
+Create a plan with 2-3 micro-goals for today (${today}). Each goal should:
 - Be achievable in 5-15 minutes
-- Build on their recent patterns and mood
+- Be directly related to improving or maintaining their current mood
 - Include variety across categories (health, work, learning, social, creative, personal)
 - Be encouraging and supportive
 
-Return as JSON with this structure. Use the correct dates: ${JSON.stringify(dates)}.
+Return as JSON with this structure.
 {
-  "plan": [
+  "goals": [
     {
-      "date": "${dates[0]}",
-      "goals": [
-        {
-          "title": "Take a 5-minute walk outside",
-          "categorySlug": "health",
-          "completed": false
-        }
-      ]
+      "title": "Take a 5-minute walk outside",
+      "category": "health"
     },
     {
-      "date": "${dates[1]}",
-      "goals": [
-        {
-          "title": "Write down one thing you're grateful for",
-          "categorySlug": "personal",
-          "completed": false
-        }
-      ]
-    },
-    {
-      "date": "${dates[2]}",
-      "goals": [
-        {
-          "title": "Spend 10 minutes on a creative hobby",
-          "categorySlug": "creative",
-          "completed": false
-        }
-      ]
+      "title": "Write down one thing you're grateful for",
+      "category": "personal"
     }
   ]
 }
 `;
 
       const completion = await openai.chat.completions.create({
-        model: "deepseek/deepseek-chat-v3-0324:free",
+        model: "anthropic/claude-3-haiku:beta",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
+        temperature: 0.8,
         response_format: { type: "json_object" },
       });
 
@@ -105,14 +72,26 @@ Return as JSON with this structure. Use the correct dates: ${JSON.stringify(date
 
       const planData = JSON.parse(responseContent);
       
-      // Save the plan
-      await ctx.runMutation(api.aiPlanningMutations.createPlan, {
+      // Save the goals to the dailyGoals table
+      await ctx.runMutation(internal.aiPlanningMutations.addMicroGoalsToDailyPlan, {
         userId,
-        plan: planData.plan,
+        goals: planData.goals,
+        date: today,
       });
 
     } catch (error) {
-      console.error("Error generating AI plan:", error);
+      console.error("Error generating AI micro-goals:", error);
     }
+  },
+});
+
+// Legacy function for backward compatibility
+export const generateDailyPlan = internalAction({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, { userId }): Promise<void> => {
+    // Just call the new micro-goals function
+    await ctx.runAction(internal.aiPlanning.generateMicroGoals, { userId });
   },
 });

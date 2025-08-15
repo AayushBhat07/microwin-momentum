@@ -1,33 +1,92 @@
-import { mutation, query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+import { internalMutation, internalQuery, query, mutation } from "./_generated/server";
+import { Doc } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { internal } from "./_generated/api";
 
-export const createPlan = mutation({
-  args: {
-    userId: v.id("users"),
-    plan: v.array(
-      v.object({
-        date: v.string(),
-        goals: v.array(
-          v.object({
-            title: v.string(),
-            categorySlug: v.string(),
-            completed: v.boolean(),
-          })
-        ),
-      })
-    ),
-  },
-  handler: async (ctx, { userId, plan }) => {
-    return await ctx.db.insert("aiPlans", {
-      userId,
-      plan,
-      generatedAt: Date.now(),
-    });
+// Get user's most recent mood entry
+export const getLatestUserMood = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }): Promise<Doc<"moodEntries"> | null> => {
+    return await ctx.db
+      .query("moodEntries")
+      .withIndex("by_user_and_date", (q) => q.eq("userId", userId))
+      .order("desc")
+      .first();
   },
 });
 
+// Count user's mood entries
+export const countUserMoodEntries = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const entries = await ctx.db
+      .query("moodEntries")
+      .withIndex("by_user_and_date", (q) => q.eq("userId", userId))
+      .collect();
+    return entries.length;
+  },
+});
+
+// Get user by email
+export const getUserByEmail = internalQuery({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email))
+      .first();
+  },
+});
+
+// Get latest plan for user
+export const getLatestPlanForUser = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("aiPlans")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .first();
+  },
+});
+
+// Add AI-generated micro-goals to the user's daily plan
+export const addMicroGoalsToDailyPlan = internalMutation({
+  args: {
+    userId: v.id("users"),
+    date: v.string(),
+    goals: v.array(
+      v.object({
+        title: v.string(),
+        category: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, { userId, date, goals }) => {
+    for (const goal of goals) {
+      // Avoid adding duplicate goals for the same day
+      const existing = await ctx.db
+        .query("dailyGoals")
+        .withIndex("by_user_and_date", (q) =>
+          q.eq("userId", userId).eq("targetDate", date)
+        )
+        .filter((q) => q.eq(q.field("title"), goal.title))
+        .first();
+
+      if (!existing) {
+        await ctx.db.insert("dailyGoals", {
+          userId,
+          title: goal.title,
+          category: goal.category as any, // Assuming category string matches validator
+          targetDate: date,
+          isCompleted: false,
+        });
+      }
+    }
+  },
+});
+
+// Add missing functions that components expect
 export const getLatestPlan = query({
   args: {},
   handler: async (ctx) => {
@@ -42,28 +101,6 @@ export const getLatestPlan = query({
   },
 });
 
-export const getLatestPlanForUser = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    return await ctx.db
-      .query("aiPlans")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .order("desc")
-      .first();
-  }
-});
-
-export const countUserMoodEntries = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const entries = await ctx.db
-      .query("moodEntries")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", userId))
-      .collect();
-    return entries.length;
-  }
-});
-
 export const markGoalCompleted = mutation({
   args: {
     planId: v.id("aiPlans"),
@@ -72,90 +109,26 @@ export const markGoalCompleted = mutation({
   },
   handler: async (ctx, { planId, date, goalIndex }) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    if (!userId) throw new Error("User not authenticated");
 
     const plan = await ctx.db.get(planId);
     if (!plan || plan.userId !== userId) {
-      throw new Error("Plan not found");
+      throw new Error("Plan not found or unauthorized");
     }
 
-    const dayPlan = plan.plan.find((p) => p.date === date);
-    const goal = dayPlan?.goals[goalIndex];
-
-    if (!goal || goal.completed) {
-      return; // Goal doesn't exist or is already completed
-    }
-
-    // Log an achievement for completing the goal
-    await ctx.runMutation(internal.achievements.createAchievement, {
-      userId,
-      clientId: `ai-plan-${planId}-${date}-${goalIndex}`,
-      title: goal.title,
-      categorySlug: goal.categorySlug,
-      source: "quick",
-      isPublic: false, // AI-planned goals are private by default
-    });
-
-    const updatedPlan = plan.plan.map((dayPlan) => {
-      if (dayPlan.date === date) {
-        const updatedGoals = [...dayPlan.goals];
-        if (updatedGoals[goalIndex]) {
-          updatedGoals[goalIndex].completed = true;
-        }
-        return { ...dayPlan, goals: updatedGoals };
+    const updatedPlan = plan.plan.map(day => {
+      if (day.date === date) {
+        const updatedGoals = day.goals.map((goal, index) => {
+          if (index === goalIndex) {
+            return { ...goal, completed: true };
+          }
+          return goal;
+        });
+        return { ...day, goals: updatedGoals };
       }
-      return dayPlan;
+      return day;
     });
 
     await ctx.db.patch(planId, { plan: updatedPlan });
-  },
-});
-
-export const getUserMoodHistory = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const cutoffDate = sevenDaysAgo.toISOString().split('T')[0];
-
-    return await ctx.db
-      .query("moodEntries")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", userId))
-      .filter((q) => q.gte(q.field("date"), cutoffDate))
-      .collect();
-  },
-});
-
-export const getUserAchievementHistory = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-
-    return await ctx.db
-      .query("achievements")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .filter((q) => q.gte(q.field("loggedAt"), sevenDaysAgo))
-      .collect();
-  },
-});
-
-export const getUserPresets = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    return await ctx.db
-      .query("userPresets")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .take(10);
-  },
-});
-
-export const getUserByEmail = internalQuery({
-  args: { email: v.string() },
-  handler: async (ctx, { email }) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", email))
-      .unique();
-    return user;
   },
 });
