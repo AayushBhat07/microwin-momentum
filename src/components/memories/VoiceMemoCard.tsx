@@ -47,7 +47,7 @@ export function VoiceMemoCard({ memory }: VoiceMemoCardProps) {
 
   return (
     <motion.div 
-      className={`aspect-[4/5] relative overflow-hidden cursor-pointer group border-4 p-1 transition-all duration-300 bg-blue-900/40 ${
+      className={`aspect-square relative overflow-hidden cursor-pointer group border-4 p-1 transition-all duration-300 bg-blue-900/40 ${
         isPlaying ? "border-green-500 animate-pulse-border" : "border-double border-blue-600/70"
       }`}
       whileHover={{ scale: 1.03 }}
