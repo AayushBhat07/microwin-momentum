@@ -33,43 +33,43 @@ export default function GoalsPage() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (user && !isTourActive && searchParams.get('tour') === 'true') {
-      const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-goals`);
-      if (!hasSeenTour) {
-        const tourSteps = [
-          {
-            targetId: 'quest-log-header',
-            title: 'Your Quest Log',
-            content: 'This is where you can view all your daily quests, both user-defined and AI-suggested.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'stats-row',
-            title: 'Daily Stats',
-            content: 'Quickly see how much XP you\'ve earned and how many quests you\'ve completed today.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'in-progress-quests',
-            title: 'In-Progress Quests',
-            content: 'These are your active quests. Complete them to level up!',
-            position: 'top' as const,
-          },
-          {
-            targetId: 'completed-quests',
-            title: 'Completed Quests',
-            content: 'Look back at all the quests you have conquered. Great job!',
-            position: 'top' as const,
-          },
-        ];
-        
-        setTimeout(() => startTour(tourSteps, () => {
-          localStorage.setItem(`tour-completed-${user._id}-goals`, 'true');
-          navigate('/memories?tour=true');
-        }), 1000);
-      }
+    const isDataLoading = questDataQuery === undefined || !backgroundImage || todayStats === undefined || latestPlan === undefined;
+
+    if (!isDataLoading && user && searchParams.get('tour') === 'true') {
+      const tourSteps = [
+        {
+          targetId: 'quest-log-header',
+          title: 'Your Quest Log',
+          content: 'This is where you can view all your daily quests, both user-defined and AI-suggested.',
+          position: 'bottom' as const,
+        },
+        {
+          targetId: 'stats-row',
+          title: 'Daily Stats',
+          content: 'Quickly see how much XP you\'ve earned and how many quests you\'ve completed today.',
+          position: 'bottom' as const,
+        },
+        {
+          targetId: 'in-progress-quests',
+          title: 'In-Progress Quests',
+          content: 'These are your active quests. Complete them to level up!',
+          position: 'top' as const,
+        },
+        {
+          targetId: 'completed-quests',
+          title: 'Completed Quests',
+          content: 'Look back at all the quests you have conquered. Great job!',
+          position: 'top' as const,
+        },
+      ];
+      
+      // Start the tour for the goals page if the tour parameter is present
+      setTimeout(() => startTour(tourSteps, () => {
+        localStorage.setItem(`tour-completed-${user._id}-goals`, 'true');
+        navigate('/memories?tour=true');
+      }), 1000);
     }
-  }, [user, startTour, isTourActive, searchParams, navigate]);
+  }, [questDataQuery, backgroundImage, todayStats, latestPlan, user, startTour, searchParams, navigate]);
 
   const allGoals = useMemo(() => {
     const userQuests = quests?.map(q => ({

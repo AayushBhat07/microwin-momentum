@@ -77,6 +77,13 @@ export default function Dashboard() {
   }, [user, isLoading, isAuthenticated, navigate]);
 
   const restartTour = () => {
+    if (user) {
+      // Clear the tour completion flags for all pages in the tour
+      localStorage.removeItem(`tour-completed-${user._id}`);
+      localStorage.removeItem(`tour-completed-${user._id}-goals`);
+      // Also clear the next step in the tour, just in case
+      localStorage.removeItem(`tour-completed-${user._id}-memories`); 
+    }
     startTour(tourSteps, () => {
       if (user) {
         localStorage.setItem(`tour-completed-${user._id}`, 'true');

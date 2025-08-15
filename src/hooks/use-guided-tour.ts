@@ -45,10 +45,12 @@ export const useGuidedTour = create<GuidedTourState>((set, get) => ({
 
   endTour: () => {
     const { onTourEnd } = get();
+    // First, set the tour to inactive
+    set({ isTourActive: false, currentStepIndex: 0, steps: [] });
+    // Then, execute the onEnd callback (which handles navigation)
     if (onTourEnd) {
       onTourEnd();
     }
-    set({ isTourActive: false, currentStepIndex: 0, steps: [] });
   },
 }));
 
