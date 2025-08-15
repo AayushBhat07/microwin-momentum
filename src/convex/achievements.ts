@@ -170,14 +170,21 @@ export const log = mutation({
       clientId: `log-${Date.now()}`,
     });
 
-    await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
+    const updatedTotals = await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
         userId,
         categorySlug: args.category,
         points: args.pointsEarned,
         source: args.source,
     });
 
-    // Badge checking is now handled by the award engine
+    const achievement = await ctx.db.get(achievementId);
+    if (achievement && updatedTotals) {
+        await ctx.runMutation(internal.awardEngine.evaluateAndAwardBadges, {
+            userId,
+            achievement,
+            userTotals: updatedTotals,
+        });
+    }
 
     return achievementId;
   },
@@ -221,13 +228,7 @@ export const createAchievement = internalMutation({
             ...rest
         });
 
-        await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
-            userId,
-            categorySlug,
-            points,
-            source: args.source,
-        });
-
+        // The logWin action is now responsible for calling updateStatsForNewWin
         return achievementId;
     }
 });

@@ -182,6 +182,9 @@ const schema = defineSchema({
     totalPoints: v.number(),
     totalAchievements: v.number(),
     lastPointsUpdateAt: v.number(),
+    totalPhotoCount: v.optional(v.number()),
+    totalVoiceCount: v.optional(v.number()),
+    totalTextCount: v.optional(v.number()),
   }).index("by_user", ["userId"]),
 
   user_preferences: defineTable({

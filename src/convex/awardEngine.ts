@@ -1,29 +1,40 @@
-"use node";
 
 import { v } from "convex/values";
-import { internalAction, internalQuery } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { Doc, Id } from "./_generated/dataModel";
+import { Doc } from "./_generated/dataModel";
 
 // --- Badge Evaluation Engine ---
-export const evaluateAndAwardBadges = internalAction({
+export const evaluateAndAwardBadges = internalMutation({
     args: {
         userId: v.id("users"),
-        achievement: v.any(),
-        userTotals: v.any(),
+        achievement: v.any(), // This is Doc<"achievements">
+        userTotals: v.any(), // This is Doc<"user_totals">
     },
-    handler: async (ctx, { userId, achievement, userTotals }): Promise<Doc<"badges">[]> => {
+    handler: async (ctx, { userId, userTotals }): Promise<Doc<"badges">[]> => {
         const newlyAwarded: Doc<"badges">[] = [];
 
         // 1. Get all data needed for evaluation
-        const categoryTotals = await ctx.runQuery(internal.userStats.getCategoryTotals, { userId });
-        const allBadges = await ctx.runQuery(internal.badges.getBadgeCatalogInternal);
-        const earnedBadges = await ctx.runQuery(internal.userStats.getEarnedBadgeSlugs, { userId });
-        const earnedSlugsSet = new Set(earnedBadges.map((b: any) => b.badgeSlug));
+        const categoryTotals = await ctx.db
+            .query("userCategoryTotals")
+            .withIndex("by_user_and_category", (q) => q.eq("userId", userId))
+            .collect();
+        const allBadges = await ctx.db.query("badges").collect();
+        const earnedBadges = await ctx.db
+            .query("userBadges")
+            .withIndex("by_user_and_badge", (q) => q.eq("userId", userId))
+            .collect();
+        const earnedSlugsSet = new Set(earnedBadges.map((b) => b.badgeSlug));
         
-        const categoryMap = new Map(categoryTotals.map((c: any) => [c.categorySlug, c.totalWins]));
+        const categoryMap = new Map(categoryTotals.map((c) => [c.categorySlug, c.totalWins]));
         const totalAchievements = userTotals?.totalAchievements ?? 0;
-        const currentStreak = (await ctx.runQuery(internal.userStats.getStreak, { userId }))?.currentStreak ?? 0;
+        
+        const userStreak = await ctx.db
+            .query("user_streaks")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .unique();
+        const currentStreak = userStreak?.currentStreak ?? 0;
+
         const totalPhotoCount = userTotals?.totalPhotoCount ?? 0;
         const totalVoiceCount = userTotals?.totalVoiceCount ?? 0;
         const totalTextCount = userTotals?.totalTextCount ?? 0;
@@ -40,30 +51,24 @@ export const evaluateAndAwardBadges = internalAction({
             if (badge.threshold) {
                 switch (badge.family) {
                     case "wins":
-                        console.log(`Checking badge '${badge.slug}': totalAchievements (${totalAchievements}) >= threshold (${badge.threshold})`);
                         if (totalAchievements >= badge.threshold) shouldAward = true;
                         break;
                     case "streak":
-                         console.log(`Checking badge '${badge.slug}': currentStreak (${currentStreak}) >= threshold (${badge.threshold})`);
                         if (currentStreak >= badge.threshold) shouldAward = true;
                         break;
                     case "category":
                         if (badge.categorySlug) {
                             const categoryCount = categoryMap.get(badge.categorySlug) ?? 0;
-                            console.log(`Checking badge '${badge.slug}': categoryCount for '${badge.categorySlug}' (${categoryCount}) >= threshold (${badge.threshold})`);
                             if (categoryCount >= (badge.threshold || 0)) shouldAward = true;
                         }
                         break;
                     case "mode":
-                        if (badge.modeType === "photo") {
-                            console.log(`Checking badge '${badge.slug}': totalPhotoCount (${totalPhotoCount}) >= threshold (${badge.threshold})`);
-                            if (totalPhotoCount >= badge.threshold) shouldAward = true;
-                        } else if (badge.modeType === "voice") {
-                             console.log(`Checking badge '${badge.slug}': totalVoiceCount (${totalVoiceCount}) >= threshold (${badge.threshold})`);
-                            if (totalVoiceCount >= badge.threshold) shouldAward = true;
-                        } else if (badge.modeType === "text") {
-                             console.log(`Checking badge '${badge.slug}': totalTextCount (${totalTextCount}) >= threshold (${badge.threshold})`);
-                            if (totalTextCount >= badge.threshold) shouldAward = true;
+                        if (badge.modeType === "photo" && totalPhotoCount >= badge.threshold) {
+                            shouldAward = true;
+                        } else if (badge.modeType === "voice" && totalVoiceCount >= badge.threshold) {
+                            shouldAward = true;
+                        } else if (badge.modeType === "text" && totalTextCount >= badge.threshold) {
+                            shouldAward = true;
                         }
                         break;
                 }
@@ -81,9 +86,6 @@ export const evaluateAndAwardBadges = internalAction({
                 }
             }
         }
-
-        // The "first_win" badge is now handled by the generic "wins" family logic with threshold: 1.
-        // The special case has been removed to avoid redundancy.
 
         console.log(`Finished evaluation. Awarded ${newlyAwarded.length} new badges:`, newlyAwarded.map(b => b.slug));
         return newlyAwarded;

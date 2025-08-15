@@ -201,18 +201,16 @@ export const updateStatsForNewWin = internalMutation({
       .unique();
 
     if (userTotals) {
-      const patchPayload: any = {
+      await ctx.db.patch(userTotals._id, {
         totalPoints: userTotals.totalPoints + points,
         totalAchievements: userTotals.totalAchievements + 1,
         lastPointsUpdateAt: Date.now(),
-        totalPhotoCount: ((userTotals as any).totalPhotoCount ?? 0) + (isPhoto ? 1 : 0),
-        totalVoiceCount: ((userTotals as any).totalVoiceCount ?? 0) + (isVoice ? 1 : 0),
-        totalTextCount: ((userTotals as any).totalTextCount ?? 0) + (isText ? 1 : 0),
-      };
-      
-      await ctx.db.patch(userTotals._id, patchPayload);
+        totalPhotoCount: (userTotals.totalPhotoCount ?? 0) + (isPhoto ? 1 : 0),
+        totalVoiceCount: (userTotals.totalVoiceCount ?? 0) + (isVoice ? 1 : 0),
+        totalTextCount: (userTotals.totalTextCount ?? 0) + (isText ? 1 : 0),
+      });
     } else {
-      const insertPayload: any = {
+      await ctx.db.insert("user_totals", {
         userId,
         totalPoints: points,
         totalAchievements: 1,
@@ -220,8 +218,7 @@ export const updateStatsForNewWin = internalMutation({
         totalPhotoCount: isPhoto ? 1 : 0,
         totalVoiceCount: isVoice ? 1 : 0,
         totalTextCount: isText ? 1 : 0,
-      };
-      await ctx.db.insert("user_totals", insertPayload);
+      });
     }
 
     // --- 2. Handle Streak ---

@@ -52,12 +52,8 @@ export const logWin = action({
       source: args.mode,
     });
 
-    // 3. Evaluate and award new badges
-    const badges_unlocked = await ctx.runAction(internal.awardEngine.evaluateAndAwardBadges, {
-      userId: user._id,
-      achievement,
-      userTotals: updatedTotals,
-    });
+    // 3. Evaluate and award new badges - handled by the achievement logging mutation
+    const badges_unlocked: any[] = [];
 
     // 4. Get latest streak info to return to client
     const streak = await ctx.runQuery(internal.userStats.getStreak, { userId: user._id });
