@@ -128,6 +128,13 @@ export const internalLogAchievement = mutation({
             clientId: `backfill-${Date.now()}`,
         });
 
+        await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
+            userId,
+            categorySlug,
+            points: pointsEarned,
+            source,
+        });
+
         // Badge checking is now handled by the award engine
 
         return achievementId;
@@ -161,6 +168,13 @@ export const log = mutation({
       source: args.source as any,
       loggedAt: Date.now(),
       clientId: `log-${Date.now()}`,
+    });
+
+    await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
+        userId,
+        categorySlug: args.category,
+        points: args.pointsEarned,
+        source: args.source,
     });
 
     // Badge checking is now handled by the award engine
@@ -197,7 +211,7 @@ export const createAchievement = internalMutation({
         
         const points = categoryDetails?.basePoints ?? 10;
 
-        return await ctx.db.insert("achievements", {
+        const achievementId = await ctx.db.insert("achievements", {
             userId,
             categorySlug,
             pointsEarned: points,
@@ -206,6 +220,15 @@ export const createAchievement = internalMutation({
             points: points, // for compatibility
             ...rest
         });
+
+        await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
+            userId,
+            categorySlug,
+            points,
+            source: args.source,
+        });
+
+        return achievementId;
     }
 });
 

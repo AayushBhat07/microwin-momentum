@@ -1,6 +1,7 @@
 import { mutation, query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const createPlan = mutation({
   args: {
@@ -78,7 +79,24 @@ export const markGoalCompleted = mutation({
       throw new Error("Plan not found");
     }
 
-    const updatedPlan = plan.plan.map(dayPlan => {
+    const dayPlan = plan.plan.find((p) => p.date === date);
+    const goal = dayPlan?.goals[goalIndex];
+
+    if (!goal || goal.completed) {
+      return; // Goal doesn't exist or is already completed
+    }
+
+    // Log an achievement for completing the goal
+    await ctx.runMutation(internal.achievements.createAchievement, {
+      userId,
+      clientId: `ai-plan-${planId}-${date}-${goalIndex}`,
+      title: goal.title,
+      categorySlug: goal.categorySlug,
+      source: "quick",
+      isPublic: false, // AI-planned goals are private by default
+    });
+
+    const updatedPlan = plan.plan.map((dayPlan) => {
       if (dayPlan.date === date) {
         const updatedGoals = [...dayPlan.goals];
         if (updatedGoals[goalIndex]) {
