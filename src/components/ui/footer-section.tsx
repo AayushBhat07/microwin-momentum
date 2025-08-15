@@ -73,10 +73,9 @@ function FooterSection() {
           <div>
             <h3 className="mb-4 text-lg font-semibold">Contact Us</h3>
             <address className="space-y-2 text-sm not-italic">
-              <p>123 Innovation Street</p>
-              <p>Tech City, TC 12345</p>
-              <p>Phone: (123) 456-7890</p>
-              <p>Email: hello@example.com</p>
+              <p>aayush bhat</p>
+              <p>Email: aayushbhat747@gmail.com</p>
+              <p>Phone: +91 9324309669</p>
             </address>
           </div>
           <div className="relative">
