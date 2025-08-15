@@ -85,6 +85,31 @@ const schema = defineSchema({
     .index("email", ["email"]) // index for the email. do not remove or modify
     .index("by_username", ["username"]),
 
+  moodEntries: defineTable({
+    userId: v.id("users"),
+    mood: v.string(), // e.g., "happy", "sad", "neutral", "excited"
+    note: v.optional(v.string()),
+    period: v.union(v.literal("am"), v.literal("pm")),
+    date: v.string(), // YYYY-MM-DD format
+  }).index("by_user_and_date", ["userId", "date"]),
+
+  aiPlans: defineTable({
+    userId: v.id("users"),
+    plan: v.array(
+      v.object({
+        date: v.string(),
+        goals: v.array(
+          v.object({
+            title: v.string(),
+            categorySlug: v.string(),
+            completed: v.boolean(),
+          })
+        ),
+      })
+    ),
+    generatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
   achievement_categories: defineTable({
     slug: v.string(),
     name: v.string(),

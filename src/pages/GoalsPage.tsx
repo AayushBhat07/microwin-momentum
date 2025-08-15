@@ -10,6 +10,7 @@ import { Link } from "react-router";
 import { useLazyImage } from "@/hooks/use-lazy-image";
 import { GoalsRadarChart } from "@/components/goals/GoalsRadarChart";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { TodaysPlan } from "@/components/dashboard/TodaysPlan";
 
 export default function GoalsPage() {
   const quests = useQuery(api.habits.getDailyQuests);
@@ -62,32 +63,69 @@ export default function GoalsPage() {
         opacity: backgroundUrl ? 1 : 0,
       }}
     >
-      <div className="flex min-h-screen bg-black/70">
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto p-4 sm:p-6 font-pixel">
+      <div className="min-h-screen bg-black/60 flex">
+        {/* Sidebar */}
+        <Sidebar activeTab="goals" onTabChange={() => {}} />
+
+        {/* Main Content */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
             <motion.div
+              className="mb-8"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="mb-8 text-center">
-                <h1 className="text-3xl md:text-4xl text-white text-shadow-pixel mb-2">Daily Quests</h1>
-                <p className="text-lg text-blue-300 max-w-2xl mx-auto">
-                  Complete these micro-goals from your wellness setup.
-                </p>
-                {todayStats && (
-                  <div className="mt-4 flex justify-center gap-6">
-                    <div className="bg-black/30 border-2 border-yellow-500 px-4 py-2 rounded">
-                      <span className="text-yellow-400 font-bold">Today's XP: {todayStats.todayPoints}</span>
-                    </div>
-                    <div className="bg-black/30 border-2 border-green-500 px-4 py-2 rounded">
-                      <span className="text-green-400 font-bold">Quests Done: {todayStats.todayAchievements}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <h1 className="text-4xl font-pixel text-white text-shadow-pixel mb-2">
+                Quest Log
+              </h1>
+              <p className="text-blue-300 font-pixel text-lg">
+                Track your daily adventures and level up!
+              </p>
+            </motion.div>
 
+            {/* Stats Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Today's XP */}
+              <motion.div
+                className="bg-yellow-600/80 backdrop-blur-md border-2 border-yellow-500/50 p-4 text-center"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <div className="text-2xl font-pixel text-white mb-1">
+                  {todayStats?.todayPoints || 0} XP
+                </div>
+                <div className="text-sm font-pixel text-yellow-100">Today's XP</div>
+              </motion.div>
+
+              {/* Quests Done Today */}
+              <motion.div
+                className="bg-green-600/80 backdrop-blur-md border-2 border-green-500/50 p-4 text-center"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="text-2xl font-pixel text-white mb-1">
+                  {todayStats?.todayAchievements || 0}
+                </div>
+                <div className="text-sm font-pixel text-green-100">Quests Done</div>
+              </motion.div>
+
+              {/* AI Plan */}
+              <motion.div
+                className="md:col-span-1"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <TodaysPlan />
+              </motion.div>
+            </div>
+
+            {/* Goals Sections */}
+            <div className="space-y-8">
               {quests && quests.length > 0 && (
                 <GoalsRadarChart quests={quests} completedQuestIds={completedQuestIds} />
               )}
@@ -262,9 +300,9 @@ export default function GoalsPage() {
                   </div>
                 </>
               )}
-            </motion.div>
+            </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

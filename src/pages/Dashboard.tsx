@@ -10,6 +10,8 @@ import { BadgesMilestonesSection } from "@/components/dashboard/BadgesMilestones
 import { useNavigate } from "react-router";
 import { Loader2 } from "lucide-react";
 import { useLazyImage } from "@/hooks/use-lazy-image";
+import { MoodModal } from "@/components/mood/MoodModal";
+import { useMoodModal } from "@/hooks/use-mood-modal";
 
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -17,6 +19,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
+  
+  // Add mood modal hook
+  const { isModalOpen, currentPeriod, closeModal } = useMoodModal();
 
   useEffect(() => {
     if (!isLoading) {
@@ -106,6 +111,15 @@ export default function Dashboard() {
 
         {/* Gamified Logging System */}
         <LogAchievementSheet open={isLogSheetOpen} onOpenChange={setIsLogSheetOpen} />
+        
+        {/* Mood Check Modal */}
+        {currentPeriod && (
+          <MoodModal 
+            isOpen={isModalOpen} 
+            onClose={closeModal} 
+            period={currentPeriod} 
+          />
+        )}
       </div>
     </div>
   );
