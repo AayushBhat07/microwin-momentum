@@ -151,8 +151,6 @@ export function LogAchievementSheet({ open, onOpenChange }: LogAchievementSheetP
             </TabsContent>
           </Tabs>
         </div>
-
-        <DebugButton />
       </SheetContent>
     </Sheet>
   );
