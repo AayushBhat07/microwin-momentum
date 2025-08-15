@@ -139,19 +139,19 @@ export default function AboutPage() {
                         </TimelineContent>
                       </TimelineItem>
                       <TimelineItem status="done">
-                        <TimelineHeading>Beta Launch</TimelineHeading>
+                        <TimelineHeading>Pre Hackathon Testing</TimelineHeading>
                         <TimelineDot status="current" />
                         <TimelineLine />
                         <TimelineContent>
-                          We launched a private beta to a wider audience, gathering crucial feedback to refine the features and user experience. This phase was all about listening to our community.
+                          We conducted rigorous testing before the hackathon to ensure a smooth and polished experience for our initial users.
                         </TimelineContent>
                       </TimelineItem>
                       <TimelineItem>
-                        <TimelineHeading>Public Launch</TimelineHeading>
+                        <TimelineHeading>Hackathon Submission</TimelineHeading>
                         <TimelineDot />
                         <TimelineLine />
                         <TimelineContent>
-                          MicroWin is now available to everyone! We're excited to welcome you to our community and help you on your journey of personal growth.
+                          We successfully submitted MicroWin to the hackathon, showcasing our vision for celebrating small victories.
                         </TimelineContent>
                       </TimelineItem>
                       <TimelineItem>
