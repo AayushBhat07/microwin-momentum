@@ -50,9 +50,15 @@ export function useMoodModal() {
     setCurrentPeriod(null);
   };
 
+  const openModalForPeriod = (period: "am" | "pm") => {
+    setCurrentPeriod(period);
+    setIsModalOpen(true);
+  };
+
   return {
     isModalOpen,
     currentPeriod,
     closeModal,
+    openModalForPeriod,
   };
 }
