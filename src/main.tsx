@@ -25,6 +25,7 @@ import Onboarding from "./pages/Onboarding";
 import SettingsPage from "./pages/Settings.tsx";
 import GoalsPage from "./pages/GoalsPage";
 import HabitsPage from "./pages/HabitsPage";
+import About from "./pages/About.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -61,6 +62,7 @@ createRoot(document.getElementById("root")!).render(
           <Routes>
             <Route path="*" element={<NotFound />} />
             <Route path="/" element={<Landing />} />
+            <Route path="/about" element={<About />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             
