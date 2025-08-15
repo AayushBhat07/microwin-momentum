@@ -4,6 +4,14 @@ import { Sparkles, Users, Zap, CheckCircle, BarChart } from "lucide-react";
 import { Link } from "react-router";
 import React from "react";
 import BlurText from "@/components/ui/BlurText";
+import {
+  Timeline,
+  TimelineContent,
+  TimelineDot,
+  TimelineHeading,
+  TimelineItem,
+  TimelineLine,
+} from "@/components/ui/timeline"
 
 const FeatureCard = ({ icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
     <div className="bg-background/10 backdrop-blur-md border-2 border-white/20 p-6 shadow-[4px_4px_0px_#00000060] transition-all duration-150 h-full flex flex-col">
@@ -80,29 +88,6 @@ export default function AboutPage() {
             </div>
         </section>
 
-        <section className="py-20">
-            <div className="container mx-auto px-6">
-                <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-center font-pixel uppercase text-white">Why We Built This</h2>
-                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center mt-4 mb-12 font-pixel text-white/80">
-                    MicroWin was born from a simple realization: the path to success isn't a giant leap, but a series of small, consistent steps.
-                </p>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <FeatureCard icon={Zap} title="Fight Procrastination">
-                        Big goals can be intimidating. By breaking them down into micro-wins, we make it easy to start and keep going.
-                    </FeatureCard>
-                    <FeatureCard icon={BarChart} title="Build Momentum">
-                        Every win you track builds momentum. See your progress visually and feel the motivation to continue your streak.
-                    </FeatureCard>
-                    <FeatureCard icon={Users} title="Create Lasting Habits">
-                        Consistency is key. Our platform is designed to help you build positive habits that stick for the long term.
-                    </FeatureCard>
-                    <FeatureCard icon={CheckCircle} title="Celebrate Progress">
-                        We believe every step forward, no matter how small, deserves to be celebrated. Acknowledge your effort and stay positive.
-                    </FeatureCard>
-                </div>
-            </div>
-        </section>
-        
         <section className="py-20 border-t-2 border-foreground bg-black/50">
             <div className="container mx-auto px-6">
                 <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -129,6 +114,58 @@ export default function AboutPage() {
             </div>
         </section>
 
+        <section className="py-20">
+            <div className="container mx-auto px-6">
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-center font-pixel uppercase text-white">Our Journey</h2>
+                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center mt-4 mb-12 font-pixel text-white/80">
+                    From a simple idea to a growing community, here's a look at our story.
+                </p>
+                <div className="max-w-2xl mx-auto">
+                    <Timeline>
+                      <TimelineItem status="done">
+                        <TimelineHeading>The Idea</TimelineHeading>
+                        <TimelineDot status="done" />
+                        <TimelineLine done />
+                        <TimelineContent>
+                          The concept of MicroWin was born from our own struggles with procrastination and staying motivated on big projects. We wanted a tool that celebrated small, daily efforts.
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem status="done">
+                        <TimelineHeading>First Prototype</TimelineHeading>
+                        <TimelineDot status="done" />
+                        <TimelineLine done />
+                        <TimelineContent>
+                          We built a simple prototype to track daily wins and share them with a small group of friends. The positive feedback was overwhelming and pushed us to build a full-fledged application.
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem status="done">
+                        <TimelineHeading>Beta Launch</TimelineHeading>
+                        <TimelineDot status="current" />
+                        <TimelineLine />
+                        <TimelineContent>
+                          We launched a private beta to a wider audience, gathering crucial feedback to refine the features and user experience. This phase was all about listening to our community.
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem>
+                        <TimelineHeading>Public Launch</TimelineHeading>
+                        <TimelineDot />
+                        <TimelineLine />
+                        <TimelineContent>
+                          MicroWin is now available to everyone! We're excited to welcome you to our community and help you on your journey of personal growth.
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem>
+                        <TimelineHeading>The Future</TimelineHeading>
+                        <TimelineDot />
+                        <TimelineContent>
+                          We're just getting started. We have a roadmap packed with new features to make tracking your wins even more fun and rewarding. Stay tuned!
+                        </TimelineContent>
+                      </TimelineItem>
+                    </Timeline>
+                </div>
+            </div>
+        </section>
+        
       </main>
       <Footer />
     </div>
