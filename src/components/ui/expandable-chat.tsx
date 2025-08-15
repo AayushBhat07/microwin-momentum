@@ -47,38 +47,47 @@ const ExpandableChat: React.FC<ExpandableChatProps> = ({
   const chatRef = useRef<HTMLDivElement>(null);
 
   const toggleChat = () => setIsOpen(!isOpen);
+  const closeChat = () => setIsOpen(false);
 
   return (
-    <div
-      className={cn(`fixed ${chatConfig.positions[position]} z-50`, className)}
-      {...props}
-    >
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+          onClick={closeChat}
+        />
+      )}
       <div
-        ref={chatRef}
-        className={cn(
-          "flex flex-col bg-background border sm:rounded-lg shadow-md overflow-hidden transition-all duration-250 ease-out sm:absolute sm:w-[90vw] sm:h-[80vh] fixed inset-0 w-full h-full sm:inset-auto",
-          chatConfig.chatPositions[position],
-          chatConfig.dimensions[size],
-          isOpen ? chatConfig.states.open : chatConfig.states.closed,
-          className,
-        )}
+        className={cn(`fixed ${chatConfig.positions[position]} z-50`, className)}
+        {...props}
       >
-        {children}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 sm:hidden"
-          onClick={toggleChat}
+        <div
+          ref={chatRef}
+          className={cn(
+            "flex flex-col bg-background border sm:rounded-lg shadow-md overflow-hidden transition-all duration-250 ease-out sm:absolute sm:w-[90vw] sm:h-[80vh] fixed inset-0 w-full h-full sm:inset-auto",
+            chatConfig.chatPositions[position],
+            chatConfig.dimensions[size],
+            isOpen ? chatConfig.states.open : chatConfig.states.closed,
+            className,
+          )}
         >
-          <X className="h-4 w-4" />
-        </Button>
+          {children}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 sm:hidden"
+            onClick={closeChat}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <ExpandableChatToggle
+          icon={icon}
+          isOpen={isOpen}
+          toggleChat={toggleChat}
+        />
       </div>
-      <ExpandableChatToggle
-        icon={icon}
-        isOpen={isOpen}
-        toggleChat={toggleChat}
-      />
-    </div>
+    </>
   );
 };
 
