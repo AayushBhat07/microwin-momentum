@@ -3,16 +3,17 @@ import { motion } from "framer-motion";
 import { Sparkles, Users, Zap, CheckCircle, BarChart } from "lucide-react";
 import { Link } from "react-router";
 import React from "react";
+import BlurText from "@/components/ui/BlurText";
 
 const FeatureCard = ({ icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
-    <div className="bg-background/10 backdrop-blur-md border-2 border-white/20 p-6 shadow-[4px_4px_0px_#00000060] transition-all duration-150 h-full">
+    <div className="bg-background/10 backdrop-blur-md border-2 border-white/20 p-6 shadow-[4px_4px_0px_#00000060] transition-all duration-150 h-full flex flex-col">
         <div className="flex items-center gap-4 mb-4">
-            <div className="bg-primary/20 p-3 border-2 border-primary/30">
+            <div className="bg-primary/20 p-3 border-2 border-primary/30 shrink-0">
                 {React.createElement(icon, { className: "w-8 h-8 text-primary" })}
             </div>
-            <h3 className="text-2xl font-bold uppercase font-pixel text-white">{title}</h3>
+            <h3 className="text-xl font-bold uppercase font-pixel text-white">{title}</h3>
         </div>
-        <p className="text-white/80 font-pixel">{children}</p>
+        <p className="text-white/80 font-pixel break-words flex-grow">{children}</p>
     </div>
 );
 
@@ -38,18 +39,19 @@ export default function AboutPage() {
 
       <main className="pt-24 relative z-10">
         <section className="py-20 text-center">
-            <motion.div
+            <BlurText
+                text="About MicroWin"
+                className="text-5xl md:text-7xl font-bold tracking-tighter uppercase font-mono text-shadow-pixel text-white justify-center"
+                animateBy="words"
+            />
+            <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="mt-6 text-xl text-white/80 max-w-3xl mx-auto font-pixel"
             >
-                <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase font-mono text-shadow-pixel text-white">
-                    About MicroWin
-                </h1>
-                <p className="mt-6 text-xl text-white/80 max-w-3xl mx-auto font-pixel">
-                    We believe that massive change is the result of small, consistent actions.
-                </p>
-            </motion.div>
+                We believe that massive change is the result of small, consistent actions.
+            </motion.p>
         </section>
 
         <section className="py-20 border-y-2 border-foreground bg-black/50">
