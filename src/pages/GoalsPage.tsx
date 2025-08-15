@@ -11,6 +11,9 @@ import { useLazyImage } from "@/hooks/use-lazy-image";
 import { GoalsRadarChart } from "@/components/goals/GoalsRadarChart";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { QuestCompletionButtons } from "@/components/goals/QuestCompletionButtons";
+import { useGuidedTour, GuidedTour } from "@/hooks/use-guided-tour";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function GoalsPage() {
   const quests = useQuery(api.habits.getDailyQuests);
@@ -23,6 +26,44 @@ export default function GoalsPage() {
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("goals");
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
+  const { startTour, isTourActive } = useGuidedTour();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user && !isTourActive) {
+      const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-goals`);
+      if (!hasSeenTour) {
+        const tourSteps = [
+          {
+            targetId: 'quest-log-header',
+            title: 'Your Quest Log',
+            content: 'This is where you can view all your daily quests, both user-defined and AI-suggested.',
+            position: 'bottom' as const,
+          },
+          {
+            targetId: 'stats-row',
+            title: 'Daily Stats',
+            content: 'Quickly see how much XP you\'ve earned and how many quests you\'ve completed today.',
+            position: 'bottom' as const,
+          },
+          {
+            targetId: 'in-progress-quests',
+            title: 'In-Progress Quests',
+            content: 'These are your active quests. Complete them to level up!',
+            position: 'top' as const,
+          },
+          {
+            targetId: 'completed-quests',
+            title: 'Completed Quests',
+            content: 'Look back at all the quests you have conquered. Great job!',
+            position: 'top' as const,
+          },
+        ];
+        
+        setTimeout(() => startTour(tourSteps, () => localStorage.setItem(`tour-completed-${user._id}-goals`, 'true')), 1000);
+      }
+    }
+  }, [user, startTour, isTourActive]);
 
   const allGoals = useMemo(() => {
     const userQuests = quests?.map(q => ({
@@ -114,6 +155,7 @@ export default function GoalsPage() {
             <div className="max-w-7xl mx-auto">
               {/* Header */}
               <motion.div
+                id="quest-log-header"
                 className="mb-8"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -128,7 +170,7 @@ export default function GoalsPage() {
               </motion.div>
 
               {/* Stats Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div id="stats-row" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {/* Today's XP */}
                 <motion.div
                   className="bg-yellow-600/80 backdrop-blur-md border-2 border-yellow-500/50 p-4 text-center"
@@ -196,7 +238,7 @@ export default function GoalsPage() {
                     </div>
 
                     {/* In-Progress Quests */}
-                    <div className="mb-12">
+                    <div id="in-progress-quests" className="mb-12">
                       <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">In-Progress Quests ({inProgressQuests.length})</h2>
                       {inProgressQuests.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -278,7 +320,7 @@ export default function GoalsPage() {
                     </div>
 
                     {/* Completed Quests */}
-                    <div>
+                    <div id="completed-quests">
                       <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">Completed Quests ({completedQuests.length})</h2>
                       {completedQuests.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -351,6 +393,7 @@ export default function GoalsPage() {
           </div>
         </div>
       </div>
+      <GuidedTour />
     </>
   );
 }

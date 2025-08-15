@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface TourStep {
+interface TourStepData {
   targetId: string;
   title: string;
   content: string;
@@ -8,25 +8,48 @@ interface TourStep {
 }
 
 interface GuidedTourState {
-  steps: TourStep[];
+  steps: TourStepData[];
   currentStepIndex: number;
   isTourActive: boolean;
-  startTour: (steps: TourStep[]) => void;
+  startTour: (steps: TourStepData[], onEnd?: () => void) => void;
   nextStep: () => void;
   endTour: () => void;
+  onTourEnd?: () => void;
 }
 
-export const useGuidedTour = create<GuidedTourState>((set) => ({
+export const useGuidedTour = create<GuidedTourState>((set, get) => ({
   steps: [],
   currentStepIndex: 0,
   isTourActive: false,
-  startTour: (steps) => set({ steps, currentStepIndex: 0, isTourActive: true }),
-  nextStep: () => set((state) => {
-    if (state.currentStepIndex < state.steps.length - 1) {
-      return { currentStepIndex: state.currentStepIndex + 1 };
+  onTourEnd: undefined,
+
+  startTour: (steps, onEnd) => {
+    if (steps.length > 0) {
+      set({
+        steps,
+        currentStepIndex: 0,
+        isTourActive: true,
+        onTourEnd: onEnd,
+      });
     }
-    // End of tour
-    return { isTourActive: false };
-  }),
-  endTour: () => set({ isTourActive: false }),
+  },
+
+  nextStep: () => {
+    const { currentStepIndex, steps, endTour } = get();
+    if (currentStepIndex < steps.length - 1) {
+      set({ currentStepIndex: currentStepIndex + 1 });
+    } else {
+      endTour();
+    }
+  },
+
+  endTour: () => {
+    const { onTourEnd } = get();
+    if (onTourEnd) {
+      onTourEnd();
+    }
+    set({ isTourActive: false, currentStepIndex: 0, steps: [] });
+  },
 }));
+
+export { GuidedTour } from '@/components/tour/GuidedTour';

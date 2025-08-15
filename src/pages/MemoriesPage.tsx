@@ -7,11 +7,51 @@ import { Camera, Loader2, Mic } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { useLazyImage } from "@/hooks/use-lazy-image";
 import { motion } from "framer-motion";
+import { useGuidedTour, GuidedTour } from "@/hooks/use-guided-tour";
+import { useEffect } from "react";
 
 export default function MemoriesPage() {
-  const { isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const memories = useQuery(api.memories.getMemories);
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
+  const { startTour, isTourActive } = useGuidedTour();
+
+  useEffect(() => {
+    if (user && !isTourActive && memories !== undefined) {
+      const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-memories`);
+      if (!hasSeenTour) {
+        const tourSteps = [
+          {
+            targetId: 'memories-header',
+            title: 'Your Memory Bank',
+            content: 'This is where all your logged wins with photos and voice notes are stored for you to look back on.',
+            position: 'bottom' as const,
+          },
+          {
+            targetId: 'photo-reel-section',
+            title: 'Photo Reel',
+            content: 'A visual gallery of your achievements. Click on any photo to see the details.',
+            position: 'bottom' as const,
+          },
+          {
+            targetId: 'audio-logs-section',
+            title: 'Audio Logs',
+            content: 'Listen to your spoken reflections and celebrate your progress.',
+            position: 'top' as const,
+          },
+        ];
+        
+        const stepsToShow: typeof tourSteps = [];
+        if (document.getElementById('memories-header')) stepsToShow.push(tourSteps[0]);
+        if (photoMemories.length > 0 && document.getElementById('photo-reel-section')) stepsToShow.push(tourSteps[1]);
+        if (voiceMemories.length > 0 && document.getElementById('audio-logs-section')) stepsToShow.push(tourSteps[2]);
+
+        if (stepsToShow.length > 0) {
+            setTimeout(() => startTour(stepsToShow, () => localStorage.setItem(`tour-completed-${user._id}-memories`, 'true')), 1000);
+        }
+      }
+    }
+  }, [user, startTour, isTourActive, memories]);
 
   const photoMemories = memories?.filter((m) => m.photoUrl) ?? [];
   const voiceMemories = memories?.filter((m) => m.audioUrl && !m.photoUrl) ?? [];
@@ -41,6 +81,7 @@ export default function MemoriesPage() {
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             <motion.div
+              id="memories-header"
               className="mb-8"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -66,7 +107,7 @@ export default function MemoriesPage() {
             )}
 
             {photoMemories.length > 0 && (
-              <section>
+              <section id="photo-reel-section">
                 <motion.div
                   className="mb-6"
                   initial={{ opacity: 0, x: -20 }}
@@ -88,7 +129,7 @@ export default function MemoriesPage() {
             )}
 
             {voiceMemories.length > 0 && (
-              <section className="mt-12">
+              <section id="audio-logs-section" className="mt-12">
                 <motion.div
                   className="mb-6"
                   initial={{ opacity: 0, x: -20 }}
@@ -111,6 +152,7 @@ export default function MemoriesPage() {
           </div>
         </div>
       </div>
+      <GuidedTour />
     </div>
   );
 }
