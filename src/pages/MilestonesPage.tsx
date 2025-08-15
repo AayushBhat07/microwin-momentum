@@ -23,54 +23,58 @@ export default function MilestonesPage() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (user && !isTourActive && searchParams.get('tour') === 'true') {
-      const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-milestones`);
-      if (!hasSeenTour) {
-        const tourSteps = [
-          {
-            targetId: 'milestones-header',
-            title: 'Milestones',
-            content: 'This page tracks your major achievements and progress towards unlocking new badges.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'log-a-win-button-milestones',
-            title: 'Log a Win',
-            content: 'Log your wins here to make progress towards your milestones and unlock badges.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'almost-there-section',
-            title: 'Almost There!',
-            content: 'See which milestones are within your reach. A little more effort and you\'ll unlock them!',
-            position: 'top' as const,
-          },
-          {
-            targetId: 'recent-unlocks-section',
-            title: 'Recent Unlocks',
-            content: 'Celebrate the milestones and badges you have recently earned.',
-            position: 'top' as const,
-          },
-          {
-            targetId: 'badge-catalog-section',
-            title: 'Badge Catalog',
-            content: 'Browse the entire collection of badges you can earn on your journey.',
-            position: 'top' as const,
-          },
-        ];
-        
-        setTimeout(() => startTour(tourSteps, () => {
-          localStorage.setItem(`tour-completed-${user._id}-milestones`, 'true');
-          localStorage.setItem(`full-tour-completed-${user._id}`, 'true');
-          toast.success("Congratulations, Champion!", {
-            description: "You've completed the grand tour. Your adventure begins now!",
-            duration: 5000,
-          });
-          navigate('/dashboard');
-        }), 1000);
-      }
+    const isDataReady = !isLoading && backgroundUrl;
+
+    if (isDataReady && user && searchParams.get('tour') === 'true') {
+      const tourSteps = [
+        {
+          targetId: 'milestones-header',
+          title: 'Milestones',
+          content: 'This page tracks your major achievements and progress towards unlocking new badges.',
+          position: 'bottom' as const,
+        },
+        {
+          targetId: 'log-a-win-button-milestones',
+          title: 'Log a Win',
+          content: 'Log your wins here to make progress towards your milestones and unlock badges.',
+          position: 'bottom' as const,
+        },
+        {
+          targetId: 'almost-there-section',
+          title: 'Almost There!',
+          content: 'See which milestones are within your reach. A little more effort and you\'ll unlock them!',
+          position: 'top' as const,
+        },
+        {
+          targetId: 'recent-unlocks-section',
+          title: 'Recent Unlocks',
+          content: 'Celebrate the milestones and badges you have recently earned.',
+          position: 'top' as const,
+        },
+        {
+          targetId: 'badge-catalog-section',
+          title: 'Badge Catalog',
+          content: 'Browse the entire collection of badges you can earn on your journey.',
+          position: 'top' as const,
+        },
+      ];
+      
+      setTimeout(() => {
+        const stepsToShow = tourSteps.filter(step => document.getElementById(step.targetId));
+        if (stepsToShow.length > 0) {
+            startTour(stepsToShow, () => {
+                localStorage.setItem(`tour-completed-${user._id}-milestones`, 'true');
+                localStorage.setItem(`full-tour-completed-${user._id}`, 'true');
+                toast.success("Congratulations, Champion!", {
+                    description: "You've completed the grand tour. Your adventure begins now!",
+                    duration: 5000,
+                });
+                navigate('/dashboard');
+            });
+        }
+      }, 1000);
     }
-  }, [user, startTour, isTourActive, navigate, searchParams]);
+  }, [user, isLoading, backgroundUrl, startTour, navigate, searchParams]);
 
   if (isLoading || !backgroundUrl) {
     return (

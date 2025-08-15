@@ -15,52 +15,54 @@ export default function MemoriesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const memories = useQuery(api.memories.getMemories);
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
-  const { startTour, isTourActive } = useGuidedTour();
+  const { startTour } = useGuidedTour();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (user && !isTourActive && memories !== undefined && searchParams.get('tour') === 'true') {
-      const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-memories`);
-      if (!hasSeenTour) {
-        const tourSteps = [
-          {
-            targetId: 'memories-header',
-            title: 'Your Memory Bank',
-            content: 'This is where all your logged wins with photos and voice notes are stored for you to look back on.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'photo-reel-section',
-            title: 'Photo Reel',
-            content: 'A visual gallery of your achievements. Click on any photo to see the details.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'audio-logs-section',
-            title: 'Audio Logs',
-            content: 'Listen to your spoken reflections and celebrate your progress.',
-            position: 'top' as const,
-          },
-        ];
-        
-        const stepsToShow: typeof tourSteps = [];
-        if (document.getElementById('memories-header')) stepsToShow.push(tourSteps[0]);
-        if (photoMemories.length > 0 && document.getElementById('photo-reel-section')) stepsToShow.push(tourSteps[1]);
-        if (voiceMemories.length > 0 && document.getElementById('audio-logs-section')) stepsToShow.push(tourSteps[2]);
+    const isDataReady = !authLoading && memories !== undefined && backgroundUrl;
+    if (isDataReady && user && searchParams.get('tour') === 'true') {
+      const tourSteps = [
+        {
+          targetId: 'memories-header',
+          title: 'Your Memory Bank',
+          content: 'This is where all your logged wins with photos and voice notes are stored for you to look back on.',
+          position: 'bottom' as const,
+        },
+        {
+          targetId: 'photo-reel-section',
+          title: 'Photo Reel',
+          content: 'A visual gallery of your achievements. Click on any photo to see the details.',
+          position: 'bottom' as const,
+        },
+        {
+          targetId: 'audio-logs-section',
+          title: 'Audio Logs',
+          content: 'Listen to your spoken reflections and celebrate your progress.',
+          position: 'top' as const,
+        },
+      ];
+      
+      const stepsToShow: typeof tourSteps = [];
+      if (document.getElementById('memories-header')) stepsToShow.push(tourSteps[0]);
+      
+      const photoMemories = memories?.filter((m) => m.photoUrl) ?? [];
+      const voiceMemories = memories?.filter((m) => m.audioUrl && !m.photoUrl) ?? [];
 
-        if (stepsToShow.length > 0) {
-            setTimeout(() => startTour(stepsToShow, () => {
-              localStorage.setItem(`tour-completed-${user._id}-memories`, 'true');
-              navigate('/milestones?tour=true');
-            }), 1000);
-        } else {
-          // If no memories, skip to next step
-          navigate('/milestones?tour=true');
-        }
+      if (photoMemories.length > 0 && document.getElementById('photo-reel-section')) stepsToShow.push(tourSteps[1]);
+      if (voiceMemories.length > 0 && document.getElementById('audio-logs-section')) stepsToShow.push(tourSteps[2]);
+
+      if (stepsToShow.length > 0) {
+          setTimeout(() => startTour(stepsToShow, () => {
+            localStorage.setItem(`tour-completed-${user._id}-memories`, 'true');
+            navigate('/milestones?tour=true');
+          }), 1000);
+      } else {
+        // If no memories, skip to next step
+        navigate('/milestones?tour=true');
       }
     }
-  }, [user, startTour, isTourActive, memories, navigate, searchParams]);
+  }, [user, authLoading, memories, backgroundUrl, startTour, navigate, searchParams]);
 
   const photoMemories = memories?.filter((m) => m.photoUrl) ?? [];
   const voiceMemories = memories?.filter((m) => m.audioUrl && !m.photoUrl) ?? [];
