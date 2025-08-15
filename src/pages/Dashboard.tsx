@@ -17,6 +17,39 @@ import { useGuidedTour } from "@/hooks/use-guided-tour";
 import { useSearchParams } from "react-router";
 import { ExpandableChatDemo } from "@/components/chat/ExpandableChatDemo";
 
+const tourSteps = [
+  {
+    targetId: 'sidebar-navigation',
+    title: 'Welcome to LevelUp!',
+    content: 'This is your navigation sidebar. Use it to explore different sections of your journey.',
+    position: 'right' as const,
+  },
+  {
+    targetId: 'log-win-button',
+    title: 'Log Your Wins',
+    content: 'This is the most important button! Click here whenever you achieve something to earn points and track progress.',
+    position: 'bottom' as const,
+  },
+  {
+    targetId: 'stats-overview',
+    title: 'Your Progress Stats',
+    content: 'Keep track of your total points, current streak, and achievements at a glance.',
+    position: 'bottom' as const,
+  },
+  {
+    targetId: 'heatmap-card',
+    title: 'Activity Heat Map',
+    content: 'This shows your consistency over time. The more active you are, the more colorful it gets!',
+    position: 'top' as const,
+  },
+  {
+    targetId: 'badges-section',
+    title: 'Badges & Milestones',
+    content: 'Earn badges and unlock milestones as you progress. This gamifies your journey!',
+    position: 'top' as const,
+  },
+];
+
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -43,6 +76,15 @@ export default function Dashboard() {
     }
   }, [user, isLoading, isAuthenticated, navigate]);
 
+  const restartTour = () => {
+    startTour(tourSteps, () => {
+      if (user) {
+        localStorage.setItem(`tour-completed-${user._id}`, 'true');
+        navigate('/goals?tour=true');
+      }
+    });
+  };
+
   // Start tour for new users
   useEffect(() => {
     if (user && !isTourActive) {
@@ -54,39 +96,6 @@ export default function Dashboard() {
       const isTourFromRedirect = searchParams.get('tour') === 'true';
 
       if (!hasSeenTour || isTourFromRedirect) {
-        const tourSteps = [
-          {
-            targetId: 'sidebar-navigation',
-            title: 'Welcome to LevelUp!',
-            content: 'This is your navigation sidebar. Use it to explore different sections of your journey.',
-            position: 'right' as const,
-          },
-          {
-            targetId: 'log-win-button',
-            title: 'Log Your Wins',
-            content: 'This is the most important button! Click here whenever you achieve something to earn points and track progress.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'stats-overview',
-            title: 'Your Progress Stats',
-            content: 'Keep track of your total points, current streak, and achievements at a glance.',
-            position: 'bottom' as const,
-          },
-          {
-            targetId: 'heatmap-card',
-            title: 'Activity Heat Map',
-            content: 'This shows your consistency over time. The more active you are, the more colorful it gets!',
-            position: 'top' as const,
-          },
-          {
-            targetId: 'badges-section',
-            title: 'Badges & Milestones',
-            content: 'Earn badges and unlock milestones as you progress. This gamifies your journey!',
-            position: 'top' as const,
-          },
-        ];
-        
         setTimeout(() => startTour(tourSteps, () => {
           localStorage.setItem(`tour-completed-${user._id}`, 'true');
           navigate('/goals?tour=true');
@@ -151,13 +160,21 @@ export default function Dashboard() {
                   Here's your quest log for today.
                 </p>
               </div>
-              <button 
-                id="log-win-button"
-                onClick={() => setIsLogSheetOpen(true)}
-                className="font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all px-6 py-3 hidden md:block"
-              >
-                Log a Win
-              </button>
+              <div className="hidden md:flex items-center gap-4">
+                <button
+                  onClick={restartTour}
+                  className="font-pixel text-lg bg-purple-600 text-white border-2 border-purple-700 shadow-[4px_4px_0px_#000] hover:bg-purple-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all px-6 py-3"
+                >
+                  Restart Tour
+                </button>
+                <button 
+                  id="log-win-button"
+                  onClick={() => setIsLogSheetOpen(true)}
+                  className="font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all px-6 py-3"
+                >
+                  Log a Win
+                </button>
+              </div>
             </motion.div>
 
             {/* Main Grid */}
