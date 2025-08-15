@@ -1,8 +1,8 @@
 import { Memory } from "@/convex/memories";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { Camera, Star } from "lucide-react";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 interface PhotoMemoryCardProps {
   memory: Memory;
@@ -12,40 +12,58 @@ export function PhotoMemoryCard({ memory }: PhotoMemoryCardProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
-          <CardContent className="p-0">
-            {memory.photoUrl && (
-              <img
-                src={memory.photoUrl}
-                alt={memory.title}
-                className="w-full h-48 object-cover"
-              />
-            )}
-          </CardContent>
-          <CardHeader>
-            <CardTitle className="text-base truncate">{memory.title}</CardTitle>
-          </CardHeader>
-          <CardFooter className="flex justify-between text-sm text-muted-foreground">
-            <span>{format(new Date(memory.loggedAt), "MMM d, yyyy")}</span>
-            <Badge variant="secondary">{memory.categorySlug}</Badge>
-          </CardFooter>
-        </Card>
+        <motion.div 
+          className="aspect-square relative overflow-hidden cursor-pointer group border-2 border-blue-800/50 hover:border-blue-500 transition-colors bg-blue-900/20"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          {memory.photoUrl && (
+            <img
+              src={memory.photoUrl}
+              alt={memory.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 flex flex-col justify-end p-3 text-white">
+            <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm p-1.5 border border-white/20 flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-400" />
+                <span className="text-xs font-bold">{memory.pointsEarned}</span>
+            </div>
+            <h3 className="font-bold text-sm leading-tight truncate font-pixel">{memory.title}</h3>
+            <p className="text-xs text-blue-300/90 font-pixel">{format(new Date(memory.loggedAt), "MMM d, yyyy")}</p>
+          </div>
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Camera className="w-10 h-10 text-white/80" />
+          </div>
+        </motion.div>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>{memory.title}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl bg-black/70 backdrop-blur-lg border-2 border-blue-700 text-white font-pixel p-0">
         {memory.photoUrl && (
           <img
             src={memory.photoUrl}
             alt={memory.title}
-            className="w-full rounded-md max-h-[70vh] object-contain"
+            className="w-full max-h-[70vh] object-contain"
           />
         )}
-        <div className="text-sm text-muted-foreground mt-2">
-            {format(new Date(memory.loggedAt), "MMMM d, yyyy 'at' h:mm a")}
+        <div className="p-6">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-blue-300 pixel-shadow">{memory.title}</DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-between items-center text-sm text-blue-400/80 mt-2">
+                <span>{format(new Date(memory.loggedAt), "MMMM d, yyyy 'at' h:mm a")}</span>
+                <div className="flex items-center gap-4">
+                    <span className="bg-blue-900/50 text-blue-300 px-2 py-1 border border-blue-700/50">
+                        {memory.categorySlug}
+                    </span>
+                    <div className="flex items-center gap-1 text-yellow-400">
+                        <Star className="w-4 h-4" />
+                        <span className="font-bold">{memory.pointsEarned} XP</span>
+                    </div>
+                </div>
+            </div>
+            {memory.description && <p className="mt-4 text-base text-blue-200/90">{memory.description}</p>}
         </div>
-        {memory.description && <p className="mt-4">{memory.description}</p>}
       </DialogContent>
     </Dialog>
   );

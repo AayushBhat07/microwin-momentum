@@ -1,37 +1,95 @@
 import { Memory } from "@/convex/memories";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { PlayCircle } from "lucide-react";
+import { Play, Pause, Mic, Star } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 
 interface VoiceMemoCardProps {
   memory: Memory;
 }
 
 export function VoiceMemoCard({ memory }: VoiceMemoCardProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const togglePlay = (e?: React.MouseEvent) => {
+    e?.stopPropagation(); // Prevent card click when clicking button
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    const updateProgress = () => {
+      if (audio) {
+        setProgress((audio.currentTime / audio.duration) * 100);
+      }
+    };
+    const handleEnded = () => {
+        setIsPlaying(false);
+        setProgress(0);
+    }
+
+    audio?.addEventListener("timeupdate", updateProgress);
+    audio?.addEventListener("ended", handleEnded);
+    return () => {
+      audio?.removeEventListener("timeupdate", updateProgress);
+      audio?.removeEventListener("ended", handleEnded);
+    };
+  }, []);
+
   return (
-    <Card>
-      <CardContent className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {memory.audioUrl && (
-            <audio src={memory.audioUrl} id={`audio-${memory._id}`} preload="none" />
-          )}
-          <button
-            onClick={() => (document.getElementById(`audio-${memory._id}`) as HTMLAudioElement)?.play()}
-            className="text-primary hover:text-primary/80"
-            aria-label="Play voice memo"
-          >
-            <PlayCircle className="h-10 w-10" />
-          </button>
-          <div>
-            <p className="font-semibold">{memory.title}</p>
-            <p className="text-sm text-muted-foreground">
-              {format(new Date(memory.loggedAt), "MMM d, yyyy")}
-            </p>
-          </div>
+    <motion.div 
+      className="aspect-[4/5] relative overflow-hidden cursor-pointer group border-2 border-blue-800/50 hover:border-blue-500 transition-colors bg-blue-900/40 p-4 flex flex-col justify-between"
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={() => togglePlay()}
+    >
+      {memory.audioUrl && (
+        <audio ref={audioRef} src={memory.audioUrl} id={`audio-${memory._id}`} preload="metadata" />
+      )}
+      
+      {/* Background Icon */}
+      <Mic className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 text-blue-800/30 transition-transform group-hover:scale-110" />
+
+      {/* Play/Pause Button */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <button
+          onClick={(e) => togglePlay(e)}
+          className="w-20 h-20 bg-black/40 border-2 border-blue-600 flex items-center justify-center text-white rounded-full backdrop-blur-sm hover:bg-blue-900/70 transition-all duration-200 scale-90 group-hover:scale-100 opacity-80 group-hover:opacity-100"
+          aria-label="Play voice memo"
+        >
+          {isPlaying ? <Pause className="h-10 w-10" /> : <Play className="h-10 w-10 ml-1" />}
+        </button>
+      </div>
+
+      {/* Bottom Content */}
+      <div className="relative z-10 flex flex-col justify-end flex-grow">
+        <div>
+            <h3 className="font-bold text-base leading-tight truncate font-pixel text-white">{memory.title}</h3>
+            <div className="flex items-center justify-between text-xs text-blue-300/90 font-pixel mt-1">
+                <span>{format(new Date(memory.loggedAt), "MMM d, yyyy")}</span>
+                <span className="text-yellow-400 flex items-center gap-1">
+                    <Star className="w-3 h-3" /> {memory.pointsEarned} XP
+                </span>
+            </div>
         </div>
-        <Badge variant="outline">{memory.categorySlug}</Badge>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="relative z-10 h-2 w-full bg-blue-900/50 border border-blue-800/50 mt-2">
+          <div 
+              className="bg-green-500 h-full transition-all duration-150"
+              style={{ width: `${progress}%` }}
+          ></div>
+      </div>
+    </motion.div>
   );
 }

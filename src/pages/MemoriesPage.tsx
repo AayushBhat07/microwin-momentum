@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Spinner } from "@/components/ui/spinner";
 import { PhotoMemoryCard } from "@/components/memories/PhotoMemoryCard";
 import { VoiceMemoCard } from "@/components/memories/VoiceMemoCard";
+import { Camera, Mic } from "lucide-react";
 
 export default function MemoriesPage() {
   const { isLoading: authLoading } = useAuth();
@@ -21,24 +22,28 @@ export default function MemoriesPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <h1 className="text-3xl font-bold tracking-tight mb-8">Your Memories</h1>
+    <div className="container mx-auto p-4 md:p-8 font-pixel text-white">
+      <h1 className="text-4xl text-blue-300 tracking-widest mb-2 pixel-shadow">MEMORIES</h1>
+      <p className="text-blue-400 mb-10">A look back at your journey of achievements.</p>
 
       {memories.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-lg text-muted-foreground">
-            You don't have any photo or voice memories yet.
+        <div className="text-center py-16 border-2 border-dashed border-blue-800/50 bg-blue-900/20">
+          <p className="text-lg text-blue-300">
+            Your memory bank is empty.
           </p>
-          <p className="text-muted-foreground">
-            Complete goals with photos or voice notes to see them here!
+          <p className="text-blue-400/80 mt-2">
+            Complete goals with photos or voice notes to fill it up!
           </p>
         </div>
       )}
 
       {photoMemories.length > 0 && (
         <section>
-          <h2 className="text-2xl font-semibold mb-4">Photo Memories</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <h2 className="flex items-center gap-3 text-2xl text-green-400 mb-6 pixel-shadow">
+            <Camera className="w-7 h-7" />
+            Photo Reel
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {photoMemories.map((memory) => (
               <PhotoMemoryCard key={memory._id} memory={memory} />
             ))}
@@ -47,9 +52,12 @@ export default function MemoriesPage() {
       )}
 
       {voiceMemories.length > 0 && (
-        <section className="mt-12">
-          <h2 className="text-2xl font-semibold mb-4">Voice Memos</h2>
-          <div className="space-y-4">
+        <section className="mt-16">
+          <h2 className="flex items-center gap-3 text-2xl text-yellow-400 mb-6 pixel-shadow">
+            <Mic className="w-7 h-7" />
+            Audio Logs
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {voiceMemories.map((memory) => (
               <VoiceMemoCard key={memory._id} memory={memory} />
             ))}
