@@ -9,6 +9,7 @@ import AnimatedHeroCard from "@/components/landing/AnimatedHeroCard";
 import { TypingAnimation } from "@/components/landing/TypingAnimation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Footer } from "@/components/landing/Footer";
 
 // --- Reusable Components ---
 const PixelatedCard = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -198,11 +199,7 @@ export default function Landing() {
         </section>
 
         {/* Footer */}
-        <footer className="py-8 bg-foreground border-t-2 border-primary">
-          <div className="container mx-auto px-6 text-center">
-            <p className="text-background/80 font-pixel">© {new Date().getFullYear()} MicroWin Momentum. All Rights Reserved.</p>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </div>
   );
