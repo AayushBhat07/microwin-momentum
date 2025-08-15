@@ -2,25 +2,48 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2, Trash2 } from "lucide-react";
+import { Check, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router";
 import { useLazyImage } from "@/hooks/use-lazy-image";
 import { GoalsRadarChart } from "@/components/goals/GoalsRadarChart";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { TodaysPlan } from "@/components/dashboard/TodaysPlan";
 
 export default function GoalsPage() {
   const quests = useQuery(api.habits.getDailyQuests);
+  const latestPlan = useQuery(api.aiPlanningMutations.getLatestPlan);
   const todayStats = useQuery(api.userStats.getTodayStats);
   const completeQuest = useMutation(api.habits.completeDailyQuest);
+  const markAIGoalCompleted = useMutation(api.aiPlanningMutations.markGoalCompleted);
   const deleteAllPresets = useMutation(api.habits.deleteAllMyPresets);
   const [completedQuestIds, setCompletedQuestIds] = useState<Set<Id<"userPresets">>>(new Set());
-  const [completingId, setCompletingId] = useState<Id<"userPresets"> | null>(null);
+  const [completingId, setCompletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("goals");
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
+
+  const allGoals = useMemo(() => {
+    const userQuests = quests?.map(q => ({
+        ...q,
+        type: 'user' as const,
+        isCompleted: completedQuestIds.has(q._id)
+    })) ?? [];
+
+    const today = new Date().toISOString().split('T')[0];
+    const todaysAIPlan = latestPlan?.plan.find(p => p.date === today);
+    
+    const aiGoals = todaysAIPlan?.goals.map((g, index) => ({
+        ...g,
+        _id: `ai-${index}-${today}`, // stable key
+        type: 'ai' as const,
+        isCompleted: g.completed,
+        goalIndex: index,
+        effortMinutes: 5, // default value for display
+    })) ?? [];
+
+    return [...userQuests, ...aiGoals];
+  }, [quests, latestPlan, completedQuestIds]);
 
   const handleCompleteQuest = async (presetId: Id<"userPresets">) => {
     if (completedQuestIds.has(presetId) || completingId) return;
@@ -39,10 +62,27 @@ export default function GoalsPage() {
     }
   };
 
-  const isLoading = quests === undefined || !backgroundUrl || todayStats === undefined;
+  const handleCompleteAIGoal = async (goalIndex: number) => {
+    if (!latestPlan || completingId) return;
+    setCompletingId(`ai-${goalIndex}`);
+    try {
+        await markAIGoalCompleted({
+            planId: latestPlan._id,
+            date: new Date().toISOString().split('T')[0],
+            goalIndex: goalIndex
+        });
+        toast.success("AI Goal Completed! Well done!");
+    } catch (e) {
+        toast.error("Failed to complete AI goal.");
+    } finally {
+        setCompletingId(null);
+    }
+  }
 
-  const inProgressQuests = quests?.filter(q => !completedQuestIds.has(q._id)) ?? [];
-  const completedQuests = quests?.filter(q => completedQuestIds.has(q._id)) ?? [];
+  const isLoading = quests === undefined || !backgroundUrl || todayStats === undefined || latestPlan === undefined;
+
+  const inProgressQuests = allGoals.filter(q => !q.isCompleted);
+  const completedQuests = allGoals.filter(q => q.isCompleted);
 
   if (isLoading) {
     return (
@@ -87,7 +127,7 @@ export default function GoalsPage() {
               </motion.div>
 
               {/* Stats Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {/* Today's XP */}
                 <motion.div
                   className="bg-yellow-600/80 backdrop-blur-md border-2 border-yellow-500/50 p-4 text-center"
@@ -113,16 +153,6 @@ export default function GoalsPage() {
                   </div>
                   <div className="text-sm font-pixel text-green-100">Quests Done</div>
                 </motion.div>
-
-                {/* AI Plan */}
-                <motion.div
-                  className="md:col-span-1"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                >
-                  <TodaysPlan />
-                </motion.div>
               </div>
 
               {/* Goals Sections */}
@@ -131,7 +161,7 @@ export default function GoalsPage() {
                   <GoalsRadarChart quests={quests} completedQuestIds={completedQuestIds} />
                 )}
 
-                {quests.length === 0 ? (
+                {allGoals.length === 0 ? (
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
                     <div className="text-center bg-black/30 border-2 border-blue-900/80 p-8 max-w-md mx-auto">
                         <h3 className="text-xl font-semibold mb-2 text-white">No Quests Available!</h3>
@@ -171,6 +201,7 @@ export default function GoalsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           <AnimatePresence>
                             {inProgressQuests.map((quest, index) => {
+                              const isAI = quest.type === 'ai';
                               const isCompleting = completingId === quest._id;
                               return (
                                 <motion.div
@@ -184,44 +215,45 @@ export default function GoalsPage() {
                                   {/* Card Component */}
                                   <div className={`
                                     font-pixel rounded-xl transition-all duration-300
-                                    bg-gray-900 border-4 border-blue-500
+                                    ${isAI ? 'bg-purple-900/80 border-4 border-purple-500' : 'bg-gray-900 border-4 border-blue-500'}
                                     shadow-lg p-1
                                   `}>
-                                    <div className={`bg-gray-800 rounded-md border-2 border-gray-600`}>
+                                    <div className={`rounded-md border-2 ${isAI ? 'bg-purple-800/50 border-purple-600' : 'bg-gray-800 border-gray-600'}`}>
                                       <div className={`flex justify-between items-center p-2 rounded-t-md bg-black/20`}>
                                         <h3 className={`text-base font-bold text-white`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
                                         <div className="flex items-center gap-2">
-                                          <span className={`text-xs font-bold text-yellow-400`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                                          {isAI && <Sparkles className="w-4 h-4 text-purple-300" />}
+                                          <span className={`text-xs font-bold ${isAI ? 'text-purple-300' : 'text-yellow-400'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
                                         </div>
                                       </div>
-                                      <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 border-blue-800 bg-black/30`}>
+                                      <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 ${isAI ? 'border-purple-800' : 'border-blue-800'} bg-black/30`}>
                                         <p className={`text-lg leading-tight font-bold px-2 text-white`}>
                                           {quest.title}
                                         </p>
                                       </div>
-                                      <div className={`p-2 mx-2 mb-2 border-2 bg-black/20 border-gray-700`}>
+                                      <div className={`p-2 mx-2 mb-2 border-2 bg-black/20 ${isAI ? 'border-purple-700' : 'border-gray-700'}`}>
                                         <p className={`text-xs text-gray-300`}>
                                           Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
                                         </p>
                                         <p className={`text-xs mt-1 text-gray-300`}>
-                                          A small step towards a greater victory. Complete this quest to build your streak.
+                                          {isAI ? 'An AI-suggested goal to boost your progress.' : 'A small step towards a greater victory. Complete this quest to build your streak.'}
                                         </p>
                                       </div>
                                       <div className="p-2">
                                         <Button
-                                          onClick={() => handleCompleteQuest(quest._id)}
+                                          onClick={() => isAI ? handleCompleteAIGoal(quest.goalIndex) : handleCompleteQuest(quest._id as Id<"userPresets">)}
                                           disabled={isCompleting}
-                                          className={`w-full font-pixel text-base transition-all uppercase bg-green-600 text-white border-2 border-green-700 shadow-[2px_2px_0px_#000] hover:bg-green-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none`}
+                                          className={`w-full font-pixel text-base transition-all uppercase ${isAI ? 'bg-purple-600 hover:bg-purple-700 border-purple-700' : 'bg-green-600 hover:bg-green-700 border-green-700'} text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none`}
                                         >
                                           {isCompleting ? (
                                             <Loader2 className="w-5 h-5 animate-spin" />
                                           ) : (
-                                            'Complete Quest'
+                                            isAI ? 'Complete AI Goal' : 'Complete Quest'
                                           )}
                                         </Button>
                                       </div>
-                                      <div className={`text-center text-xs p-1 border-t-2 text-gray-400 border-gray-700`}>
-                                        <p>Quest Card - Level Up Your Life</p>
+                                      <div className={`text-center text-xs p-1 border-t-2 ${isAI ? 'text-purple-400 border-purple-700' : 'text-gray-400 border-gray-700'}`}>
+                                        <p>{isAI ? 'AI Generated Goal' : 'Quest Card - Level Up Your Life'}</p>
                                       </div>
                                     </div>
                                   </div>
@@ -241,7 +273,9 @@ export default function GoalsPage() {
                       {completedQuests.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           <AnimatePresence>
-                            {completedQuests.map((quest, index) => (
+                            {completedQuests.map((quest, index) => {
+                              const isAI = quest.type === 'ai';
+                              return (
                               <motion.div
                                 key={quest._id}
                                 layout
@@ -260,6 +294,7 @@ export default function GoalsPage() {
                                     <div className={`flex justify-between items-center p-2 rounded-t-md bg-gray-700`}>
                                       <h3 className={`text-base font-bold text-gray-400`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
                                       <div className="flex items-center gap-2">
+                                        {isAI && <Sparkles className="w-4 h-4 text-purple-400" />}
                                         <span className={`text-xs font-bold text-gray-400`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
                                       </div>
                                     </div>
@@ -273,7 +308,7 @@ export default function GoalsPage() {
                                         Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
                                       </p>
                                       <p className={`text-xs mt-1 text-gray-400`}>
-                                        A small step towards a greater victory. Complete this quest to build your streak.
+                                        {isAI ? 'An AI-suggested goal to boost your progress.' : 'A small step towards a greater victory. Complete this quest to build your streak.'}
                                       </p>
                                     </div>
                                     <div className="p-2">
@@ -287,12 +322,12 @@ export default function GoalsPage() {
                                       </Button>
                                     </div>
                                     <div className={`text-center text-xs p-1 border-t-2 text-gray-500 border-gray-600`}>
-                                      <p>Quest Card - Level Up Your Life</p>
+                                      <p>{isAI ? 'AI Generated Goal' : 'Quest Card - Level Up Your Life'}</p>
                                     </div>
                                   </div>
                                 </div>
                               </motion.div>
-                            ))}
+                            )})}
                           </AnimatePresence>
                         </div>
                       ) : (
