@@ -15,6 +15,7 @@ import { useMoodModal } from "@/hooks/use-mood-modal";
 import { GuidedTour } from "@/components/tour/GuidedTour";
 import { useGuidedTour } from "@/hooks/use-guided-tour";
 import { useSearchParams } from "react-router";
+import { ExpandableChatDemo } from "@/components/chat/ExpandableChatDemo";
 
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -200,6 +201,7 @@ export default function Dashboard() {
         {/* Guided Tour */}
         <GuidedTour />
       </div>
+      <ExpandableChatDemo />
     </div>
   );
 }
