@@ -247,7 +247,7 @@ export default function GoalsPage() {
                     <div id="in-progress-quests" className="mb-12">
                       <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">In-Progress Quests ({inProgressQuests.length})</h2>
                       {inProgressQuests.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                           <AnimatePresence>
                             {inProgressQuests.map((quest, index) => {
                               const isAI = quest.type === 'ai';
@@ -263,56 +263,46 @@ export default function GoalsPage() {
                                 >
                                   {/* Card Component */}
                                   <div className={`
-                                    font-pixel rounded-xl transition-all duration-300
-                                    ${isAI ? 'bg-purple-900/80 border-4 border-purple-500' : 'bg-gray-900 border-4 border-blue-500'}
-                                    shadow-lg p-1
+                                    font-pixel rounded-lg transition-all duration-300
+                                    ${isAI ? 'bg-purple-900/80 border-2 border-purple-500' : 'bg-gray-900 border-2 border-blue-500'}
+                                    shadow-md p-0.5
                                   `}>
-                                    <div className={`rounded-md border-2 ${isAI ? 'bg-purple-800/50 border-purple-600' : 'bg-gray-800 border-gray-600'}`}>
-                                      <div className={`flex justify-between items-center p-2 rounded-t-md bg-black/20`}>
-                                        <h3 className={`text-base font-bold text-white`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
-                                        <div className="flex items-center gap-2">
-                                          {isAI && <Sparkles className="w-4 h-4 text-purple-300" />}
-                                          <span className={`text-xs font-bold ${isAI ? 'text-purple-300' : 'text-yellow-400'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                                    <div className={`rounded-md border border ${isAI ? 'bg-purple-800/50 border-purple-600' : 'bg-gray-800 border-gray-600'}`}>
+                                      <div className={`flex justify-between items-center p-1.5 rounded-t-md bg-black/20`}>
+                                        <h3 className={`text-sm font-bold text-white truncate`}>{quest.title}</h3>
+                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                          {isAI && <Sparkles className="w-3 h-3 text-purple-300" />}
+                                          <span className={`text-xs font-bold ${isAI ? 'text-purple-300' : 'text-yellow-400'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes}m` : 'QUICK'}</span>
                                         </div>
                                       </div>
-                                      <div className={`min-h-[5rem] flex items-center justify-center text-center my-2 mx-2 p-2 border-4 ${isAI ? 'border-purple-800' : 'border-blue-800'} bg-black/30`}>
-                                        <p className={`text-base leading-tight font-bold text-white break-words`}>
+                                      <div className={`min-h-[4rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 ${isAI ? 'border-purple-800' : 'border-blue-800'} bg-black/30`}>
+                                        <p className={`text-sm leading-tight font-bold text-white break-words`}>
                                           {quest.title}
                                         </p>
                                       </div>
-                                      <div className={`p-2 mx-2 mb-2 border-2 bg-black/20 ${isAI ? 'border-purple-700' : 'border-gray-700'}`}>
-                                        <p className={`text-xs text-gray-300`}>
+                                      <div className={`p-1.5 mx-1.5 mb-1.5 border bg-black/20 text-xs ${isAI ? 'border-purple-700' : 'border-gray-700'}`}>
+                                        <p className={`text-gray-300`}>
                                           Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
                                         </p>
-                                        <p className={`text-xs mt-1 text-gray-300`}>
-                                          {isAI ? 'An AI-suggested goal to boost your progress.' : 'A small step towards a greater victory. Complete this quest to build your streak.'}
-                                        </p>
                                       </div>
-                                      <div className="p-2">
+                                      <div className="p-1.5">
                                         {quest.type === 'user' ? (
                                           <QuestCompletionButtons
                                             questId={quest._id as Id<"userPresets">}
                                             isCompleting={isCompleting}
                                             setIsCompleting={setCompletingId}
-                                            onComplete={() => {/* Quest completion is handled by the backend query refresh */}
-                                          }
+                                            onComplete={() => {/* Quest completion is handled by the backend query refresh */}}
                                           />
                                         ) : (
                                           <Button
                                             onClick={() => handleCompleteAIGoal(quest.goalIndex)}
                                             disabled={isCompleting}
-                                            className="w-full font-pixel text-base transition-all uppercase bg-purple-600 hover:bg-purple-700 border-purple-700 text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
+                                            size="sm"
+                                            className="w-full font-pixel text-sm transition-all uppercase bg-purple-600 hover:bg-purple-700 border-purple-700 text-white border shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
                                           >
-                                            {isCompleting ? (
-                                              <Loader2 className="w-5 h-5 animate-spin" />
-                                            ) : (
-                                              'Complete AI Goal'
-                                            )}
+                                            {isCompleting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Complete AI Goal'}
                                           </Button>
                                         )}
-                                      </div>
-                                      <div className={`text-center text-xs p-1 border-t-2 ${isAI ? 'text-purple-400 border-purple-700' : 'text-gray-400 border-gray-700'}`}>
-                                        <p>{isAI ? 'AI Generated Goal' : 'Quest Card - Level Up Your Life'}</p>
                                       </div>
                                     </div>
                                   </div>
@@ -330,7 +320,7 @@ export default function GoalsPage() {
                     <div id="completed-quests">
                       <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">Completed Quests ({completedQuests.length})</h2>
                       {completedQuests.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                           <AnimatePresence>
                             {completedQuests.map((quest, index) => {
                               const isAI = quest.type === 'ai';
@@ -344,44 +334,33 @@ export default function GoalsPage() {
                                 transition={{ duration: 0.3, delay: index * 0.05 }}
                               >
                                 {/* Card Component */}
-                                <div className={`
-                                  font-pixel rounded-xl transition-all duration-300
-                                  bg-gray-600 border-gray-700
-                                  shadow-lg p-1 opacity-70
-                                `}>
-                                  <div className={`bg-gray-800 rounded-md border-2 border-gray-700`}>
-                                    <div className={`flex justify-between items-center p-2 rounded-t-md bg-gray-700`}>
-                                      <h3 className={`text-base font-bold text-gray-400`}>{quest.title.substring(0, 25)}{quest.title.length > 25 && '...'}</h3>
-                                      <div className="flex items-center gap-2">
-                                        {isAI && <Sparkles className="w-4 h-4 text-purple-400" />}
-                                        <span className={`text-xs font-bold text-gray-400`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
+                                <div className="font-pixel rounded-lg bg-gray-600 border-gray-700 shadow-md p-0.5 opacity-60">
+                                  <div className="bg-gray-800 rounded-md border border-gray-700">
+                                    <div className="flex justify-between items-center p-1.5 rounded-t-md bg-gray-700">
+                                      <h3 className="text-sm font-bold text-gray-400 truncate">{quest.title}</h3>
+                                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                        {isAI && <Sparkles className="w-3 h-3 text-purple-400" />}
+                                        <span className="text-xs font-bold text-gray-400">{quest.effortMinutes > 0 ? `${quest.effortMinutes}m` : 'QUICK'}</span>
                                       </div>
                                     </div>
-                                    <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 border-gray-600 bg-gray-700`}>
-                                      <p className={`text-lg leading-tight font-bold px-2 text-gray-400 line-through`}>
+                                    <div className="min-h-[4rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 border-gray-600 bg-gray-700">
+                                      <p className="text-sm leading-tight font-bold px-2 text-gray-400 line-through">
                                         {quest.title}
                                       </p>
                                     </div>
-                                    <div className={`p-2 mx-2 mb-2 border-2 bg-gray-700 border-gray-600`}>
-                                      <p className={`text-xs text-gray-400`}>
+                                    <div className="p-1.5 mx-1.5 mb-1.5 border bg-gray-700 border-gray-600 text-xs">
+                                      <p className="text-gray-400">
                                         Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
                                       </p>
-                                      <p className={`text-xs mt-1 text-gray-400`}>
-                                        {isAI ? 'An AI-suggested goal to boost your progress.' : 'A small step towards a greater victory. Complete this quest to build your streak.'}
-                                      </p>
                                     </div>
-                                    <div className="p-2">
+                                    <div className="p-1.5">
                                       <Button
                                         disabled={true}
-                                        className={`w-full font-pixel text-base transition-all uppercase bg-green-700 text-white border-2 border-green-800 cursor-not-allowed`}
+                                        size="sm"
+                                        className="w-full font-pixel text-sm uppercase bg-green-700 text-white border border-green-800 cursor-not-allowed"
                                       >
-                                        <div className="flex items-center justify-center">
-                                          <Check className="w-5 h-5 mr-2" /> Done
-                                        </div>
+                                        <Check className="w-4 h-4 mr-2" /> Done
                                       </Button>
-                                    </div>
-                                    <div className={`text-center text-xs p-1 border-t-2 text-gray-500 border-gray-600`}>
-                                      <p>{isAI ? 'AI Generated Goal' : 'Quest Card - Level Up Your Life'}</p>
                                     </div>
                                   </div>
                                 </div>
