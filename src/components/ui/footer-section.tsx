@@ -118,7 +118,12 @@ function FooterSection() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="rounded-full"
+                      onClick={() => window.open("https://www.linkedin.com/in/aayush-bhat07", "_blank", "noopener,noreferrer")}
+                    >
                       <Linkedin className="h-4 w-4" />
                       <span className="sr-only">LinkedIn</span>
                     </Button>
