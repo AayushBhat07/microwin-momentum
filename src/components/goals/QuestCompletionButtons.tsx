@@ -305,36 +305,36 @@ export function QuestCompletionButtons({
 
   return (
     <>
-      <div className="space-y-2">
+      <div className="flex items-center justify-around p-1">
         {/* Quick Complete */}
         <Button
           onClick={handleQuickComplete}
-          className="w-full font-pixel text-sm transition-all uppercase bg-green-600 hover:bg-green-700 border-green-700 text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
+          size="icon"
+          className="h-9 w-9 bg-green-600 hover:bg-green-700 border-green-700 text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
         >
-          <Check className="w-4 h-4 mr-2" />
-          Complete Quest
+          <Check className="w-4 h-4" />
         </Button>
 
         {/* Voice Complete */}
         <Button
           onClick={handleVoiceComplete}
-          className={`w-full font-pixel text-sm transition-all uppercase border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none ${
+          size="icon"
+          className={`h-9 w-9 border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none ${
             isRecording 
               ? 'bg-red-600 hover:bg-red-700 border-red-700 text-white animate-pulse' 
               : 'bg-blue-600 hover:bg-blue-700 border-blue-700 text-white'
           }`}
         >
-          <Mic className="w-4 h-4 mr-2" />
-          {isRecording ? "Stop & Complete" : "Voice Note"}
+          <Mic className="w-4 h-4" />
         </Button>
 
         {/* Photo Complete */}
         <Button
           onClick={handlePhotoComplete}
-          className="w-full font-pixel text-sm transition-all uppercase bg-purple-600 hover:bg-purple-700 border-purple-700 text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
+          size="icon"
+          className="h-9 w-9 bg-purple-600 hover:bg-purple-700 border-purple-700 text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
         >
-          <Camera className="w-4 h-4 mr-2" />
-          Add Photo
+          <Camera className="w-4 h-4" />
         </Button>
       </div>
 
