@@ -11,7 +11,7 @@ const FeatureCard = ({ icon, title, children }: { icon: React.ElementType, title
             <div className="bg-primary/20 p-3 border-2 border-primary/30 shrink-0">
                 {React.createElement(icon, { className: "w-8 h-8 text-primary" })}
             </div>
-            <h3 className="text-xl font-bold uppercase font-pixel text-white">{title}</h3>
+            <h3 className="text-xl font-bold uppercase font-pixel text-white break-words">{title}</h3>
         </div>
         <p className="text-white/80 font-pixel break-words flex-grow">{children}</p>
     </div>
