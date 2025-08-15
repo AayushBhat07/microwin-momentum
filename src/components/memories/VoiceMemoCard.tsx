@@ -47,48 +47,61 @@ export function VoiceMemoCard({ memory }: VoiceMemoCardProps) {
 
   return (
     <motion.div 
-      className="aspect-[4/5] relative overflow-hidden cursor-pointer group border-2 border-blue-800/50 hover:border-blue-500 transition-colors bg-blue-900/40 p-4 flex flex-col justify-between"
+      className={`aspect-[4/5] relative overflow-hidden cursor-pointer group border-4 p-1 transition-all duration-300 bg-blue-900/40 ${
+        isPlaying ? "border-green-500 animate-pulse-border" : "border-double border-blue-600/70"
+      }`}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
       onClick={() => togglePlay()}
     >
-      {memory.audioUrl && (
-        <audio ref={audioRef} src={memory.audioUrl} id={`audio-${memory._id}`} preload="metadata" />
-      )}
-      
-      {/* Background Icon */}
-      <Mic className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 text-blue-800/30 transition-transform group-hover:scale-110" />
+      {/* Corner decorations */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-blue-400 opacity-70"></div>
+      <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-blue-400 opacity-70"></div>
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-blue-400 opacity-70"></div>
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-blue-400 opacity-70"></div>
 
-      {/* Play/Pause Button */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <button
-          onClick={(e) => togglePlay(e)}
-          className="w-20 h-20 bg-black/40 border-2 border-blue-600 flex items-center justify-center text-white rounded-full backdrop-blur-sm hover:bg-blue-900/70 transition-all duration-200 scale-90 group-hover:scale-100 opacity-80 group-hover:opacity-100"
-          aria-label="Play voice memo"
-        >
-          {isPlaying ? <Pause className="h-10 w-10" /> : <Play className="h-10 w-10 ml-1" />}
-        </button>
-      </div>
+      <div className="relative w-full h-full flex flex-col justify-between p-3 bg-blue-900/20">
+        {memory.audioUrl && (
+          <audio ref={audioRef} src={memory.audioUrl} id={`audio-${memory._id}`} preload="metadata" />
+        )}
+        
+        {/* Background Icon */}
+        <Mic className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 text-blue-800/30 transition-transform group-hover:scale-110" />
 
-      {/* Bottom Content */}
-      <div className="relative z-10 flex flex-col justify-end flex-grow">
-        <div>
-            <h3 className="font-bold text-base leading-tight truncate font-pixel text-white">{memory.title}</h3>
-            <div className="flex items-center justify-between text-xs text-blue-300/90 font-pixel mt-1">
-                <span>{format(new Date(memory.loggedAt), "MMM d, yyyy")}</span>
-                <span className="text-yellow-400 flex items-center gap-1">
-                    <Star className="w-3 h-3" /> {memory.pointsEarned} XP
-                </span>
-            </div>
+        {/* Play/Pause Button */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <button
+            onClick={(e) => togglePlay(e)}
+            className="w-20 h-20 bg-black/40 border-2 border-blue-600 flex items-center justify-center text-white rounded-full backdrop-blur-sm hover:bg-blue-900/70 transition-all duration-200 scale-90 group-hover:scale-100 opacity-80 group-hover:opacity-100"
+            aria-label="Play voice memo"
+          >
+            {isPlaying ? <Pause className="h-10 w-10" /> : <Play className="h-10 w-10 ml-1" />}
+          </button>
         </div>
-      </div>
 
-      {/* Progress Bar */}
-      <div className="relative z-10 h-2 w-full bg-blue-900/50 border border-blue-800/50 mt-2">
-          <div 
-              className="bg-green-500 h-full transition-all duration-150"
-              style={{ width: `${progress}%` }}
-          ></div>
+        {/* Bottom Content */}
+        <div className="relative z-10 flex flex-col justify-end flex-grow">
+          <div>
+              <h3 className="font-bold text-base leading-tight truncate font-pixel text-white">{memory.title}</h3>
+              <div className="flex items-center justify-between text-xs text-blue-300/90 font-pixel mt-1">
+                  <span>{format(new Date(memory.loggedAt), "MMM d, yyyy")}</span>
+                  <span className="text-yellow-400 flex items-center gap-1">
+                      <Star className="w-3 h-3" /> {memory.pointsEarned} XP
+                  </span>
+              </div>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="relative z-10 h-3 w-full bg-black/50 border border-blue-800/50 mt-2 overflow-hidden">
+            <div 
+                className="h-full transition-all duration-150"
+                style={{
+                  width: `${progress}%`,
+                  backgroundImage: 'repeating-linear-gradient(45deg, #4ade80, #4ade80 4px, #22c55e 4px, #22c55e 8px)',
+                }}
+            ></div>
+        </div>
       </div>
     </motion.div>
   );
