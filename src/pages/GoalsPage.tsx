@@ -320,7 +320,7 @@ export default function GoalsPage() {
                     <div id="completed-quests">
                       <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">Completed Quests ({completedQuests.length})</h2>
                       {completedQuests.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                           <AnimatePresence>
                             {completedQuests.map((quest, index) => {
                               const isAI = quest.type === 'ai';
