@@ -11,19 +11,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Facebook, Instagram, Linkedin, Moon, Send, Sun, Twitter } from "lucide-react"
+import { Facebook, Instagram, Linkedin, Send, Twitter } from "lucide-react"
 
 function FooterSection() {
-  const [isDarkMode, setIsDarkMode] = React.useState(true)
-
   React.useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-    }
-  }, [isDarkMode])
-
+    // Set dark mode by default
+    document.documentElement.classList.add("dark")
+  }, [])
+  
   return (
     <footer className="relative border-t bg-background text-foreground transition-colors duration-300">
       <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8">
@@ -133,18 +128,6 @@ function FooterSection() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Sun className="h-4 w-4" />
-              <Switch
-                id="dark-mode"
-                checked={isDarkMode}
-                onCheckedChange={setIsDarkMode}
-              />
-              <Moon className="h-4 w-4" />
-              <Label htmlFor="dark-mode" className="sr-only">
-                Toggle dark mode
-              </Label>
             </div>
           </div>
         </div>
