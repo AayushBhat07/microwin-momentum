@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 export function PhotoMemoryCard() {
-  const memories = useQuery(api.memories.getPhotoMemories);
+  const memories = useQuery(api.memories.getMemories);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
 

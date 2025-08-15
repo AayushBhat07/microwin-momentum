@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BarChart3, Star, Clipboard, Camera, Settings } from "lucide-react";
+import { LayoutDashboard, Star, Trophy, Heart, Settings, User, Camera } from "lucide-react";
 import { useNavigate } from "react-router";
 
 interface SidebarProps {
@@ -8,7 +8,16 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { id: "dashboard", icon: BarChart3, label: "Dashboard", color: "bg-teal-500" },
+  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", color: "bg-teal-500" },
+  { href: "/goals", icon: Star, label: "Goals" },
+  { href: "/habits", icon: Heart, label: "Habits" },
+  { href: "/milestones", icon: Trophy, label: "Milestones" },
+  { href: "/memories", icon: Camera, label: "Memories" },
+  { id: "settings", icon: Settings, label: "Settings", color: "bg-gray-500" },
+];
+
+const bottomNavItems = [
+  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", color: "bg-teal-500" },
   { id: "milestones", icon: Star, label: "Milestones", color: "bg-pink-500" },
   { id: "goals", icon: Clipboard, label: "Goals", color: "bg-yellow-500" },
   { id: "memories", icon: Camera, label: "Memories", color: "bg-orange-500" },
@@ -25,18 +34,16 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         const isActive = activeTab === item.id;
 
         const handleClick = () => {
-          if (item.id === "dashboard") {
+          if (item.href) {
+            navigate(item.href);
+          } else if (item.id === "dashboard") {
             navigate("/dashboard");
-          } else if (item.id === "milestones") {
-            navigate("/milestones");
-          } else if (item.id === "goals") {
-            navigate("/goals");
-          } else if (item.id === "memories") {
-            navigate("/memories");
           } else if (item.id === "settings") {
             navigate("/settings");
           }
-          onTabChange(item.id);
+          if (item.id) {
+            onTabChange(item.id);
+          }
         };
         
         return (
