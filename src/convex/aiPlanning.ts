@@ -32,8 +32,17 @@ export const generateDailyPlan = internalAction({
         baseURL: "https://openrouter.ai/api/v1",
       });
 
+      const today = new Date();
+      const dates = [0, 1, 2].map(offset => {
+        const date = new Date(today);
+        date.setDate(today.getDate() + offset);
+        return date.toISOString().split('T')[0];
+      });
+
       const prompt = `
 You are a compassionate AI wellness coach. Based on the user's recent mood and achievement data, create a personalized 3-day micro-goal plan.
+
+Today's date is ${dates[0]}. The plan should be for today, tomorrow, and the day after (${dates[0]}, ${dates[1]}, ${dates[2]}).
 
 Recent mood entries: ${JSON.stringify(moodEntries)}
 Recent achievements: ${JSON.stringify(achievements)}
@@ -45,15 +54,35 @@ Create a 3-day plan with 2-4 micro-goals per day. Each goal should:
 - Include variety across categories (health, work, learning, social, creative, personal)
 - Be encouraging and supportive
 
-Return as JSON with this structure:
+Return as JSON with this structure. Use the correct dates: ${JSON.stringify(dates)}.
 {
   "plan": [
     {
-      "date": "2024-01-15",
+      "date": "${dates[0]}",
       "goals": [
         {
           "title": "Take a 5-minute walk outside",
           "categorySlug": "health",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "date": "${dates[1]}",
+      "goals": [
+        {
+          "title": "Write down one thing you're grateful for",
+          "categorySlug": "personal",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "date": "${dates[2]}",
+      "goals": [
+        {
+          "title": "Spend 10 minutes on a creative hobby",
+          "categorySlug": "creative",
           "completed": false
         }
       ]
