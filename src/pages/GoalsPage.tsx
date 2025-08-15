@@ -244,8 +244,8 @@ export default function GoalsPage() {
                                         {quest.type === 'user' ? (
                                           <QuestCompletionButtons
                                             questId={quest._id as Id<"userPresets">}
-                                            questTitle={quest.title}
                                             isCompleting={isCompleting}
+                                            setIsCompleting={setCompletingId}
                                             onComplete={() => setCompletedQuestIds(prev => new Set(prev).add(quest._id as Id<"userPresets">))}
                                           />
                                         ) : (

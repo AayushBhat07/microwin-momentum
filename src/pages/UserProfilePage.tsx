@@ -151,7 +151,7 @@ export default function UserProfilePage() {
             </Card>
           </div>
 
-          {userProfile.badges.length > 0 && (
+          {(userProfile as any).badges && (userProfile as any).badges.length > 0 && (
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -161,7 +161,7 @@ export default function UserProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {userProfile.badges.map((badge: any) => (
+                  {(userProfile as any).badges?.map((badge: any) => (
                     <BadgeCard key={badge.userBadge._id} badge={badge} />
                   ))}
                 </div>
@@ -169,25 +169,7 @@ export default function UserProfilePage() {
             </Card>
           )}
 
-          {userProfile.achievements.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Public Achievements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {userProfile.achievements.map((achievement) => (
-                    <AchievementCard 
-                      key={achievement._id} 
-                      achievement={achievement}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {userProfile.achievements.length === 0 && (
+          {(!(userProfile as any).achievements || (userProfile as any).achievements.length === 0) && (
             <Card>
               <CardContent className="p-8 text-center">
                 <p className="text-muted-foreground">
