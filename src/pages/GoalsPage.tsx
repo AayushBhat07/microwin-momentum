@@ -247,7 +247,7 @@ export default function GoalsPage() {
                     <div id="in-progress-quests" className="mb-12">
                       <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">In-Progress Quests ({inProgressQuests.length})</h2>
                       {inProgressQuests.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           <AnimatePresence>
                             {inProgressQuests.map((quest, index) => {
                               const isAI = quest.type === 'ai';
@@ -265,18 +265,18 @@ export default function GoalsPage() {
                                   <div className={`
                                     font-pixel rounded-lg transition-all duration-300
                                     ${isAI ? 'bg-purple-900/80 border-2 border-purple-500' : 'bg-gray-900 border-2 border-blue-500'}
-                                    shadow-md p-0.5
+                                    shadow-md p-1
                                   `}>
                                     <div className={`rounded-md border border ${isAI ? 'bg-purple-800/50 border-purple-600' : 'bg-gray-800 border-gray-600'}`}>
                                       <div className={`flex justify-between items-center p-1.5 rounded-t-md bg-black/20`}>
-                                        <h3 className={`text-sm font-bold text-white truncate`}>{quest.title}</h3>
+                                        <h3 className={`text-xs font-bold text-white truncate`}>{quest.title}</h3>
                                         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                                           {isAI && <Sparkles className="w-3 h-3 text-purple-300" />}
                                           <span className={`text-xs font-bold ${isAI ? 'text-purple-300' : 'text-yellow-400'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes}m` : 'QUICK'}</span>
                                         </div>
                                       </div>
-                                      <div className={`min-h-[4rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 ${isAI ? 'border-purple-800' : 'border-blue-800'} bg-black/30`}>
-                                        <p className={`text-sm leading-tight font-bold text-white break-words`}>
+                                      <div className={`min-h-[3.5rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 ${isAI ? 'border-purple-800' : 'border-blue-800'} bg-black/30`}>
+                                        <p className={`text-xs leading-tight font-bold text-white break-words`}>
                                           {quest.title}
                                         </p>
                                       </div>
@@ -320,7 +320,7 @@ export default function GoalsPage() {
                     <div id="completed-quests">
                       <h2 className="text-2xl md:text-3xl text-white text-shadow-pixel mb-4 text-center">Completed Quests ({completedQuests.length})</h2>
                       {completedQuests.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           <AnimatePresence>
                             {completedQuests.map((quest, index) => {
                               const isAI = quest.type === 'ai';
@@ -334,17 +334,17 @@ export default function GoalsPage() {
                                 transition={{ duration: 0.3, delay: index * 0.05 }}
                               >
                                 {/* Card Component */}
-                                <div className="font-pixel rounded-lg bg-gray-600 border-gray-700 shadow-md p-0.5 opacity-60">
+                                <div className="font-pixel rounded-lg bg-gray-600 border-gray-700 shadow-md p-1 opacity-60">
                                   <div className="bg-gray-800 rounded-md border border-gray-700">
                                     <div className="flex justify-between items-center p-1.5 rounded-t-md bg-gray-700">
-                                      <h3 className="text-sm font-bold text-gray-400 truncate">{quest.title}</h3>
+                                      <h3 className="text-xs font-bold text-gray-400 truncate">{quest.title}</h3>
                                       <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                                         {isAI && <Sparkles className="w-3 h-3 text-purple-400" />}
                                         <span className="text-xs font-bold text-gray-400">{quest.effortMinutes > 0 ? `${quest.effortMinutes}m` : 'QUICK'}</span>
                                       </div>
                                     </div>
-                                    <div className="min-h-[4rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 border-gray-600 bg-gray-700">
-                                      <p className="text-sm leading-tight font-bold px-2 text-gray-400 line-through">
+                                    <div className="min-h-[3.5rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 border-gray-600 bg-gray-700">
+                                      <p className="text-xs leading-tight font-bold px-2 text-gray-400 line-through">
                                         {quest.title}
                                       </p>
                                     </div>
