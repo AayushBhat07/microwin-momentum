@@ -23,12 +23,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="h-screen sticky top-0 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col justify-between p-4 font-pixel">
+    <div className="h-screen sticky top-0 w-64 bg-black/40 backdrop-blur-md border-r-2 border-blue-900/80 flex flex-col justify-between p-4 font-pixel text-white">
       <div>
         {/* Logo */}
         <div className="mb-10 text-center">
           <Link to="/dashboard" className="flex items-center justify-center gap-2">
-            <BrainCircuit className="w-10 h-10 text-sidebar-primary" />
+            <BrainCircuit className="w-10 h-10 text-blue-400" />
             <span className="text-2xl font-bold tracking-widest text-shadow-pixel">LevelUp</span>
           </Link>
         </div>
@@ -41,10 +41,10 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               to={item.path}
               onClick={() => onTabChange(item.id)}
               className={`
-                flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+                flex items-center gap-3 px-4 py-3 transition-all duration-200
                 ${isActive(item.path)
-                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                  : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  ? 'bg-blue-600/80 border-2 border-blue-500 text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]'
+                  : 'bg-black/30 border-2 border-transparent hover:bg-blue-900/60 hover:border-blue-700'
                 }
               `}
             >
@@ -56,11 +56,11 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       </div>
 
       {/* User Profile */}
-      <div className="flex items-center gap-3 p-2 bg-sidebar-accent rounded-lg">
+      <div className="flex items-center gap-3 p-2 bg-black/30 border-2 border-blue-900/80">
         <UserButton />
         <div className="flex-grow overflow-hidden">
           <p className="text-sm font-bold truncate">{user?.name}</p>
-          <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+          <p className="text-xs text-blue-300 truncate">{user?.email}</p>
         </div>
       </div>
     </div>
