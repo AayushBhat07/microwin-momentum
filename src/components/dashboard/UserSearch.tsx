@@ -1,43 +1,38 @@
-import { useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { Search, Star, Flame } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
-import { Search, Star, Flame } from "lucide-react";
 import { motion } from "framer-motion";
 
+const dummyPlayers = [
+  { _id: '1', username: 'PixelAvenger', image: '/assets/t2.png', totalPoints: 1250, currentStreak: 15 },
+  { _id: '2', username: 'RetroGamerX', image: '/assets/t3.png', totalPoints: 980, currentStreak: 8 },
+  { _id: '3', username: 'SynthwaveHero', image: '/assets/t4.png', totalPoints: 2100, currentStreak: 22 },
+  { _id: '4', username: 'ArcadeMaster', image: '/assets/onboarding2.png', totalPoints: 750, currentStreak: 5 },
+];
+
 export function UserSearch() {
-  const [searchTerm, setSearchTerm] = useState("");
-  
-  const searchResults = useQuery(
-    api.users.searchUsers,
-    searchTerm.trim() ? { query: searchTerm.trim() } : "skip"
-  );
-
   return (
-    <div className="bg-black/60 backdrop-blur-sm p-4 rounded-lg border-2 border-blue-900/80 h-full">
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300 h-4 w-4" />
-        <Input
-          placeholder="Search for players..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-blue-900/30 border-blue-700 text-white font-pixel placeholder:text-blue-300/70 focus:border-blue-500 focus:ring-blue-500"
-        />
-      </div>
+    <div className="relative group bg-black/60 backdrop-blur-sm p-4 rounded-lg border-2 border-blue-900/80 h-full">
+      <div className="transition-all duration-300 group-hover:blur-sm group-hover:brightness-50">
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300 h-4 w-4" />
+          <Input
+            placeholder="Search for players..."
+            className="pl-10 bg-blue-900/30 border-blue-700 text-white font-pixel placeholder:text-blue-300/70 focus:border-blue-500 focus:ring-blue-500"
+            disabled
+          />
+        </div>
 
-      <div className="space-y-3 h-[calc(100%-4rem)] overflow-y-auto pr-2">
-        {searchResults && searchResults.length > 0 && (
-          searchResults.map((user: any) => (
+        <div className="space-y-3 h-[calc(100%-4rem)] overflow-y-auto pr-2">
+          {dummyPlayers.map((user, index) => (
             <motion.div
               key={user._id}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center justify-between p-3 rounded-md border border-blue-800/50 hover:bg-blue-900/30 transition-colors"
+              transition={{ delay: index * 0.1 }}
+              className="flex items-center justify-between p-3 rounded-md border border-blue-800/50"
             >
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10 border-2 border-blue-700">
@@ -60,28 +55,17 @@ export function UserSearch() {
                   </div>
                 </div>
               </div>
-              <Link to={`/u/${user.username}`}>
-                <Button variant="outline" size="sm" className="font-pixel bg-blue-800/50 border-blue-700 hover:bg-blue-700 text-white">
-                  Profile
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" className="font-pixel bg-blue-800/50 border-blue-700 text-white" disabled>
+                Profile
+              </Button>
             </motion.div>
-          ))
-        )}
-
-        {searchTerm.trim() && searchResults?.length === 0 && (
-          <div className="text-center py-8 text-blue-300/80 font-pixel">
-            <p>No players found for</p>
-            <p className="text-white text-lg">"{searchTerm}"</p>
-          </div>
-        )}
-
-        {!searchTerm.trim() && (
-           <div className="text-center py-8 text-blue-300/80 font-pixel">
-            <p>Search for other players</p>
-            <p className="text-white text-lg">by their username</p>
-          </div>
-        )}
+          ))}
+        </div>
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <div className="bg-black/80 border-2 border-yellow-500 text-yellow-400 font-pixel text-2xl px-8 py-4 rounded-lg shadow-lg">
+          Under Progress
+        </div>
       </div>
     </div>
   );
