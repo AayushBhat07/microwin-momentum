@@ -10,6 +10,7 @@ import { Link } from "react-router";
 import { useLazyImage } from "@/hooks/use-lazy-image";
 import { GoalsRadarChart } from "@/components/goals/GoalsRadarChart";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { QuestCompletionButtons } from "@/components/goals/QuestCompletionButtons";
 
 export default function GoalsPage() {
   const quests = useQuery(api.habits.getDailyQuests);
@@ -240,17 +241,26 @@ export default function GoalsPage() {
                                         </p>
                                       </div>
                                       <div className="p-2">
-                                        <Button
-                                          onClick={() => isAI ? handleCompleteAIGoal(quest.goalIndex) : handleCompleteQuest(quest._id as Id<"userPresets">)}
-                                          disabled={isCompleting}
-                                          className={`w-full font-pixel text-base transition-all uppercase ${isAI ? 'bg-purple-600 hover:bg-purple-700 border-purple-700' : 'bg-green-600 hover:bg-green-700 border-green-700'} text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none`}
-                                        >
-                                          {isCompleting ? (
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                          ) : (
-                                            isAI ? 'Complete AI Goal' : 'Complete Quest'
-                                          )}
-                                        </Button>
+                                        {quest.type === 'user' ? (
+                                          <QuestCompletionButtons
+                                            questId={quest._id as Id<"userPresets">}
+                                            questTitle={quest.title}
+                                            isCompleting={isCompleting}
+                                            onComplete={() => setCompletedQuestIds(prev => new Set(prev).add(quest._id as Id<"userPresets">))}
+                                          />
+                                        ) : (
+                                          <Button
+                                            onClick={() => handleCompleteAIGoal(quest.goalIndex)}
+                                            disabled={isCompleting}
+                                            className="w-full font-pixel text-base transition-all uppercase bg-purple-600 hover:bg-purple-700 border-purple-700 text-white border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none"
+                                          >
+                                            {isCompleting ? (
+                                              <Loader2 className="w-5 h-5 animate-spin" />
+                                            ) : (
+                                              'Complete AI Goal'
+                                            )}
+                                          </Button>
+                                        )}
                                       </div>
                                       <div className={`text-center text-xs p-1 border-t-2 ${isAI ? 'text-purple-400 border-purple-700' : 'text-gray-400 border-gray-700'}`}>
                                         <p>{isAI ? 'AI Generated Goal' : 'Quest Card - Level Up Your Life'}</p>

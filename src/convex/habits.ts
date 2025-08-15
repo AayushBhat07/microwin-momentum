@@ -33,6 +33,49 @@ export const getDailyQuests = query({
 });
 
 /**
+ * Completes a daily quest with optional media attachments
+ */
+export const completeDailyQuestWithMedia = mutation({
+  args: {
+    presetId: v.id("userPresets"),
+    photoStorageId: v.optional(v.id("_storage")),
+    audioStorageId: v.optional(v.id("_storage")),
+    note: v.optional(v.string()),
+  },
+  handler: async (ctx, { presetId, photoStorageId, audioStorageId, note }) => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const preset = await ctx.db.get(presetId);
+    if (!preset || preset.userId !== user._id) {
+      throw new Error("Quest not found or not owned by user");
+    }
+
+    // Determine source based on media type
+    let source: "quick" | "photo" | "voice" = "quick";
+    if (photoStorageId) source = "photo";
+    else if (audioStorageId) source = "voice";
+
+    // Create achievement with media
+    await ctx.runMutation(internal.achievements.createAchievement, {
+      userId: user._id,
+      clientId: `quest-${presetId}-${Date.now()}`,
+      title: preset.title,
+      description: note || "Completed a daily quest.",
+      categorySlug: preset.categorySlug,
+      photoStorageId,
+      audioStorageId,
+      source,
+      isPublic: !preset.defaultPrivate,
+    });
+
+    return { title: preset.title };
+  },
+});
+
+/**
  * Completes a daily quest, creating an achievement and awarding points.
  */
 export const completeDailyQuest = mutation({
