@@ -67,10 +67,18 @@ export default function MemoriesPage() {
 
             {photoMemories.length > 0 && (
               <section>
-                <h2 className="flex items-center gap-3 text-2xl text-green-400 mb-6 pixel-shadow">
-                  <Camera className="w-7 h-7" />
-                  Photo Reel
-                </h2>
+                <motion.div
+                  className="mb-6"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <h2 className="flex items-center gap-3 text-3xl font-pixel text-white text-shadow-pixel">
+                    <Camera className="w-8 h-8 text-green-400" />
+                    <span>Photo Reel</span>
+                  </h2>
+                  <p className="text-blue-300 font-pixel text-sm mt-1 ml-11">A gallery of your visual achievements.</p>
+                </motion.div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {photoMemories.map((memory) => (
                     <PhotoMemoryCard key={memory._id} memory={memory} />
@@ -80,11 +88,19 @@ export default function MemoriesPage() {
             )}
 
             {voiceMemories.length > 0 && (
-              <section className="mt-16">
-                <h2 className="flex items-center gap-3 text-2xl text-yellow-400 mb-6 pixel-shadow">
-                  <Mic className="w-7 h-7" />
-                  Audio Logs
-                </h2>
+              <section className="mt-12">
+                <motion.div
+                  className="mb-6"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  <h2 className="flex items-center gap-3 text-3xl font-pixel text-white text-shadow-pixel">
+                    <Mic className="w-8 h-8 text-yellow-400" />
+                    <span>Audio Logs</span>
+                  </h2>
+                  <p className="text-blue-300 font-pixel text-sm mt-1 ml-11">Your collection of spoken reflections.</p>
+                </motion.div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                   {voiceMemories.map((memory) => (
                     <VoiceMemoCard key={memory._id} memory={memory} />

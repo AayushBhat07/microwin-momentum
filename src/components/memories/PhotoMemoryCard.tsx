@@ -67,7 +67,7 @@ export function PhotoMemoryCard({ memory }: PhotoMemoryCardProps) {
         )}
         <div className="p-6">
             <DialogHeader>
-              <DialogTitle className="text-2xl text-blue-300 pixel-shadow">{memory.title}</DialogTitle>
+              <DialogTitle className="text-2xl text-blue-300 text-shadow-pixel">{memory.title}</DialogTitle>
             </DialogHeader>
             <div className="flex justify-between items-center text-sm text-blue-400/80 mt-2">
                 <span>{format(new Date(memory.loggedAt), "MMMM d, yyyy 'at' h:mm a")}</span>
