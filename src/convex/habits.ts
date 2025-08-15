@@ -33,6 +33,54 @@ export const getDailyQuests = query({
 });
 
 /**
+ * Fetches daily quests and their completion status for the current day.
+ */
+export const getQuestsWithCompletion = query({
+  args: {},
+  handler: async (ctx): Promise<{ quests: Doc<"userPresets">[]; completedTodayIds: Id<"userPresets">[] }> => {
+    const user: Doc<"users"> | null = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) {
+      return { quests: [], completedTodayIds: [] };
+    }
+
+    // 1. Fetch all user presets that are considered daily quests
+    const quests: Doc<"userPresets">[] = await ctx.db
+      .query("userPresets")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .filter(q => q.or(
+          q.eq(q.field("source"), "onboarding"),
+          q.eq(q.field("source"), "custom"),
+          q.eq(q.field("source"), "system")
+      ))
+      .collect();
+
+    // 2. Fetch all achievements logged today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startOfTodayTimestamp = today.getTime();
+
+    const todaysAchievements = await ctx.db
+      .query("achievements")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .filter((q) => q.gte(q.field("loggedAt"), startOfTodayTimestamp))
+      .collect();
+
+    // 3. Create a set of completed quest titles for efficient lookup
+    const completedTitles = new Set(todaysAchievements.map(a => a.title));
+
+    // 4. Determine which quests have been completed today by matching titles
+    const completedTodayIds: Id<"userPresets">[] = quests
+      .filter((quest: Doc<"userPresets">) => completedTitles.has(quest.title))
+      .map((quest: Doc<"userPresets">) => quest._id);
+
+    return {
+      quests,
+      completedTodayIds,
+    };
+  },
+});
+
+/**
  * Completes a daily quest with optional media attachments
  */
 export const completeDailyQuestWithMedia = mutation({

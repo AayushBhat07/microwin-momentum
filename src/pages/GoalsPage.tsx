@@ -127,7 +127,8 @@ export default function GoalsPage() {
     }
   }
 
-  const isLoading = quests === undefined || !backgroundUrl || todayStats === undefined || latestPlan === undefined;
+  const questData = quests || latestPlan || todayStats;
+  const isLoading = questData === undefined || !backgroundUrl || todayStats === undefined || latestPlan === undefined;
 
   const inProgressQuests = allGoals.filter(q => !q.isCompleted);
   const completedQuests = allGoals.filter(q => q.isCompleted);
