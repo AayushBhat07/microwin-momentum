@@ -19,11 +19,30 @@ export const generateDailyPlansForUsers = internalAction({
     
     for (const user of users) {
       try {
+        // Check if user has enough mood entries
+        const moodEntryCount = await ctx.runQuery(internal.aiPlanningMutations.countUserMoodEntries, { userId: user._id });
+        if (moodEntryCount < 2) {
+          console.log(`Skipping plan for user ${user._id}, not enough mood entries (${moodEntryCount}). Needs 2.`);
+          continue;
+        }
+
+        // Check if a plan was generated recently
+        const latestPlan = await ctx.runQuery(internal.aiPlanningMutations.getLatestPlanForUser, { userId: user._id });
+        if (latestPlan) {
+          const twentyFourHours = 24 * 60 * 60 * 1000;
+          if (Date.now() - latestPlan.generatedAt < twentyFourHours) {
+            console.log(`Skipping plan for user ${user._id}, plan generated recently.`);
+            continue;
+          }
+        }
+
         await ctx.runAction(internal.aiPlanning.generateDailyPlan, {
           userId: user._id,
         });
+        console.log(`Successfully triggered AI plan generation for user ${user._id}.`);
+
       } catch (error) {
-        console.error(`Failed to generate plan for user ${user._id}:`, error);
+        console.error(`Failed to process plan for user ${user._id}:`, error);
       }
     }
   },

@@ -41,6 +41,28 @@ export const getLatestPlan = query({
   },
 });
 
+export const getLatestPlanForUser = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("aiPlans")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .first();
+  }
+});
+
+export const countUserMoodEntries = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const entries = await ctx.db
+      .query("moodEntries")
+      .withIndex("by_user_and_date", (q) => q.eq("userId", userId))
+      .collect();
+    return entries.length;
+  }
+});
+
 export const markGoalCompleted = mutation({
   args: {
     planId: v.id("aiPlans"),
