@@ -20,13 +20,11 @@ export function ExpandableChatDemo() {
         </ExpandableChatHeader>
 
         <ExpandableChatBody>
-          <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-background/95">
-            <h2 className="font-pixel text-3xl text-white text-shadow-pixel mb-4">
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="bg-black/80 border-2 border-yellow-500 text-yellow-400 font-pixel text-2xl px-8 py-4 rounded-lg shadow-lg">
               Mental Wellness Bot
-            </h2>
-            <p className="font-pixel text-xl text-blue-300">
-              Coming Soon...
-            </p>
+              <p className="text-lg mt-2">Coming Soon...</p>
+            </div>
           </div>
         </ExpandableChatBody>
       </ExpandableChat>
