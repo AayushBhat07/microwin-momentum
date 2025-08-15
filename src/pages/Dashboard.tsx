@@ -12,6 +12,8 @@ import { Loader2 } from "lucide-react";
 import { useLazyImage } from "@/hooks/use-lazy-image";
 import { MoodModal } from "@/components/mood/MoodModal";
 import { useMoodModal } from "@/hooks/use-mood-modal";
+import { GuidedTour } from "@/components/tour/GuidedTour";
+import { useGuidedTour } from "@/hooks/use-guided-tour";
 
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -19,6 +21,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
+  
+  // Add guided tour
+  const { startTour, isTourActive } = useGuidedTour();
   
   // Add mood modal hook
   const { isModalOpen, currentPeriod, closeModal } = useMoodModal();
@@ -34,6 +39,60 @@ export default function Dashboard() {
       }
     }
   }, [user, isLoading, isAuthenticated, navigate]);
+
+  // Start tour for new users
+  useEffect(() => {
+    if (user && !isTourActive) {
+      // Check if user has seen the tour before (you can add this to user profile later)
+      const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}`);
+      if (!hasSeenTour) {
+        const tourSteps = [
+          {
+            targetId: 'sidebar-navigation',
+            title: 'Welcome to LevelUp!',
+            content: 'This is your navigation sidebar. Use it to explore different sections of your journey.',
+            position: 'right' as const,
+          },
+          {
+            targetId: 'log-win-button',
+            title: 'Log Your Wins',
+            content: 'This is the most important button! Click here whenever you achieve something to earn points and track progress.',
+            position: 'bottom' as const,
+          },
+          {
+            targetId: 'stats-overview',
+            title: 'Your Progress Stats',
+            content: 'Keep track of your total points, current streak, and achievements at a glance.',
+            position: 'bottom' as const,
+          },
+          {
+            targetId: 'heatmap-card',
+            title: 'Activity Heat Map',
+            content: 'This shows your consistency over time. The more active you are, the more colorful it gets!',
+            position: 'top' as const,
+          },
+          {
+            targetId: 'badges-section',
+            title: 'Badges & Milestones',
+            content: 'Earn badges and unlock milestones as you progress. This gamifies your journey!',
+            position: 'top' as const,
+          },
+        ];
+        
+        setTimeout(() => startTour(tourSteps), 1000);
+      }
+    }
+  }, [user, startTour, isTourActive]);
+
+  // Mark tour as completed when it ends
+  useEffect(() => {
+    if (user && !isTourActive) {
+      const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}`);
+      if (hasSeenTour === null) {
+        localStorage.setItem(`tour-completed-${user._id}`, 'true');
+      }
+    }
+  }, [user, isTourActive]);
 
   // Show a loading screen while auth state is being determined or if we are waiting for redirection.
   if (isLoading || (isAuthenticated && !user) || !backgroundUrl) {
@@ -59,7 +118,9 @@ export default function Dashboard() {
     >
       <div className="min-h-screen bg-black/60 flex">
         {/* Sidebar */}
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <div id="sidebar-navigation">
+          <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 p-6 overflow-y-auto">
@@ -80,6 +141,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <button 
+                id="log-win-button"
                 onClick={() => setIsLogSheetOpen(true)}
                 className="font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all px-6 py-3 hidden md:block"
               >
@@ -90,11 +152,13 @@ export default function Dashboard() {
             {/* Main Grid */}
             <div className="space-y-8">
               {/* Stats Overview - Full Width on Top */}
-              <StatsOverview />
+              <div id="stats-overview">
+                <StatsOverview />
+              </div>
 
               {/* Heat Map & User Search */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
+                <div id="heatmap-card" className="lg:col-span-2">
                   <HeatMapCard />
                 </div>
                 <div className="lg:col-span-1">
@@ -103,7 +167,9 @@ export default function Dashboard() {
               </div>
 
               {/* Badges & Milestones Section */}
-              <BadgesMilestonesSection />
+              <div id="badges-section">
+                <BadgesMilestonesSection />
+              </div>
 
             </div>
           </div>
@@ -120,6 +186,9 @@ export default function Dashboard() {
             period={currentPeriod} 
           />
         )}
+
+        {/* Guided Tour */}
+        <GuidedTour />
       </div>
     </div>
   );
