@@ -9,15 +9,18 @@ import { useLazyImage } from "@/hooks/use-lazy-image";
 import { motion } from "framer-motion";
 import { useGuidedTour, GuidedTour } from "@/hooks/use-guided-tour";
 import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 
 export default function MemoriesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const memories = useQuery(api.memories.getMemories);
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
   const { startTour, isTourActive } = useGuidedTour();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (user && !isTourActive && memories !== undefined) {
+    if (user && !isTourActive && memories !== undefined && searchParams.get('tour') === 'true') {
       const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-memories`);
       if (!hasSeenTour) {
         const tourSteps = [
@@ -47,11 +50,17 @@ export default function MemoriesPage() {
         if (voiceMemories.length > 0 && document.getElementById('audio-logs-section')) stepsToShow.push(tourSteps[2]);
 
         if (stepsToShow.length > 0) {
-            setTimeout(() => startTour(stepsToShow, () => localStorage.setItem(`tour-completed-${user._id}-memories`, 'true')), 1000);
+            setTimeout(() => startTour(stepsToShow, () => {
+              localStorage.setItem(`tour-completed-${user._id}-memories`, 'true');
+              navigate('/milestones?tour=true');
+            }), 1000);
+        } else {
+          // If no memories, skip to next step
+          navigate('/milestones?tour=true');
         }
       }
     }
-  }, [user, startTour, isTourActive, memories]);
+  }, [user, startTour, isTourActive, memories, navigate, searchParams]);
 
   const photoMemories = memories?.filter((m) => m.photoUrl) ?? [];
   const voiceMemories = memories?.filter((m) => m.audioUrl && !m.photoUrl) ?? [];

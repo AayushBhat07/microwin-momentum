@@ -10,6 +10,8 @@ import { useLazyImage } from "@/hooks/use-lazy-image";
 import { Loader2 } from "lucide-react";
 import { useGuidedTour, GuidedTour } from "@/hooks/use-guided-tour";
 import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
 
 export default function MilestonesPage() {
   const { user, isLoading } = useAuth();
@@ -17,9 +19,11 @@ export default function MilestonesPage() {
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
   const { startTour, isTourActive } = useGuidedTour();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (user && !isTourActive) {
+    if (user && !isTourActive && searchParams.get('tour') === 'true') {
       const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-milestones`);
       if (!hasSeenTour) {
         const tourSteps = [
@@ -55,10 +59,18 @@ export default function MilestonesPage() {
           },
         ];
         
-        setTimeout(() => startTour(tourSteps, () => localStorage.setItem(`tour-completed-${user._id}-milestones`, 'true')), 1000);
+        setTimeout(() => startTour(tourSteps, () => {
+          localStorage.setItem(`tour-completed-${user._id}-milestones`, 'true');
+          localStorage.setItem(`full-tour-completed-${user._id}`, 'true');
+          toast.success("Congratulations, Champion!", {
+            description: "You've completed the grand tour. Your adventure begins now!",
+            duration: 5000,
+          });
+          navigate('/dashboard');
+        }), 1000);
       }
     }
-  }, [user, startTour, isTourActive]);
+  }, [user, startTour, isTourActive, navigate, searchParams]);
 
   if (isLoading || !backgroundUrl) {
     return (

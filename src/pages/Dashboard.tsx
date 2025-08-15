@@ -14,10 +14,12 @@ import { MoodModal } from "@/components/mood/MoodModal";
 import { useMoodModal } from "@/hooks/use-mood-modal";
 import { GuidedTour } from "@/components/tour/GuidedTour";
 import { useGuidedTour } from "@/hooks/use-guided-tour";
+import { useSearchParams } from "react-router";
 
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isLogSheetOpen, setIsLogSheetOpen] = useState(false);
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
@@ -43,9 +45,14 @@ export default function Dashboard() {
   // Start tour for new users
   useEffect(() => {
     if (user && !isTourActive) {
+      const hasCompletedFullTour = localStorage.getItem(`full-tour-completed-${user._id}`);
+      if (hasCompletedFullTour) return;
+
       // Check if user has seen the tour before (you can add this to user profile later)
       const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}`);
-      if (!hasSeenTour) {
+      const isTourFromRedirect = searchParams.get('tour') === 'true';
+
+      if (!hasSeenTour || isTourFromRedirect) {
         const tourSteps = [
           {
             targetId: 'sidebar-navigation',
@@ -79,10 +86,13 @@ export default function Dashboard() {
           },
         ];
         
-        setTimeout(() => startTour(tourSteps), 1000);
+        setTimeout(() => startTour(tourSteps, () => {
+          localStorage.setItem(`tour-completed-${user._id}`, 'true');
+          navigate('/goals?tour=true');
+        }), 1000);
       }
     }
-  }, [user, startTour, isTourActive]);
+  }, [user, startTour, isTourActive, navigate, searchParams]);
 
   // Mark tour as completed when it ends
   useEffect(() => {

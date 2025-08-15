@@ -14,6 +14,7 @@ import { QuestCompletionButtons } from "@/components/goals/QuestCompletionButton
 import { useGuidedTour, GuidedTour } from "@/hooks/use-guided-tour";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useNavigate, useSearchParams } from "react-router";
 
 export default function GoalsPage() {
   const quests = useQuery(api.habits.getDailyQuests);
@@ -28,9 +29,11 @@ export default function GoalsPage() {
   const backgroundUrl = useLazyImage("/assets/onboarding1.png");
   const { startTour, isTourActive } = useGuidedTour();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (user && !isTourActive) {
+    if (user && !isTourActive && searchParams.get('tour') === 'true') {
       const hasSeenTour = localStorage.getItem(`tour-completed-${user._id}-goals`);
       if (!hasSeenTour) {
         const tourSteps = [
@@ -60,10 +63,13 @@ export default function GoalsPage() {
           },
         ];
         
-        setTimeout(() => startTour(tourSteps, () => localStorage.setItem(`tour-completed-${user._id}-goals`, 'true')), 1000);
+        setTimeout(() => startTour(tourSteps, () => {
+          localStorage.setItem(`tour-completed-${user._id}-goals`, 'true');
+          navigate('/memories?tour=true');
+        }), 1000);
       }
     }
-  }, [user, startTour, isTourActive]);
+  }, [user, startTour, isTourActive, searchParams, navigate]);
 
   const allGoals = useMemo(() => {
     const userQuests = quests?.map(q => ({
