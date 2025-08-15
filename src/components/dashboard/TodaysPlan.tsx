@@ -65,11 +65,11 @@ export function TodaysPlan() {
                 `}
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <button
                     onClick={() => handleCompleteGoal(index)}
                     disabled={goal.completed}
-                    className="text-purple-400 hover:text-purple-300 disabled:text-green-400"
+                    className="flex-shrink-0 text-purple-400 hover:text-purple-300 disabled:text-green-400"
                   >
                     {goal.completed ? (
                       <CheckCircle className="w-5 h-5" />
@@ -77,11 +77,11 @@ export function TodaysPlan() {
                       <Circle className="w-5 h-5" />
                     )}
                   </button>
-                  <div>
-                    <p className={`text-sm ${goal.completed ? 'line-through' : ''}`}>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm ${goal.completed ? 'line-through' : ''} break-words`}>
                       {goal.title}
                     </p>
-                    <p className="text-xs text-purple-300">
+                    <p className="text-xs text-purple-300 truncate">
                       {category?.name || goal.categorySlug}
                     </p>
                   </div>

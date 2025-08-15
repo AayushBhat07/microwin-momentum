@@ -275,8 +275,8 @@ export default function GoalsPage() {
                                           <span className={`text-xs font-bold ${isAI ? 'text-purple-300' : 'text-yellow-400'}`}>{quest.effortMinutes > 0 ? `${quest.effortMinutes} MIN` : 'QUICK'}</span>
                                         </div>
                                       </div>
-                                      <div className={`h-20 flex items-center justify-center text-center my-2 mx-2 border-4 ${isAI ? 'border-purple-800' : 'border-blue-800'} bg-black/30`}>
-                                        <p className={`text-lg leading-tight font-bold px-2 text-white`}>
+                                      <div className={`min-h-[5rem] flex items-center justify-center text-center my-2 mx-2 p-2 border-4 ${isAI ? 'border-purple-800' : 'border-blue-800'} bg-black/30`}>
+                                        <p className={`text-base leading-tight font-bold text-white break-words`}>
                                           {quest.title}
                                         </p>
                                       </div>
