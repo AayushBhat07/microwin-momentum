@@ -17,16 +17,16 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavigate, useSearchParams } from "react-router";
 
 export default function GoalsPage() {
-  const quests = useQuery(api.habits.getDailyQuests);
+  const questDataQuery = useQuery(api.habits.getQuestsWithCompletion);
+  const quests = questDataQuery?.quests;
   const latestPlan = useQuery(api.aiPlanningMutations.getLatestPlan);
   const todayStats = useQuery(api.userStats.getTodayStats);
   const completeQuest = useMutation(api.habits.completeDailyQuest);
   const markAIGoalCompleted = useMutation(api.aiPlanningMutations.markGoalCompleted);
   const deleteAllPresets = useMutation(api.habits.deleteAllMyPresets);
-  const [completedQuestIds, setCompletedQuestIds] = useState<Set<Id<"userPresets">>>(new Set());
+  const completedQuestIds = useMemo(() => new Set(questDataQuery?.completedTodayIds ?? []), [questDataQuery?.completedTodayIds]);
   const [completingId, setCompletingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("goals");
-  const backgroundUrl = useLazyImage("/assets/onboarding1.png");
+  const backgroundImage = useLazyImage("/assets/onboarding1.png");
   const { startTour, isTourActive } = useGuidedTour();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -102,7 +102,6 @@ export default function GoalsPage() {
       toast.success(`+10 XP! Completed: ${result.title}`, {
         description: "Your heroic deed has been recorded!",
       });
-      setCompletedQuestIds(prev => new Set(prev).add(presetId));
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     } finally {
@@ -128,7 +127,7 @@ export default function GoalsPage() {
   }
 
   const questData = quests || latestPlan || todayStats;
-  const isLoading = questData === undefined || !backgroundUrl || todayStats === undefined || latestPlan === undefined;
+  const isLoading = questData === undefined || !backgroundImage || todayStats === undefined || latestPlan === undefined;
 
   const inProgressQuests = allGoals.filter(q => !q.isCompleted);
   const completedQuests = allGoals.filter(q => q.isCompleted);
@@ -149,8 +148,8 @@ export default function GoalsPage() {
       <div 
         className="min-h-screen bg-cover bg-center bg-fixed transition-opacity duration-1000" 
         style={{ 
-          backgroundImage: `url(${backgroundUrl})`,
-          opacity: backgroundUrl ? 1 : 0,
+          backgroundImage: `url(${backgroundImage})`,
+          opacity: backgroundImage ? 1 : 0,
         }}
       >
         <div className="min-h-screen bg-black/60 flex">
@@ -295,7 +294,8 @@ export default function GoalsPage() {
                                             questId={quest._id as Id<"userPresets">}
                                             isCompleting={isCompleting}
                                             setIsCompleting={setCompletingId}
-                                            onComplete={() => setCompletedQuestIds(prev => new Set(prev).add(quest._id as Id<"userPresets">))}
+                                            onComplete={() => {/* Quest completion is handled by the backend query refresh */}
+                                          }
                                           />
                                         ) : (
                                           <Button
