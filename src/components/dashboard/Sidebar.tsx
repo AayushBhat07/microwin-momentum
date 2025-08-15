@@ -17,7 +17,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     { id: "goals", icon: Target, label: "Goals", path: "/goals" },
     { id: "memories", icon: MemoryStick, label: "Memories", path: "/memories" },
     { id: "milestones", icon: Trophy, label: "Milestones", path: "/milestones" },
-    { id: "profile", icon: User, label: "Profile", path: `/profile/${user?._id}` },
+    { id: "settings", icon: Settings, label: "Settings", path: "/settings" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
