@@ -1,4 +1,3 @@
-
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -28,13 +27,11 @@ export const evaluateAndAwardBadges = internalMutation({
         
         const categoryMap = new Map(categoryTotals.map((c) => [c.categorySlug, c.totalWins]));
         const totalAchievements = userTotals?.totalAchievements ?? 0;
-        
         const userStreak = await ctx.db
             .query("user_streaks")
             .withIndex("by_user", (q) => q.eq("userId", userId))
             .unique();
         const currentStreak = userStreak?.currentStreak ?? 0;
-
         const totalPhotoCount = userTotals?.totalPhotoCount ?? 0;
         const totalVoiceCount = userTotals?.totalVoiceCount ?? 0;
         const totalTextCount = userTotals?.totalTextCount ?? 0;
@@ -51,7 +48,9 @@ export const evaluateAndAwardBadges = internalMutation({
             if (badge.threshold) {
                 switch (badge.family) {
                     case "wins":
-                        if (totalAchievements >= badge.threshold) shouldAward = true;
+                        if (totalAchievements >= badge.threshold) {
+                            shouldAward = true;
+                        }
                         break;
                     case "streak":
                         if (currentStreak >= badge.threshold) shouldAward = true;

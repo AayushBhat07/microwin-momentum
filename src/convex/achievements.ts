@@ -177,15 +177,6 @@ export const log = mutation({
         source: args.source,
     });
 
-    const achievement = await ctx.db.get(achievementId);
-    if (achievement && updatedTotals) {
-        await ctx.runMutation(internal.awardEngine.evaluateAndAwardBadges, {
-            userId,
-            achievement,
-            userTotals: updatedTotals,
-        });
-    }
-
     return achievementId;
   },
 });

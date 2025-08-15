@@ -1,10 +1,9 @@
 "use node";
 
 import { v } from "convex/values";
-import { action, internalMutation } from "./_generated/server";
+import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { Doc, Id } from "./_generated/dataModel";
-import { evaluateAndAwardBadges } from "./awardEngine";
+import { Doc } from "./_generated/dataModel";
 
 // Main action to log a win with full gamification
 export const logWin = action({
@@ -24,7 +23,7 @@ export const logWin = action({
     achievement: Doc<"achievements">;
     totals: Doc<"user_totals"> | null;
     streak: Doc<"user_streaks"> | null;
-    badges_unlocked: any[]; // TODO: type this
+    badges_unlocked: Doc<"badges">[];
   }> => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
     if (!user) throw new Error("User not found");
@@ -52,8 +51,12 @@ export const logWin = action({
       source: args.mode,
     });
 
-    // 3. Evaluate and award new badges - handled by the achievement logging mutation
-    const badges_unlocked: any[] = [];
+    // 3. Evaluate and award new badges
+    const badges_unlocked = await ctx.runMutation(internal.awardEngine.evaluateAndAwardBadges, {
+        userId: user._id,
+        achievement,
+        userTotals: updatedTotals,
+    });
 
     // 4. Get latest streak info to return to client
     const streak = await ctx.runQuery(internal.userStats.getStreak, { userId: user._id });
