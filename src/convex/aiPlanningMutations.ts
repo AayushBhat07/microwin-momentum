@@ -108,3 +108,14 @@ export const getUserPresets = internalQuery({
       .take(10);
   },
 });
+
+export const getUserByEmail = internalQuery({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email))
+      .unique();
+    return user;
+  },
+});

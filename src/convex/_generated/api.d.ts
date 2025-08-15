@@ -25,6 +25,7 @@ import type * as backfillOnboardingBadges from "../backfillOnboardingBadges.js";
 import type * as badges from "../badges.js";
 import type * as crons from "../crons.js";
 import type * as dailyGoals from "../dailyGoals.js";
+import type * as debug from "../debug.js";
 import type * as files from "../files.js";
 import type * as gamification from "../gamification.js";
 import type * as goals from "../goals.js";
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   badges: typeof badges;
   crons: typeof crons;
   dailyGoals: typeof dailyGoals;
+  debug: typeof debug;
   files: typeof files;
   gamification: typeof gamification;
   goals: typeof goals;
