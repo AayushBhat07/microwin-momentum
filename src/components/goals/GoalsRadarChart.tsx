@@ -79,7 +79,7 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
       <h2 className="text-xl text-white text-shadow-pixel mb-2 text-center font-pixel">Quest Progress Radar</h2>
       <div style={{ width: "100%", height: 250 }}>
         <ResponsiveContainer>
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
             <defs>
               <radialGradient id="radarGradient" cx="0.5" cy="0.5" r="0.5">
                 <stop offset="0%" stopColor="rgba(59, 130, 246, 0.4)" />
