@@ -113,6 +113,52 @@ export const remove = mutation({
   },
 });
 
+export const deleteOnboardingGoals = mutation({
+  args: {},
+  handler: async (ctx): Promise<{ success: boolean; habitsDeleted: number; goalsDeleted: number }> => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) {
+      throw new Error("User must be authenticated.");
+    }
+
+    // Delete onboarding habits
+    const habits = await ctx.db
+      .query("userPresets")
+      .withIndex("by_user_and_source", (q) =>
+        q.eq("userId", user._id).eq("source", "onboarding")
+      )
+      .collect();
+
+    for (const habit of habits) {
+      await ctx.db.delete(habit._id);
+    }
+
+    // Find and delete onboarding daily goals
+    const firstGoal = await ctx.db
+      .query("dailyGoals")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .order("asc")
+      .first();
+
+    if (firstGoal) {
+      const onboardingDate = firstGoal.targetDate;
+      const onboardingGoals = await ctx.db
+        .query("dailyGoals")
+        .withIndex("by_user_and_date", (q) =>
+          q.eq("userId", user._id).eq("targetDate", onboardingDate)
+        )
+        .collect();
+
+      for (const goal of onboardingGoals) {
+        await ctx.db.delete(goal._id);
+      }
+      return { success: true, habitsDeleted: habits.length, goalsDeleted: onboardingGoals.length };
+    }
+
+    return { success: true, habitsDeleted: habits.length, goalsDeleted: 0 };
+  },
+});
+
 export const getAllForUser = internalQuery({
    args: {},
    handler: async (ctx): Promise<Doc<"dailyGoals">[]> => {
