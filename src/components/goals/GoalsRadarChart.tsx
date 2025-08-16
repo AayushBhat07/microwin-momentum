@@ -17,6 +17,18 @@ interface GoalsRadarChartProps {
 
 const categoryMap = new Map(ACHIEVEMENT_CATEGORIES.map(c => [c.slug, c]));
 
+const getShortName = (name: string): string => {
+  const nameMap: Record<string, string> = {
+    "Health & Fitness": "Health",
+    "Work & Career": "Work", 
+    "Learning & Growth": "Learning",
+    "Social & Relationships": "Social",
+    "Creative & Hobbies": "Creative",
+    "Personal Care": "Personal",
+  };
+  return nameMap[name] || name;
+};
+
 export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartProps) {
   const completedQuests = quests.filter(q => completedQuestIds.has(q._id));
 
@@ -38,7 +50,8 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
     }
 
   const data = ACHIEVEMENT_CATEGORIES.map(category => ({
-    subject: category.name,
+    subject: getShortName(category.name),
+    fullName: category.name,
     completed: categoryCounts.get(category.slug) || 0,
     fullMark: totalQuestsPerCategory.get(category.slug) || 1, // Avoid division by zero
     color: category.colorHex,
@@ -51,7 +64,7 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
 
   const CustomAngleAxisTick = (props: any) => {
     const { x, y, payload } = props;
-    const categoryInfo = ACHIEVEMENT_CATEGORIES.find(c => c.name === payload.value);
+    const categoryInfo = ACHIEVEMENT_CATEGORIES.find(c => getShortName(c.name) === payload.value);
     const totalQuests = categoryInfo ? totalQuestsPerCategory.get(categoryInfo.slug) || 0 : 0;
     const tickColor = totalQuests > 0 ? "#fff" : "#888";
 
@@ -67,6 +80,19 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
         {payload.value}
       </text>
     );
+  };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="p-2 bg-black/80 border border-blue-500 rounded-md font-pixel text-sm">
+          <p className="label text-white">{`${data.fullName}`}</p>
+          <p className="intro text-blue-300">{`Completed: ${data.completed} / ${data.fullMark}`}</p>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -95,14 +121,7 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
               fill="url(#radarGradient)"
               fillOpacity={0.8}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(0,0,0,0.8)",
-                borderColor: "#3b82f6",
-                fontFamily: "monospace",
-              }}
-              labelStyle={{ color: "#fff" }}
-            />
+            <Tooltip content={<CustomTooltip />} />
           </RadarChart>
         </ResponsiveContainer>
       </div>
