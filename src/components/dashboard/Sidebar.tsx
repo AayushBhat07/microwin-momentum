@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { Home, Target, Trophy, Settings, BrainCircuit, MemoryStick } from "lucide-react";
+import { BrainCircuit } from "lucide-react";
 import { UserButton } from "@/components/auth/UserButton";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -13,11 +13,11 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const { user } = useAuth();
 
   const navItems = [
-    { id: "dashboard", icon: Home, label: "Dashboard", path: "/dashboard" },
-    { id: "goals", icon: Target, label: "Goals", path: "/goals" },
-    { id: "memories", icon: MemoryStick, label: "Memories", path: "/memories" },
-    { id: "milestones", icon: Trophy, label: "Milestones", path: "/milestones" },
-    { id: "settings", icon: Settings, label: "Settings", path: "/settings" },
+    { id: "dashboard", label: "Dashboard", path: "/dashboard" },
+    { id: "goals", label: "Goals", path: "/goals" },
+    { id: "memories", label: "Memories", path: "/memories" },
+    { id: "milestones", label: "Milestones", path: "/milestones" },
+    { id: "settings", label: "Settings", path: "/settings" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -41,14 +41,13 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               to={item.path}
               onClick={() => onTabChange(item.id)}
               className={`
-                flex items-center gap-3 px-4 py-3 transition-all duration-200
+                flex items-center justify-center px-4 py-3 transition-all duration-200
                 ${isActive(item.path)
                   ? 'bg-blue-600/80 border-2 border-blue-500 text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]'
                   : 'bg-black/30 border-2 border-transparent hover:bg-blue-900/60 hover:border-blue-700'
                 }
               `}
             >
-              <item.icon className="w-6 h-6" />
               <span className="text-lg">{item.label}</span>
             </Link>
           ))}
