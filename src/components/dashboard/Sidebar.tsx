@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { LayoutDashboard, Target, Trophy, Settings, BrainCircuit, MemoryStick } from "lucide-react";
+import { LayoutGrid, Target, Trophy, Settings, BrainCircuit, MemoryStick } from "lucide-react";
 import { UserButton } from "@/components/auth/UserButton";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -13,7 +13,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const { user } = useAuth();
 
   const navItems = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { id: "dashboard", icon: LayoutGrid, label: "Dashboard", path: "/dashboard" },
     { id: "goals", icon: Target, label: "Goals", path: "/goals" },
     { id: "memories", icon: MemoryStick, label: "Memories", path: "/memories" },
     { id: "milestones", icon: Trophy, label: "Milestones", path: "/milestones" },
