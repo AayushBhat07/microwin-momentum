@@ -42,12 +42,32 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
     completed: categoryCounts.get(category.slug) || 0,
     fullMark: totalQuestsPerCategory.get(category.slug) || 1, // Avoid division by zero
     color: category.colorHex,
-  })).filter(item => (totalQuestsPerCategory.get(ACHIEVEMENT_CATEGORIES.find(c => c.name === item.subject)!.slug) || 0) > 0);
+  }));
 
 
   if (data.length === 0) {
     return null; // Don't render chart if there's no data to show
   }
+
+  const CustomAngleAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    const categoryInfo = ACHIEVEMENT_CATEGORIES.find(c => c.name === payload.value);
+    const totalQuests = categoryInfo ? totalQuestsPerCategory.get(categoryInfo.slug) || 0 : 0;
+    const tickColor = totalQuests > 0 ? "#fff" : "#888";
+
+    return (
+      <text
+        x={x}
+        y={y}
+        textAnchor="middle"
+        fill={tickColor}
+        fontSize={12}
+        fontFamily="monospace"
+      >
+        {payload.value}
+      </text>
+    );
+  };
 
   return (
     <motion.div 
@@ -67,7 +87,7 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
               </radialGradient>
             </defs>
             <PolarGrid stroke="rgba(255, 255, 255, 0.2)" />
-            <PolarAngleAxis dataKey="subject" tick={{ fill: "#fff", fontSize: 12, fontFamily: "monospace" }} />
+            <PolarAngleAxis dataKey="subject" tick={<CustomAngleAxisTick />} />
             <Radar
               name="Completed"
               dataKey="completed"
