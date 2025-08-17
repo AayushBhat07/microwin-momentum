@@ -146,13 +146,13 @@ export default function GoalsPage() {
   return (
     <>
       <div 
-        className="min-h-screen bg-cover bg-center bg-fixed transition-opacity duration-1000" 
+        className="h-screen overflow-hidden bg-cover bg-center bg-fixed transition-opacity duration-1000" 
         style={{ 
           backgroundImage: `url(${backgroundImage})`,
           opacity: backgroundImage ? 1 : 0,
         }}
       >
-        <div className="min-h-screen bg-black/60 flex">
+        <div className="h-full bg-black/60 flex">
           {/* Sidebar */}
           <Sidebar activeTab="goals" onTabChange={() => {}} />
 
