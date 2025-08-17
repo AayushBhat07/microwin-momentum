@@ -89,8 +89,9 @@ export default function MemoriesPage() {
       <div className="h-full bg-black/60 flex">
         <Sidebar activeTab="memories" onTabChange={() => {}} />
 
-        <div className="flex-1 p-2 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="py-6 pr-6">
             <motion.div
               id="memories-header"
               className="mb-8"

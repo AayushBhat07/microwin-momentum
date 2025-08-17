@@ -150,8 +150,8 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-2 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto">
+          <div className="py-6 pr-6">
             {/* Header */}
             <motion.div
               className="mb-8 flex justify-between items-center"
