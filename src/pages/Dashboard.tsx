@@ -150,7 +150,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-2 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <motion.div
