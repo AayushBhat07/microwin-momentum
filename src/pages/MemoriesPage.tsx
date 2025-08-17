@@ -91,7 +91,7 @@ export default function MemoriesPage() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="py-6 pr-6">
+          <div className="p-7">
             <motion.div
               id="memories-header"
               className="mb-8"

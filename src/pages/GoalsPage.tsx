@@ -158,7 +158,7 @@ export default function GoalsPage() {
 
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto">
-            <div className="py-6 pr-6">
+            <div className="p-7">
               {/* Header */}
               <motion.div
                 id="quest-log-header"

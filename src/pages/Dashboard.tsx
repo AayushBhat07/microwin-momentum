@@ -151,7 +151,7 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="py-6 pr-6">
+          <div className="p-7">
             {/* Header */}
             <motion.div
               className="mb-8 flex justify-between items-center"
