@@ -13,29 +13,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { GoogleIcon } from "./GoogleIcon";
 
 export function AuthCard() {
   const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const handleGoogleSignIn = () => {
-    setIsLoading(true);
-    signIn("google")
-      .catch((err) => {
-        console.error("Google sign-in error:", err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to sign in with Google. Please try again.",
-        );
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
 
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,59 +46,36 @@ export function AuthCard() {
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Get Started</CardTitle>
           <CardDescription>
-            Sign in to your account to continue
+            Enter your email to sign in or create an account.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <Button
-            variant="outline"
-            onClick={handleGoogleSignIn}
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            <GoogleIcon />
-            Sign in with Google
-          </Button>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-          <form onSubmit={handleEmailSubmit} className="grid gap-2">
-            <Label htmlFor="email" className="sr-only">
-              Email
-            </Label>
-            <div className="relative flex items-center gap-2">
-              <div className="relative flex-1">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  name="email"
-                  placeholder="name@example.com"
-                  type="email"
-                  className="pl-9"
-                  disabled={isLoading}
-                  required
-                />
+        <CardContent>
+          <form onSubmit={handleEmailSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    name="email"
+                    placeholder="name@example.com"
+                    type="email"
+                    className="pl-9"
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
               </div>
-              <Button
-                type="submit"
-                variant="outline"
-                size="icon"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ArrowRight className="h-4 w-4" />
-                )}
-              </Button>
             </div>
-            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Send Verification Code"
+              )}
+            </Button>
+            {error && <p className="mt-2 text-sm text-red-500 text-center">{error}</p>}
           </form>
         </CardContent>
         <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted border-t rounded-b-lg">
