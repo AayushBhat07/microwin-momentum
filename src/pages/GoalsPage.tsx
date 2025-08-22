@@ -34,7 +34,6 @@ export default function GoalsPage() {
 
   useEffect(() => {
     const isDataLoading = questDataQuery === undefined || !backgroundImage || todayStats === undefined || latestPlan === undefined;
-
     if (!isDataLoading && user && searchParams.get('tour') === 'true') {
       const tourSteps = [
         {
@@ -62,8 +61,6 @@ export default function GoalsPage() {
           position: 'top' as const,
         },
       ];
-      
-      // Start the tour for the goals page if the tour parameter is present
       setTimeout(() => startTour(tourSteps, () => {
         localStorage.setItem(`tour-completed-${user._id}-goals`, 'true');
         navigate('/memories?tour=true');
@@ -79,15 +76,15 @@ export default function GoalsPage() {
     })) ?? [];
 
     const today = new Date().toISOString().split('T')[0];
-    const todaysAIPlan = latestPlan?.plan.find(p => p.date === today);
+    const todaysAIPlan = latestPlan?.plan.find((p: any) => p.date === today);
     
-    const aiGoals = todaysAIPlan?.goals.map((g, index) => ({
+    const aiGoals = todaysAIPlan?.goals.map((g: any, index: number) => ({
         ...g,
-        _id: `ai-${index}-${today}`, // stable key
+        _id: `ai-${index}-${today}`,
         type: 'ai' as const,
         isCompleted: g.completed,
         goalIndex: index,
-        effortMinutes: 5, // default value for display
+        effortMinutes: 5,
     })) ?? [];
 
     return [...userQuests, ...aiGoals];
@@ -95,7 +92,6 @@ export default function GoalsPage() {
 
   const handleCompleteQuest = async (presetId: Id<"userPresets">) => {
     if (completedQuestIds.has(presetId) || completingId) return;
-
     setCompletingId(presetId);
     try {
       const result = await completeQuest({ presetId });
@@ -128,7 +124,6 @@ export default function GoalsPage() {
 
   const questData = quests || latestPlan || todayStats;
   const isLoading = questData === undefined || !backgroundImage || todayStats === undefined || latestPlan === undefined;
-
   const inProgressQuests = allGoals.filter(q => !q.isCompleted);
   const completedQuests = allGoals.filter(q => q.isCompleted);
 
@@ -155,7 +150,7 @@ export default function GoalsPage() {
         <div className="h-full bg-black/60 flex">
           {/* Sidebar */}
           <Sidebar activeTab="goals" onTabChange={() => {}} />
-
+          
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto">
             <div className="p-7">
@@ -267,7 +262,7 @@ export default function GoalsPage() {
                                     ${isAI ? 'bg-purple-900/80 border-2 border-purple-500' : 'bg-gray-900 border-2 border-blue-500'}
                                     shadow-md p-1
                                   `}>
-                                    <div className={`rounded-md border border ${isAI ? 'bg-purple-800/50 border-purple-600' : 'bg-gray-800 border-gray-600'}`}>
+                                    <div className={`rounded-md border ${isAI ? 'bg-purple-800/50 border-purple-600' : 'bg-gray-800 border-gray-600'}`}>
                                       <div className={`flex justify-between items-center p-1.5 rounded-t-md bg-black/20`}>
                                         <h3 className={`text-xs font-bold text-white truncate`}>{quest.title}</h3>
                                         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -287,7 +282,7 @@ export default function GoalsPage() {
                                       </div>
                                       <div className="p-1.5">
                                         {quest.type === 'user' ? (
-                                          <QuestCompletionButtons
+                                        <QuestCompletionButtons
                                             questId={quest._id as Id<"userPresets">}
                                             isCompleting={isCompleting}
                                             setIsCompleting={setCompletingId}
@@ -325,47 +320,48 @@ export default function GoalsPage() {
                             {completedQuests.map((quest, index) => {
                               const isAI = quest.type === 'ai';
                               return (
-                              <motion.div
-                                key={quest._id}
-                                layout
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.3, delay: index * 0.05 }}
-                              >
-                                {/* Card Component */}
-                                <div className="font-pixel rounded-lg bg-gray-600 border-gray-700 shadow-md p-1 opacity-60">
-                                  <div className="bg-gray-800 rounded-md border border-gray-700">
-                                    <div className="flex justify-between items-center p-1.5 rounded-t-md bg-gray-700">
-                                      <h3 className="text-xs font-bold text-gray-400 truncate">{quest.title}</h3>
-                                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                        {isAI && <Sparkles className="w-3 h-3 text-purple-400" />}
-                                        <span className="text-xs font-bold text-gray-400">{quest.effortMinutes > 0 ? `${quest.effortMinutes}m` : 'QUICK'}</span>
+                                <motion.div
+                                  key={quest._id}
+                                  layout
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.9 }}
+                                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                                >
+                                  {/* Card Component */}
+                                  <div className="font-pixel rounded-lg bg-gray-600 border-gray-700 shadow-md p-1 opacity-60">
+                                    <div className="bg-gray-800 rounded-md border border-gray-700">
+                                      <div className="flex justify-between items-center p-1.5 rounded-t-md bg-gray-700">
+                                        <h3 className="text-xs font-bold text-gray-400 truncate">{quest.title}</h3>
+                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                          {isAI && <Sparkles className="w-3 h-3 text-purple-400" />}
+                                          <span className="text-xs font-bold text-gray-400">{quest.effortMinutes > 0 ? `${quest.effortMinutes}m` : 'QUICK'}</span>
+                                        </div>
+                                      </div>
+                                      <div className="min-h-[3.5rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 border-gray-600 bg-gray-700">
+                                        <p className="text-xs leading-tight font-bold px-2 text-gray-400 line-through">
+                                          {quest.title}
+                                        </p>
+                                      </div>
+                                      <div className="p-1.5 mx-1.5 mb-1.5 border bg-gray-700 border-gray-600 text-xs">
+                                        <p className="text-gray-400">
+                                          Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
+                                        </p>
+                                      </div>
+                                      <div className="p-1.5">
+                                        <Button
+                                          disabled={true}
+                                          size="sm"
+                                          className="w-full font-pixel text-sm uppercase bg-green-700 text-white border border-green-800 cursor-not-allowed"
+                                        >
+                                          <Check className="w-4 h-4 mr-2" /> Done
+                                        </Button>
                                       </div>
                                     </div>
-                                    <div className="min-h-[3.5rem] flex items-center justify-center text-center my-1.5 mx-1.5 p-1.5 border-2 border-gray-600 bg-gray-700">
-                                      <p className="text-xs leading-tight font-bold px-2 text-gray-400 line-through">
-                                        {quest.title}
-                                      </p>
-                                    </div>
-                                    <div className="p-1.5 mx-1.5 mb-1.5 border bg-gray-700 border-gray-600 text-xs">
-                                      <p className="text-gray-400">
-                                        Category: <span className="font-bold uppercase">{quest.categorySlug}</span>
-                                      </p>
-                                    </div>
-                                    <div className="p-1.5">
-                                      <Button
-                                        disabled={true}
-                                        size="sm"
-                                        className="w-full font-pixel text-sm uppercase bg-green-700 text-white border border-green-800 cursor-not-allowed"
-                                      >
-                                        <Check className="w-4 h-4 mr-2" /> Done
-                                      </Button>
-                                    </div>
                                   </div>
-                                </div>
-                              </motion.div>
-                            )})}
+                                </motion.div>
+                              )}
+                            )}
                           </AnimatePresence>
                         </div>
                       ) : (

@@ -5,10 +5,13 @@ import { CheckCircle, Circle, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { ACHIEVEMENT_CATEGORIES } from "@/convex/schema";
+import { useState } from "react";
+import Confetti from "react-confetti";
 
 export function TodaysPlan() {
   const latestPlan = useQuery(api.aiPlanningMutations.getLatestPlan);
   const markGoalCompleted = useMutation(api.aiPlanningMutations.markGoalCompleted);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   if (!latestPlan) {
     return (
@@ -25,7 +28,7 @@ export function TodaysPlan() {
   }
 
   const today = new Date().toISOString().split('T')[0];
-  const todaysPlan = latestPlan.plan.find(day => day.date === today);
+  const todaysPlan = latestPlan.plan.find((day: any) => day.date === today);
 
   const handleCompleteGoal = async (goalIndex: number) => {
     if (!todaysPlan) return;
@@ -37,13 +40,16 @@ export function TodaysPlan() {
         goalIndex,
       });
       toast.success("Goal completed! Great job!");
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000); // Confetti for 5 seconds
     } catch (error) {
       toast.error("Failed to mark goal as completed");
     }
   };
 
   return (
-    <div className="bg-black/40 backdrop-blur-md border-2 border-purple-500/50 p-6 text-white font-pixel">
+    <div className="bg-black/40 backdrop-blur-md border-2 border-purple-500/50 p-6 text-white font-pixel relative overflow-hidden">
+      {showConfetti && <Confetti recycle={false} onConfettiComplete={() => setShowConfetti(false)} />}
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="w-5 h-5 text-purple-400" />
         <h3 className="text-lg text-purple-300">Today's AI Plan</h3>
@@ -51,7 +57,7 @@ export function TodaysPlan() {
 
       {todaysPlan ? (
         <div className="space-y-3">
-          {todaysPlan.goals.map((goal, index) => {
+          {todaysPlan.goals.map((goal: any, index: number) => {
             const category = ACHIEVEMENT_CATEGORIES.find(c => c.slug === goal.categorySlug);
             return (
               <motion.div

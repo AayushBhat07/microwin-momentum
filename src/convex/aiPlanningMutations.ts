@@ -1,4 +1,4 @@
-import { mutation, query, internalQuery } from "./_generated/server";
+import { mutation, query, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
@@ -15,7 +15,7 @@ export const getLatestUserMood = internalQuery({
   },
 });
 
-export const addMicroGoalsToDailyPlan = mutation({
+export const addMicroGoalsToDailyPlan = internalMutation({
   args: {
     userId: v.id("users"),
     date: v.string(),
