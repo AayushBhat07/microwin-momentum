@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Check, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router";
+import ReactConfetti from "react-confetti";
 import { useLazyImage } from "@/hooks/use-lazy-image";
 import { GoalsRadarChart } from "@/components/goals/GoalsRadarChart";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { QuestCompletionButtons } from "@/components/goals/QuestCompletionButtons";
 import { useGuidedTour, GuidedTour } from "@/hooks/use-guided-tour";
-import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate, useSearchParams } from "react-router";
 
@@ -26,11 +26,28 @@ export default function GoalsPage() {
   const deleteAllPresets = useMutation(api.habits.deleteAllMyPresets);
   const completedQuestIds = useMemo(() => new Set(questDataQuery?.completedTodayIds ?? []), [questDataQuery?.completedTodayIds]);
   const [completingId, setCompletingId] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
   const backgroundImage = useLazyImage("/assets/onboarding1.png");
   const { startTour, isTourActive } = useGuidedTour();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const isDataLoading = questDataQuery === undefined || !backgroundImage || todayStats === undefined || latestPlan === undefined;
@@ -98,6 +115,7 @@ export default function GoalsPage() {
       toast.success(`+10 XP! Completed: ${result.title}`, {
         description: "Your heroic deed has been recorded!",
       });
+      setShowConfetti(true);
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     } finally {
@@ -115,6 +133,7 @@ export default function GoalsPage() {
             goalIndex: goalIndex
         });
         toast.success("AI Goal Completed! Well done!");
+        setShowConfetti(true);
     } catch (e) {
         toast.error("Failed to complete AI goal.");
     } finally {
@@ -140,6 +159,7 @@ export default function GoalsPage() {
 
   return (
     <>
+      {showConfetti && <ReactConfetti width={windowSize.width} height={windowSize.height} recycle={false} onConfettiComplete={() => setShowConfetti(false)} />}
       <div 
         className="h-screen overflow-hidden bg-cover bg-center bg-fixed transition-opacity duration-1000" 
         style={{ 
@@ -286,7 +306,9 @@ export default function GoalsPage() {
                                             questId={quest._id as Id<"userPresets">}
                                             isCompleting={isCompleting}
                                             setIsCompleting={setCompletingId}
-                                            onComplete={() => {/* Quest completion is handled by the backend query refresh */}}
+                                            onComplete={() => {
+                                              setShowConfetti(true);
+                                            }}
                                           />
                                         ) : (
                                           <Button
