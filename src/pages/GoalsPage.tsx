@@ -159,7 +159,14 @@ export default function GoalsPage() {
 
   return (
     <>
-      {showConfetti && <ReactConfetti width={windowSize.width} height={windowSize.height} recycle={false} onConfettiComplete={() => setShowConfetti(false)} />}
+      {showConfetti && <ReactConfetti 
+        width={windowSize.width} 
+        height={windowSize.height} 
+        numberOfPieces={500}
+        gravity={0.15}
+        recycle={false} 
+        onConfettiComplete={() => setShowConfetti(false)} 
+      />}
       <div 
         className="h-screen overflow-hidden bg-cover bg-center bg-fixed transition-opacity duration-1000" 
         style={{ 
