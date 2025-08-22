@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Doc } from "./_generated/dataModel";
 import { v } from "convex/values";
@@ -119,6 +119,17 @@ export const completeDailyQuestWithMedia = mutation({
       isPublic: !preset.defaultPrivate,
     });
 
+    // Trigger AI goal generation in the background
+    await ctx.scheduler.runAfter(
+      0,
+      internal.aiGoalGeneration.generateSingleGoal,
+      {
+        userId: user._id,
+        completedGoalTitle: preset.title,
+        completedGoalCategory: preset.categorySlug,
+      }
+    );
+
     return { title: preset.title };
   },
 });
@@ -151,6 +162,17 @@ export const completeDailyQuest = mutation({
       source: "quick",
       isPublic: !preset.defaultPrivate,
     });
+
+    // Trigger AI goal generation in the background
+    await ctx.scheduler.runAfter(
+      0,
+      internal.aiGoalGeneration.generateSingleGoal,
+      {
+        userId: user._id,
+        completedGoalTitle: preset.title,
+        completedGoalCategory: preset.categorySlug,
+      }
+    );
 
     return { title: preset.title };
   },
@@ -189,5 +211,36 @@ export const deleteAllMyPresets = mutation({
     }
 
     return { deletedCount: presets.length };
+  },
+});
+
+export const getRecentUserAchievements = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    return await ctx.db
+      .query("achievements")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.gte(q.field("loggedAt"), oneDayAgo))
+      .order("desc")
+      .take(5);
+  },
+});
+
+export const addGeneratedGoal = internalMutation({
+  args: {
+    userId: v.id("users"),
+    title: v.string(),
+    categorySlug: v.string(),
+  },
+  handler: async (ctx, { userId, title, categorySlug }) => {
+    await ctx.db.insert("userPresets", {
+      userId,
+      title,
+      categorySlug,
+      effortMinutes: Math.floor(Math.random() * 10) + 5, // 5-15 minutes
+      defaultPrivate: true,
+      source: "system",
+    });
   },
 });

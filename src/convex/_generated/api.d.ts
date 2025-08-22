@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as achievements from "../achievements.js";
 import type * as ai from "../ai.js";
+import type * as aiGoalGeneration from "../aiGoalGeneration.js";
 import type * as aiPlanning from "../aiPlanning.js";
 import type * as aiPlanningMutations from "../aiPlanningMutations.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
@@ -58,6 +59,7 @@ import type * as wellness from "../wellness.js";
 declare const fullApi: ApiFromModules<{
   achievements: typeof achievements;
   ai: typeof ai;
+  aiGoalGeneration: typeof aiGoalGeneration;
   aiPlanning: typeof aiPlanning;
   aiPlanningMutations: typeof aiPlanningMutations;
   "auth/emailOtp": typeof auth_emailOtp;
