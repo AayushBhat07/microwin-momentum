@@ -4,7 +4,6 @@ import {
   PolarGrid,
   PolarAngleAxis,
   ResponsiveContainer,
-  Tooltip,
 } from "recharts";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { ACHIEVEMENT_CATEGORIES } from "@/convex/schema";
@@ -15,7 +14,7 @@ interface GoalsRadarChartProps {
   completedQuestIds: Set<Id<"userPresets">>;
 }
 
-const categoryMap = new Map(ACHIEVEMENT_CATEGORIES.map(c => [c.slug, c]));
+const categoryDetailsMap = new Map(ACHIEVEMENT_CATEGORIES.map(c => [c.slug, { name: c.name, color: c.colorHex }]));
 
 const getShortName = (name: string): string => {
   const nameMap: Record<string, string> = {
@@ -32,30 +31,29 @@ const getShortName = (name: string): string => {
 export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartProps) {
   const completedQuests = quests.filter(q => completedQuestIds.has(q._id));
 
-  const categoryCounts = new Map<string, number>();
-  for (const category of ACHIEVEMENT_CATEGORIES) {
-    categoryCounts.set(category.slug, 0);
-  }
+  // Dynamically find all unique categories from the quests
+  const uniqueCategorySlugs = [...new Set(quests.map(q => q.categorySlug))];
 
+  const categoryCounts = new Map<string, number>();
   for (const quest of completedQuests) {
     categoryCounts.set(quest.categorySlug, (categoryCounts.get(quest.categorySlug) || 0) + 1);
   }
 
   const totalQuestsPerCategory = new Map<string, number>();
-    for (const category of ACHIEVEMENT_CATEGORIES) {
-        totalQuestsPerCategory.set(category.slug, 0);
-    }
-    for (const quest of quests) {
-        totalQuestsPerCategory.set(quest.categorySlug, (totalQuestsPerCategory.get(quest.categorySlug) || 0) + 1);
-    }
+  for (const quest of quests) {
+    totalQuestsPerCategory.set(quest.categorySlug, (totalQuestsPerCategory.get(quest.categorySlug) || 0) + 1);
+  }
 
-  const data = ACHIEVEMENT_CATEGORIES.map(category => ({
-    subject: getShortName(category.name),
-    fullName: category.name,
-    completed: categoryCounts.get(category.slug) || 0,
-    fullMark: totalQuestsPerCategory.get(category.slug) || 1, // Avoid division by zero
-    color: category.colorHex,
-  }));
+  const data = uniqueCategorySlugs.map(slug => {
+    const details = categoryDetailsMap.get(slug as any) || { name: slug, color: "#8884d8" }; // Fallback for unknown categories
+    return {
+      subject: getShortName(details.name),
+      fullName: details.name,
+      completed: categoryCounts.get(slug) || 0,
+      fullMark: totalQuestsPerCategory.get(slug) || 1, // Avoid division by zero
+      color: details.color,
+    };
+  });
 
 
   if (data.length === 0) {
@@ -64,8 +62,8 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
 
   const CustomAngleAxisTick = (props: any) => {
     const { x, y, payload } = props;
-    const categoryInfo = ACHIEVEMENT_CATEGORIES.find(c => getShortName(c.name) === payload.value);
-    const totalQuests = categoryInfo ? totalQuestsPerCategory.get(categoryInfo.slug) || 0 : 0;
+    const dataPoint = data.find(d => d.subject === payload.value);
+    const totalQuests = dataPoint ? dataPoint.fullMark : 0;
     const tickColor = totalQuests > 0 ? "#fff" : "#888";
 
     return (
@@ -80,19 +78,6 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
         {payload.value}
       </text>
     );
-  };
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="p-2 bg-black/80 border border-blue-500 rounded-md font-pixel text-sm">
-          <p className="label text-white">{`${data.fullName}`}</p>
-          <p className="intro text-blue-300">{`Completed: ${data.completed} / ${data.fullMark}`}</p>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -121,7 +106,6 @@ export function GoalsRadarChart({ quests, completedQuestIds }: GoalsRadarChartPr
               fill="url(#radarGradient)"
               fillOpacity={0.8}
             />
-            <Tooltip content={<CustomTooltip />} />
           </RadarChart>
         </ResponsiveContainer>
       </div>
