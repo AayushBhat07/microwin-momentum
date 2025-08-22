@@ -11,6 +11,13 @@ import { toast } from "sonner";
 import { Loader2, Heart, Shield, Plus, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ACHIEVEMENT_CATEGORIES } from "@/convex/schema";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Suggestion {
   title: string;
@@ -47,6 +54,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
   // UI state
   const [step, setStep] = useState<"challenges" | "suggestions">("challenges");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingModalOpen, setIsGeneratingModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChallengeToggle = (challengeSlug: string) => {
@@ -68,6 +76,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
     }
 
     setIsGenerating(true);
+    setIsGeneratingModalOpen(true);
     try {
       const generated = await generateSuggestions({
         challenges: selectedChallenges,
@@ -79,6 +88,7 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
       toast.error("Failed to generate suggestions. Please try again.");
     } finally {
       setIsGenerating(false);
+      setIsGeneratingModalOpen(false);
     }
   };
 
@@ -144,105 +154,197 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
     }
   };
 
-  if (step === "challenges") {
+  const renderContent = () => {
+    if (step === "challenges") {
+      return (
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+          <CardHeader className="font-pixel text-center">
+            <div className="flex items-center gap-2 justify-center">
+              <Heart className="w-6 h-6 text-pink-400" />
+              <CardTitle className="text-gray-900 text-shadow-pixel text-2xl">Wellness Support</CardTitle>
+            </div>
+            <CardDescription className="text-gray-600">
+              Help us understand what you're working through.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 p-8 font-pixel">
+            {/* Trending Challenges */}
+            <div className="space-y-3">
+              <Label className="text-base text-gray-900">What challenges are you facing?</Label>
+              {trendingChallenges === undefined ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3">
+                  {trendingChallenges.map((challenge) => (
+                    <div key={challenge.slug} className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          id={challenge.slug}
+                          checked={selectedChallenges.includes(challenge.slug)}
+                          onCheckedChange={() => handleChallengeToggle(challenge.slug)}
+                          className="w-5 h-5 border-2 bg-gray-50 border-blue-400 text-blue-600 focus:ring-blue-500"
+                        />
+                        <Label htmlFor={challenge.slug} className="cursor-pointer text-gray-800 text-base">
+                          {challenge.label}
+                        </Label>
+                      </div>
+                      {selectedChallenges.includes(challenge.slug) && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="ml-8 space-y-2"
+                        >
+                          <Label className="text-sm text-gray-600">
+                            How intense is this?
+                          </Label>
+                          <Slider
+                            value={[intensities[challenge.slug] || 3]}
+                            onValueChange={(value) => handleIntensityChange(challenge.slug, value)}
+                            max={5}
+                            min={1}
+                            step={1}
+                            className="w-full"
+                          />
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>Mild</span>
+                            <span>Very Intense</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Optional Notes */}
+            <div className="space-y-3">
+              <Label htmlFor="notes" className="text-base text-gray-900">
+                Additional context (optional)
+              </Label>
+              <Textarea
+                id="notes"
+                placeholder="Anything else you'd like us to know..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="font-pixel bg-white border-2 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 min-h-[80px]"
+              />
+              {notes && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="consent-notes"
+                    checked={consentToSaveNotes}
+                    onCheckedChange={(checked) => setConsentToSaveNotes(checked === true)}
+                    className="w-4 h-4 border-2 bg-gray-50 border-blue-400 text-blue-600 focus:ring-blue-500"
+                  />
+                  <Label htmlFor="consent-notes" className="text-xs text-gray-600 cursor-pointer">
+                    I consent to saving these notes
+                  </Label>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              onClick={handleGenerateSuggestions} 
+              disabled={selectedChallenges.length === 0 || isGenerating}
+              className="w-full font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+            >
+              {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Get Micro-Goals
+            </Button>
+          </CardFooter>
+        </motion.div>
+      );
+    }
+
     return (
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
         <CardHeader className="font-pixel text-center">
-          <div className="flex items-center gap-2 justify-center">
-            <Heart className="w-6 h-6 text-pink-400" />
-            <CardTitle className="text-gray-900 text-shadow-pixel text-2xl">Wellness Support</CardTitle>
-          </div>
+          <CardTitle className="text-gray-900 text-shadow-pixel text-2xl">Your Micro-Goals</CardTitle>
           <CardDescription className="text-gray-600">
-            Help us understand what you're working through.
+            Select the goals that feel right for you.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 p-8 font-pixel">
-          {/* Trending Challenges */}
+        <CardContent className="space-y-6 p-8">
+          {/* Generated Suggestions */}
           <div className="space-y-3">
-            <Label className="text-base text-gray-900">What challenges are you facing?</Label>
-            {trendingChallenges === undefined ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-3">
-                {trendingChallenges.map((challenge) => (
-                  <div key={challenge.slug} className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        id={challenge.slug}
-                        checked={selectedChallenges.includes(challenge.slug)}
-                        onCheckedChange={() => handleChallengeToggle(challenge.slug)}
-                        className="w-5 h-5 border-2 bg-gray-50 border-blue-400 text-blue-600 focus:ring-blue-500"
-                      />
-                      <Label htmlFor={challenge.slug} className="cursor-pointer text-gray-800 text-base">
-                        {challenge.label}
-                      </Label>
+            <Label className="text-base font-pixel text-gray-900">Suggested for you</Label>
+            <div className="grid gap-3 max-h-64 overflow-y-auto p-2 -mr-2">
+              {suggestions.map((suggestion) => {
+                const isSelected = selectedSuggestions.has(suggestion.title);
+                return (
+                  <div
+                    key={suggestion.title}
+                    className={`
+                      flex items-center justify-between p-3 cursor-pointer transition-all duration-200 border-2
+                      ${isSelected 
+                        ? 'bg-blue-600 border-blue-400 text-white shadow-[2px_2px_0px_#000]' 
+                        : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200'
+                      }
+                    `}
+                    onClick={() => handleSuggestionToggle(suggestion.title)}
+                  >
+                    <div className="flex-1 pr-4">
+                      <p className="text-base font-pixel">{suggestion.title}</p>
+                      <p className={`text-xs font-pixel ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
+                        {suggestion.effortMinutes} min • {ACHIEVEMENT_CATEGORIES.find(c => c.slug === suggestion.categorySlug)?.name}
+                      </p>
                     </div>
-                    {selectedChallenges.includes(challenge.slug) && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        className="ml-8 space-y-2"
-                      >
-                        <Label className="text-sm text-gray-600">
-                          How intense is this?
-                        </Label>
-                        <Slider
-                          value={[intensities[challenge.slug] || 3]}
-                          onValueChange={(value) => handleIntensityChange(challenge.slug, value)}
-                          max={5}
-                          min={1}
-                          step={1}
-                          className="w-full"
-                        />
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Mild</span>
-                          <span>Very Intense</span>
-                        </div>
-                      </motion.div>
-                    )}
+                    <div className={`w-6 h-6 border-2 flex items-center justify-center ${isSelected ? 'border-white bg-blue-500' : 'border-gray-400'}`}>
+                      {isSelected && <Check className="w-5 h-5 text-white" />}
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
           </div>
 
-          {/* Optional Notes */}
-          <div className="space-y-3">
-            <Label htmlFor="notes" className="text-base text-gray-900">
-              Additional context (optional)
-            </Label>
-            <Textarea
-              id="notes"
-              placeholder="Anything else you'd like us to know..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="font-pixel bg-white border-2 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 min-h-[80px]"
-            />
-            {notes && (
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="consent-notes"
-                  checked={consentToSaveNotes}
-                  onCheckedChange={(checked) => setConsentToSaveNotes(checked === true)}
-                  className="w-4 h-4 border-2 bg-gray-50 border-blue-400 text-blue-600 focus:ring-blue-500"
-                />
-                <Label htmlFor="consent-notes" className="text-xs text-gray-600 cursor-pointer">
-                  I consent to saving these notes
-                </Label>
-              </div>
-            )}
+          {/* Add Custom Goal */}
+          <div className="space-y-3 p-4 border-2 border-gray-300 bg-gray-50">
+            <Label className="text-base font-pixel text-gray-900">Add your own</Label>
+            <div className="flex flex-wrap gap-2">
+              <input
+                type="text"
+                placeholder="e.g., Drink a glass of water"
+                value={customGoal}
+                onChange={(e) => setCustomGoal(e.target.value)}
+                className="flex-1 basis-48 px-3 py-2 text-sm font-pixel bg-white border-2 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500"
+              />
+              <select
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                className="px-3 py-2 text-sm font-pixel bg-white border-2 border-gray-300 text-gray-900"
+              >
+                {ACHIEVEMENT_CATEGORIES.map((cat) => (
+                  <option key={cat.slug} value={cat.slug} className="bg-white text-gray-900">
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <Button size="sm" onClick={handleAddCustomGoal} disabled={!customGoal.trim()} className="bg-blue-600 text-white border-2 border-blue-700 shadow-[2px_2px_0px_#000] hover:bg-blue-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
+
+          <p className="text-sm text-gray-600 font-pixel text-center">
+            Selected: {selectedSuggestions.size} micro-goals
+          </p>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex gap-4">
+          <Button variant="outline" onClick={() => setStep("challenges")} className="w-full font-pixel text-lg bg-white text-gray-800 border-2 border-gray-300 shadow-[4px_4px_0px_#ccc] hover:bg-gray-100 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
+            Back
+          </Button>
           <Button 
-            onClick={handleGenerateSuggestions} 
-            disabled={selectedChallenges.length === 0 || isGenerating}
+            onClick={handleSubmit} 
+            disabled={selectedSuggestions.size === 0 || isSubmitting}
             className="w-full font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
           >
-            {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Get Micro-Goals
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Continue
           </Button>
         </CardFooter>
       </motion.div>
@@ -250,92 +352,22 @@ export default function WellnessSupport({ onComplete, source = "onboarding" }: W
   }
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-      <CardHeader className="font-pixel text-center">
-        <CardTitle className="text-gray-900 text-shadow-pixel text-2xl">Your Micro-Goals</CardTitle>
-        <CardDescription className="text-gray-600">
-          Select the goals that feel right for you.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6 p-8">
-        {/* Generated Suggestions */}
-        <div className="space-y-3">
-          <Label className="text-base font-pixel text-gray-900">Suggested for you</Label>
-          <div className="grid gap-3 max-h-64 overflow-y-auto p-2 -mr-2">
-            {suggestions.map((suggestion) => {
-              const isSelected = selectedSuggestions.has(suggestion.title);
-              return (
-                <div
-                  key={suggestion.title}
-                  className={`
-                    flex items-center justify-between p-3 cursor-pointer transition-all duration-200 border-2
-                    ${isSelected 
-                      ? 'bg-blue-600 border-blue-400 text-white shadow-[2px_2px_0px_#000]' 
-                      : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200'
-                    }
-                  `}
-                  onClick={() => handleSuggestionToggle(suggestion.title)}
-                >
-                  <div className="flex-1 pr-4">
-                    <p className="text-base font-pixel">{suggestion.title}</p>
-                    <p className={`text-xs font-pixel ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-                      {suggestion.effortMinutes} min • {ACHIEVEMENT_CATEGORIES.find(c => c.slug === suggestion.categorySlug)?.name}
-                    </p>
-                  </div>
-                  <div className={`w-6 h-6 border-2 flex items-center justify-center ${isSelected ? 'border-white bg-blue-500' : 'border-gray-400'}`}>
-                    {isSelected && <Check className="w-5 h-5 text-white" />}
-                  </div>
-                </div>
-              );
-            })}
+    <>
+      {renderContent()}
+      <Dialog open={isGeneratingModalOpen}>
+        <DialogContent className="font-pixel text-center bg-white border-blue-400 border-4 shadow-[8px_8px_0px_#1e40af]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-gray-900 text-shadow-pixel">Crafting Your Quests...</DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Our AI is analyzing your challenges to create personalized micro-goals just for you.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-8 space-y-4">
+            <Loader2 className="h-16 w-16 animate-spin text-blue-500" />
+            <p className="text-gray-600">Please wait a moment.</p>
           </div>
-        </div>
-
-        {/* Add Custom Goal */}
-        <div className="space-y-3 p-4 border-2 border-gray-300 bg-gray-50">
-          <Label className="text-base font-pixel text-gray-900">Add your own</Label>
-          <div className="flex flex-wrap gap-2">
-            <input
-              type="text"
-              placeholder="e.g., Drink a glass of water"
-              value={customGoal}
-              onChange={(e) => setCustomGoal(e.target.value)}
-              className="flex-1 basis-48 px-3 py-2 text-sm font-pixel bg-white border-2 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500"
-            />
-            <select
-              value={customCategory}
-              onChange={(e) => setCustomCategory(e.target.value)}
-              className="px-3 py-2 text-sm font-pixel bg-white border-2 border-gray-300 text-gray-900"
-            >
-              {ACHIEVEMENT_CATEGORIES.map((cat) => (
-                <option key={cat.slug} value={cat.slug} className="bg-white text-gray-900">
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            <Button size="sm" onClick={handleAddCustomGoal} disabled={!customGoal.trim()} className="bg-blue-600 text-white border-2 border-blue-700 shadow-[2px_2px_0px_#000] hover:bg-blue-700 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all">
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        <p className="text-sm text-gray-600 font-pixel text-center">
-          Selected: {selectedSuggestions.size} micro-goals
-        </p>
-      </CardContent>
-      <CardFooter className="flex gap-4">
-        <Button variant="outline" onClick={() => setStep("challenges")} className="w-full font-pixel text-lg bg-white text-gray-800 border-2 border-gray-300 shadow-[4px_4px_0px_#ccc] hover:bg-gray-100 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
-          Back
-        </Button>
-        <Button 
-          onClick={handleSubmit} 
-          disabled={selectedSuggestions.size === 0 || isSubmitting}
-          className="w-full font-pixel text-lg bg-blue-600 text-white border-2 border-blue-700 shadow-[4px_4px_0px_#000] hover:bg-blue-700 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
-        >
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Continue
-        </Button>
-      </CardFooter>
-    </motion.div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
