@@ -2,7 +2,8 @@
 
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
-import { api, internal } from "./_generated/api";
+import { query, mutation, internalQuery } from "./_generated/server";
+import { internal } from "./_generated/api";
 import OpenAI from "openai";
 
 export const generateMicroGoals = internalAction({
@@ -48,11 +49,11 @@ Return as JSON with this structure.
   "goals": [
     {
       "title": "Take a 5-minute walk outside",
-      "category": "health"
+      "categorySlug": "health"
     },
     {
       "title": "Write down one thing you're grateful for",
-      "category": "personal"
+      "categorySlug": "personal"
     }
   ]
 }

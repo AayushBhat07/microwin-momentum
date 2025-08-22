@@ -219,7 +219,14 @@ export const createAchievement = internalMutation({
             ...rest
         });
 
-        // The logWin action is now responsible for calling updateStatsForNewWin
+        // Call updateStatsForNewWin to ensure real-time updates
+        await ctx.runMutation(internal.userStats.updateStatsForNewWin, {
+            userId,
+            categorySlug,
+            points,
+            source: args.source,
+        });
+
         return achievementId;
     }
 });
