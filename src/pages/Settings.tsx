@@ -41,6 +41,9 @@ export default function SettingsPage() {
       try {
         const result = await deleteOnboardingGoals();
         toast.success(`Onboarding goals have been reset. ${result.goalsDeleted} goals and ${result.habitsDeleted} habits deleted.`);
+        await resetOnboarding();
+        toast.info("Redirecting to onboarding to set new goals.");
+        navigate("/onboarding");
       } catch (error) {
         toast.error("Failed to reset onboarding goals.");
         console.error(error);
