@@ -1,3 +1,4 @@
+import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { VlyToolbar } from "@/components/VlyToolbar";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
