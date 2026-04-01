@@ -156,8 +156,7 @@
 }
 
 .hero-content {
-  opacity: 0; /* Start transparent for GSAP */
-  will-change: opacity; /* Performance hint */
+  will-change: opacity;
 }
 
 @layer utilities {

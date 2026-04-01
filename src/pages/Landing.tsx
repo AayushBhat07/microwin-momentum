@@ -64,19 +64,7 @@ export default function Landing() {
         }
       );
 
-      gsap.fromTo(heroRef.current,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          ease: "power1.inOut",
-          scrollTrigger: {
-            trigger: contentRef.current,
-            start: "top top",
-            end: "center center",
-            scrub: 1,
-          }
-        }
-      );
+      gsap.set(heroRef.current, { opacity: 1 });
     }, mainRef);
 
     return () => ctx.revert();
